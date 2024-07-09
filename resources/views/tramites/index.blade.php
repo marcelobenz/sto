@@ -21,7 +21,7 @@
 
 @section('contenidoPrincipal')
     <div class="container mt-5">
-        <h1>Lista de Trámites</h1>
+        <h1 class="text-center">Lista de Trámites</h1>
         <table id="tramitesTable" class="table table-bordered table-striped table-hover">
             <thead>
                 <tr>
