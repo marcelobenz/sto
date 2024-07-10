@@ -58,7 +58,7 @@
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Total de Tramites en Gestión',
+                        label: 'Total de Trámites en Gestión',
                         data: data,
                         backgroundColor: 'rgba(54, 162, 235, 0.2)',
                         borderColor: 'rgba(54, 162, 235, 1)',
