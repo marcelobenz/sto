@@ -20,8 +20,8 @@
 @endsection
 
 @section('contenidoPrincipal')
-    <div class="container mt-5">
-        <h1 class="text-center">Lista de Trámites</h1>
+    <div class="container-fluid px-3">
+        <h1 class="text-center">Todos los Trámites</h1>
         <table id="tramitesTable" class="table table-bordered table-striped table-hover">
             <thead>
                 <tr>
