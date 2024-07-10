@@ -21,11 +21,11 @@
 
 @section('contenidoPrincipal')
     <div class="container-fluid px-3">
-        <h1 class="text-center">Todos los Trámites</h1>
         <table id="tramitesTable" class="table table-bordered table-striped table-hover">
             <thead>
+                <tr colspan=5><h3 class="text-center" style="background-color: #f0f0f0; padding: 10px;">Todos los Trámites</h3></tr>
                 <tr>
-                    <th>ID Trámite</th>
+                    <th>ID Trámites</th>
                     <th>Fecha de Alta</th>
                     <th>Fecha de Modificación</th>
                     <!--<th>ID Usuario</th>
