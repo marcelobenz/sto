@@ -25,7 +25,7 @@
             <thead>
                 <tr colspan=5><h3 class="text-center" style="background-color: #f0f0f0; padding: 10px;">Todos los Trámites</h3></tr>
                 <tr>
-                    <th>ID Trámite22</th>
+                    <th>ID Trámite</th>
                     <th>Fecha de Alta</th>
                     <th>Fecha de Modificación</th>
                     <!--<th>ID Usuario</th>
