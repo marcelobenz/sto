@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TramiteController;
+use App\Http\Controllers\DashboardController;
 
 
 /*
@@ -24,3 +25,5 @@ Route::get('/navbar', function () {
 });
 
 Route::get('/tramites', [TramiteController::class, 'index'])->name('tramites.index');
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
+//Route::get('/dashboard', 'DashboardController@index')->name('dashboard.index');
