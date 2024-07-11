@@ -14,7 +14,7 @@ class DashboardController extends Controller
             FROM tramite_estado_tramite tet
             JOIN estado_tramite et ON tet.id_estado_tramite = et.id_estado_tramite
             WHERE tet.activo = 1
-            AND et.tipo IN (\'PERSONALIZADO\', \'EXPEDIENTE\', \'INICIADO\')
+            AND et.tipo IN (\'EN_CREACION\',\'PERSONALIZADO\', \'EXPEDIENTE\', \'INICIADO\',\'A_FINALIZAR\',\'DE_FINALIZACION\')
             GROUP BY et.tipo;
         ');
 

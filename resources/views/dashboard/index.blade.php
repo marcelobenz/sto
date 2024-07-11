@@ -1,4 +1,3 @@
-<!-- resources/views/dashboard/index.blade.php -->
 @extends('navbar')
 
 @section('heading')
@@ -17,23 +16,68 @@
         justify-content: center; /* Centrado horizontal */
         align-items: center; /* Centrado vertical */
     }
-    /* Estilo para cada columna dentro de la container-fluid */
-    .dashboard-column {
-        padding: 0 25px; /* Espaciado horizontal */
-        margin-bottom: 30px; /* Separación inferior */
-    }
     /* Añade un espacio entre el navbar y el gráfico */
     body {
         padding-top: 70px; /* Ajusta según el tamaño de tu navbar */
+    }
+    .card-columns {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: space-around;
+    }
+    .card {
+        flex: 1;
+        margin: 10px;
+    }
+    .chart-card {
+        max-width: 600px; /* Ajusta el tamaño máximo del gráfico */
+        margin: 0 auto; /* Centra la tarjeta del gráfico */
+    }
+    .chart-container {
+        position: relative;
+        width: 100%;
+        padding-top: 56.25%; /* Proporción de 16:9 */
+    }
+    .chart-container canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
     }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 @endsection
 
 @section('contenidoPrincipal')
-<div style="width: 50%; margin: auto;">
-    <canvas id="myChart"></canvas>
+
+<div class="container-fluid">
+    <!-- Valores -->
+    <div class="row card-columns">
+        @foreach($chartData as $data)
+        <div class="card">
+            <div class="card-body text-center">
+                <h8 class="card-title">{{ $data['tipo'] }}</h8>
+                <h1>{{ $data['total'] }}</h1>
+            </div>
+        </div>
+        @endforeach
+    </div>
+    <!-- Gráfico -->
+    <div class="row">
+        <div class="col-sm-12 mb-3 mb-sm-0 center">
+            <div class="card chart-card">
+                <div class="card-body">
+                    <h5 class="card-title text-center">Trámites en Gestión</h5>
+                    <div class="chart-container">
+                        <canvas id="myChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
 @endsection
 
 @section('scripting')
@@ -58,7 +102,7 @@
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Total de Trámites en Gestión',
+                        label: '',
                         data: data,
                         backgroundColor: 'rgba(54, 162, 235, 0.2)',
                         borderColor: 'rgba(54, 162, 235, 1)',
