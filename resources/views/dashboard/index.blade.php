@@ -32,6 +32,9 @@
     .chart-card {
         max-width: 600px; /* Ajusta el tamaño máximo del gráfico */
         margin: 0 auto; /* Centra la tarjeta del gráfico */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
     .chart-container {
         position: relative;
@@ -44,6 +47,17 @@
         left: 0;
         width: 100%;
         height: 100%;
+    }
+    .chart-row {
+        display: flex;
+        justify-content: center;
+    }
+    .chart-column {
+        flex: 1;
+        padding: 10px;
+    }
+    .equal-height {
+        display: flex;
     }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -63,14 +77,26 @@
         </div>
         @endforeach
     </div>
-    <!-- Gráfico -->
-    <div class="row">
-        <div class="col-sm-12 mb-3 mb-sm-0 center">
+    <!-- Gráficos -->
+    <div class="row chart-row equal-height">
+        <!-- Gráfico de barras -->
+        <div class="chart-column">
             <div class="card chart-card">
                 <div class="card-body">
                     <h5 class="card-title text-center">Trámites en Gestión</h5>
                     <div class="chart-container">
-                        <canvas id="myChart"></canvas>
+                        <canvas id="barChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Gráfico de tortas -->
+        <div class="chart-column">
+            <div class="card chart-card">
+                <div class="card-body">
+                    <h5 class="card-title text-center">Distribución de Trámites</h5>
+                    <div class="chart-container">
+                        <canvas id="pieChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -85,24 +111,24 @@
     var chartData = {!! json_encode($chartData) !!}; // Convertir PHP a JSON directamente
 
     document.addEventListener('DOMContentLoaded', function () {
-        var canvas = document.getElementById('myChart');
-        if (canvas) {
-            var ctx = canvas.getContext('2d');
+        var barCanvas = document.getElementById('barChart');
+        var pieCanvas = document.getElementById('pieChart');
 
+        if (barCanvas) {
+            var barCtx = barCanvas.getContext('2d');
             var labels = chartData.map(function(item) {
                 return item.tipo;
             });
-
             var data = chartData.map(function(item) {
                 return item.total;
             });
 
-            var chart = new Chart(ctx, {
+            var barChart = new Chart(barCtx, {
                 type: 'bar',
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: '',
+                        label: 'Cantidad de Trámites',
                         data: data,
                         backgroundColor: 'rgba(54, 162, 235, 0.2)',
                         borderColor: 'rgba(54, 162, 235, 1)',
@@ -118,7 +144,42 @@
                 }
             });
         } else {
-            console.error('Element with id "myChart" not found.');
+            console.error('Element with id "barChart" not found.');
+        }
+
+        if (pieCanvas) {
+            var pieCtx = pieCanvas.getContext('2d');
+
+            var pieChart = new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Distribución de Trámites',
+                        data: data,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(25, 6, 186, 0.2)',
+                            'rgba(75, 100, 40, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(25, 6, 186, 1)',
+                            'rgba(75, 100, 40, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true
+                }
+            });
+        } else {
+            console.error('Element with id "pieChart" not found.');
         }
     });
 </script>
