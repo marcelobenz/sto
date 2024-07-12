@@ -79,6 +79,15 @@
     </div>
     <!-- Gráficos -->
     <div class="row chart-row equal-height">
+
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="card-title">Total de Trámites</h5>
+                <h1>{{ $totales[0]->sumatotal }}</h1>
+            </div>
+        </div>
+
+
         <!-- Gráfico de barras -->
         <div class="chart-column">
             <div class="card chart-card">
