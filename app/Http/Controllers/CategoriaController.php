@@ -52,9 +52,19 @@ class CategoriaController extends Controller
 
     public function edit($id)
     {
+<<<<<<< HEAD
         $categoria = Categoria::findOrFail($id);
         $categoriasActivas = Categoria::where('flag_activo', 1)->get();
         return view('categorias.edit', compact('categoria', 'categoriasActivas'));
+=======
+        $categoria = Categoria::find($id);
+    
+        if (!$categoria) {
+            return redirect()->route('categorias.index')->with('error', 'Categoría no encontrada.');
+        }
+    
+        return view('categorias.edit', compact('categoria'));
+>>>>>>> 7a85e9d (primera parte ABM categorias)
     }
 
 public function update(Request $request, $id)
@@ -88,8 +98,12 @@ public function update(Request $request, $id)
 
 public function create()
     {
+<<<<<<< HEAD
         $categoriasActivas = Categoria::where('flag_activo', 1)->get();
         return view('categorias.create', compact('categoriasActivas'));
+=======
+        return view('categorias.create');
+>>>>>>> 7a85e9d (primera parte ABM categorias)
     }
 
     // Guarda la nueva categoría en la base de datos
