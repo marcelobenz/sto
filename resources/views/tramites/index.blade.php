@@ -27,10 +27,48 @@
             width: 16px; /* Ajusta el ancho del icono */
             height: 16px; /* Ajusta el alto del icono */
         }
-    </style>
+
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 1000;
+        }
+
+        #overlay div {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        #overlay img {
+            display: block;
+            margin: 0 auto;
+        }
+
+        #overlay p {
+            margin-top: 10px; /* Ajusta este valor según sea necesario */
+            font-size: 16px; /* Ajusta el tamaño de la fuente según sea necesario */
+            color: #000; /* Ajusta el color del texto según sea necesario */
+        }
+</style>
 @endsection
 
 @section('contenidoPrincipal')
+    <div id="overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); z-index:1000;">
+        <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%);">
+            <!-- Aquí puedes poner un spinner o un mensaje de carga -->
+            <img src="spinner.gif" alt="Cargando...">
+            <p>Cargando ...</p>
+        </div>
+    </div>
+
     <div class="container-fluid px-3">
         <table id="tramitesTable" class="table table-bordered table-striped table-hover">
             <thead>
@@ -38,10 +76,22 @@
                 <tr>
                     <th>ID Trámite</th>
                     <th>Categoría</th>
-                    <th>Fecha de Alta</th>
-                    <th>Fecha de Modificación</th>
+                    <th>Fecha Alta</th>
+                    <th>Fecha Modif</th>
                     <th>Correo</th>
-                    <th>CUIT Contribuyente</th>
+                    <th>CUIT </th>
+                    <th>Legajo</th>
+                    <th>Usuario</th>
+                </tr>
+                <tr>
+                    <th><input type="text" placeholder="Buscar ID"></th>
+                    <th><input type="text" placeholder="Buscar Categoría"></th>
+                    <th><input type="text" placeholder="Buscar Fecha Alta"></th>
+                    <th><input type="text" placeholder="Buscar Fecha Modif"></th>
+                    <th><input type="text" placeholder="Buscar Correo"></th>
+                    <th><input type="text" placeholder="Buscar CUIT"></th>
+                    <th><input type="text" placeholder="Buscar Legajo"></th>
+                    <th><input type="text" placeholder="Buscar Usuario"></th>
                 </tr>
             </thead>
             <tbody>
@@ -55,26 +105,48 @@
     <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script>
     <script>
-        $(document).ready(function() {
-            $('#tramitesTable').DataTable({
-                "processing": true,
-                "serverSide": true,
-                "ajax": "{{ route('tramites.index') }}",
-                "columns": [
-                    { "data": "id_tramite" },
-                    { "data": "nombre_categoria" },
-                    { "data": "fecha_alta" },
-                    { "data": "fecha_modificacion" },
-                    { "data": "correo" },
-                    { "data": "cuit_contribuyente" }
-                ],
-                "language": {
-                    "paginate": {
-                        "previous": "<",
-                        "next": ">"
-                    },
-                    "processing": "<div id='custom-processing'>Cargando, por favor espera...</div>"
+    $(document).ready(function() {
+        var table = $('#tramitesTable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "{{ route('tramites.index') }}",
+                beforeSend: function() {
+                    $('#overlay').show();
+                },
+                complete: function() {
+                    $('#overlay').hide();
                 }
+            },
+            columns: [
+                { data: 'id_tramite' },
+                { data: 'nombre_categoria' },
+                { data: 'fecha_alta' },
+                { data: 'fecha_modificacion' },
+                { data: 'correo' },
+                { data: 'cuit_contribuyente' },
+                { data: 'legajo' },
+                { data: 'usuario' }
+            ],
+            pageLength: 5,
+            language: {
+                paginate: {
+                    previous: "<",
+                    next: ">"
+                }
+            }
+        });
+
+            // Configurar búsqueda en cada columna
+            $('#tramitesTable thead input').on('keyup', function (e) {
+                if (e.key === 'Enter') { // Ejecutar búsqueda solo cuando se presiona Enter
+                    var columnIndex = $(this).parent().index();
+                    table.column(columnIndex).search(this.value,false,true).draw();
+                }
+            });
+            // Evitar que el DataTable se recargue con cada clic en los inputs
+            $('#tramitesTable thead input').on('click', function (e) {
+                e.stopPropagation(); // Previene la propagación del clic que podría estar causando la recarga
             });
         });
     </script>

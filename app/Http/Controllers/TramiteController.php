@@ -15,7 +15,8 @@ class TramiteController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $data = DB::table('tramite as t')
+            $query = DB::table('tramite as t')
+                ->distinct()
                 ->join('multinota as m', 't.id_tramite', '=', 'm.id_tramite')
                 ->join('tramite_estado_tramite as tet', 'tet.id_tramite', '=', 't.id_tramite')
                 ->join('tipo_tramite_multinota as ttm', 'ttm.id_tipo_tramite_multinota', '=', 'm.id_tipo_tramite_multinota')
@@ -27,12 +28,28 @@ class TramiteController extends Controller
                     't.fecha_modificacion', 
                     't.correo', 
                     't.cuit_contribuyente', 
-                    'c.nombre as nombre_categoria'
+                    'c.nombre as nombre_categoria',
+                    'u.legajo as legajo',
+                    DB::raw('CONCAT(u.nombre, \' \', u.apellido) as usuario')
                 )
                 ->distinct()
-                ->orderBy('t.id_tramite', 'DESC')
-                ->get();
+                ->where('tet.activo', '=', 1)  // Filtro para tet.activo
+                ->orderBy('t.id_tramite', 'ASC');
 
+            // Filtrado de búsqueda
+            if ($request->has('search.value') && $request->input('search.value') != '') {
+                $searchValue = $request->input('search.value');
+                $query->where(function($q) use ($searchValue) {
+                    $q->where('t.id_tramite', 'like', "%{$searchValue}%")
+                      ->orWhere('t.correo', 'like', "%{$searchValue}%")
+                      ->orWhere('t.cuit_contribuyente', 'like', "%{$searchValue}%")
+                      ->orWhere('u.legajo', 'like', "%{$searchValue}%")
+                      ->orWhere(DB::raw('CONCAT(u.nombre, \' \', u.apellido)'), 'like', "%{$searchValue}%");
+                });
+            }
+
+            $data = $query->get();
+                
             // Log para depuración
             Log::info('Consulta SQL ejecutada');
             Log::info($data);
