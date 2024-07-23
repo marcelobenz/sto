@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Tramite;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
+use DB;
+use Log;
 
 class TramiteController extends Controller
 {
@@ -13,23 +14,40 @@ class TramiteController extends Controller
      */
     public function index(Request $request)
     {
-        // Obtiene todos los trámites de la base de datos
-        //$tramites = Tramite::all();
-
-        // Obtiene los trámites con paginación
-        // $tramites = Tramite::paginate(10); // Cambia el 10 por el número de elementos que quieres por página
-
         if ($request->ajax()) {
-            $data = Tramite::select('id_tramite','fecha_alta','fecha_modificacion','correo',
-                    'cuit_contribuyente');
+            $data = DB::table('tramite as t')
+                ->join('multinota as m', 't.id_tramite', '=', 'm.id_tramite')
+                ->join('tramite_estado_tramite as tet', 'tet.id_tramite', '=', 't.id_tramite')
+                ->join('tipo_tramite_multinota as ttm', 'ttm.id_tipo_tramite_multinota', '=', 'm.id_tipo_tramite_multinota')
+                ->join('categoria as c', 'ttm.id_categoria', '=', 'c.id_categoria')
+                ->leftJoin('usuario_interno as u', 'u.id_usuario_interno', '=', 'tet.id_usuario_interno')
+                ->select(
+                    't.id_tramite', 
+                    't.fecha_alta', 
+                    't.fecha_modificacion', 
+                    't.correo', 
+                    't.cuit_contribuyente', 
+                    'c.nombre as nombre_categoria'
+                )
+                ->distinct()
+                ->orderBy('t.id_tramite', 'DESC')
+                ->get();
+
+            // Log para depuración
+            Log::info('Consulta SQL ejecutada');
+            Log::info($data);
+
+            if ($data->isEmpty()) {
+                Log::info('No se encontraron registros');
+            } else {
+                Log::info('Registros encontrados', ['count' => $data->count()]);
+            }
+
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->make(true);
         }
 
-        // Retorna la vista con los trámites
-        //return view('tramites.index', compact('tramites'));
         return view('tramites.index');
-
     }
 }
