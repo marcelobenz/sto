@@ -63,6 +63,8 @@ class TramiteController extends Controller
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->make(true);
+            
+            Log::info('Termina');
         }
 
         return view('tramites.index');
