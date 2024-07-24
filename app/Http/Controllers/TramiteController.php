@@ -52,7 +52,7 @@ class TramiteController extends Controller
                 
             // Log para depuración
             Log::info('Consulta SQL ejecutada');
-            Log::info($data);
+            //Log::info($data);
 
             if ($data->isEmpty()) {
                 Log::info('No se encontraron registros');
