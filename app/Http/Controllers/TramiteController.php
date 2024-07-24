@@ -64,7 +64,6 @@ class TramiteController extends Controller
                 ->addIndexColumn()
                 ->make(true);
             
-            Log::info('Termina');
         }
 
         return view('tramites.index');
