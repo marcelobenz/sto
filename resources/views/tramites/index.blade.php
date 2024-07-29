@@ -5,6 +5,17 @@
     <!-- Incluye DataTables CSS -->
     <link href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css" rel="stylesheet">
     <style>
+         /* Estilos personalizados para el mensaje de procesamiento */
+         #custom-processing {
+            font-size: 16px;
+            color: black;
+            font-weight: bold;
+            background-color: #f0f8ff;
+            padding: 10px;
+            border: 1px solid blue;
+            border-radius: 5px;
+            text-align: center;
+        }
         /* Estilos personalizados para los iconos de flecha */
         .dataTables_wrapper .dataTables_paginate .paginate_button {
             font-size: 12px; /* Ajusta el tamaño de la fuente */
@@ -26,21 +37,11 @@
                 <tr colspan=5><h3 class="text-center" style="background-color: #f0f0f0; padding: 10px;">Todos los Trámites</h3></tr>
                 <tr>
                     <th>ID Trámite</th>
+                    <th>Categoría</th>
                     <th>Fecha de Alta</th>
                     <th>Fecha de Modificación</th>
-                    <!--<th>ID Usuario</th>
-                    <th>ID Prioridad</th>
-                    <th>ID Estado</th>
-                    <th>ID Tipo de Trámite</th>
-                    <th>ID Solicitante</th>
-                    <th>ID Requisito</th>
-                    <th>Convenio</th> -->
                     <th>Correo</th>
                     <th>CUIT Contribuyente</th>
-                    <!-- <th>Flag Ingreso</th>
-                    <th>ID Usuario Interno</th>
-                    <th>Flag Rechazado</th>
-                    <th>Flag Cancelado</th> -->
                 </tr>
             </thead>
             <tbody>
@@ -61,27 +62,18 @@
                 "ajax": "{{ route('tramites.index') }}",
                 "columns": [
                     { "data": "id_tramite" },
+                    { "data": "nombre_categoria" },
                     { "data": "fecha_alta" },
                     { "data": "fecha_modificacion" },
-                    // { "data": "id_usuario" },
-                    // { "data": "id_prioridad" },
-                    // { "data": "id_estado" },
-                    // { "data": "id_tipo_tramite" },
-                    // { "data": "id_solicitante" },
-                    // { "data": "id_requisito" },
-                    // { "data": "convenio" },
                     { "data": "correo" },
                     { "data": "cuit_contribuyente" }
-                    // { "data": "flag_ingreso" },
-                    // { "data": "id_usuario_interno" },
-                    // { "data": "flag_rechazado" },
-                    // { "data": "flag_cancelado" }
                 ],
                 "language": {
                     "paginate": {
                         "previous": "<",
                         "next": ">"
-                    }
+                    },
+                    "processing": "<div id='custom-processing'>Cargando, por favor espera...</div>"
                 }
             });
         });
