@@ -35,8 +35,13 @@
                 <li class="nav-item">
                     <a class="nav-link" href="#">Formularios</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Administracion</a>
+                <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="administracionDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Administracion
+                </a>
+                    <div class="dropdown-menu" aria-labelledby="administracionDropdown">
+                        <a class="dropdown-item" href="categorias">Categorias</a>
+                    </div>
                 </li>
             </ul>
         </div>
