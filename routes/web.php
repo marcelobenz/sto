@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AutorizacionController;
 use App\Http\Controllers\TramiteController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Http\Request;
@@ -48,6 +49,7 @@ Route::get('/navbar', function () {
     return view('navbar');
 });
 
+Route::get('/ingreso', [AutorizacionController::class, 'index'])->name('ingreso.index');
 Route::get('/tramites', [TramiteController::class, 'index'])->name('tramites.index');
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
 //Route::get('/dashboard', 'DashboardController@index')->name('dashboard.index');
