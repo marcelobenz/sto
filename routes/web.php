@@ -5,6 +5,7 @@ use App\Http\Controllers\TramiteController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Session;
 
 
 /*
@@ -19,31 +20,28 @@ use Illuminate\Support\Facades\Http;
 */
 
 Route::get('/success', function (Request $request) {
-    /* $state = $request->session()->pull('state');
- 
-    throw_unless(
-        strlen($state) > 0 && $state === $request->state,
-        InvalidArgumentException::class,
-        'Invalid state value.'
-    ); */
-
     $code = $request->code;
 
-    $response = Http::asForm()->post('http://localhost:8000/oauth/token', [
+    $response = Http::asForm()->post(env('SERVICIO_TOKEN_CVSA'), [
         'grant_type' => 'authorization_code',
-        'client_id' => '1',
-        'client_secret' => 'GToG3ZMH8toPdQsJ3Jq0YSnBBZp4xRUbqcBl855Z',
-        'redirect_uri' => 'http://127.0.0.1:8001/success',
+        'client_id' => env('OAUTH_ID'),
+        'client_secret' => env('OAUTH_SECRET'),
+        'redirect_uri' => env('URL_CALLBACK_CVSA'),
         'code' => $request->code,
     ]);
 
     $res = $response->json();
 
-    return $response->json();
+    Session::put('TOKEN_TYPE', $res['token_type']);
+    Session::put('ACCESS_TOKEN', $res['access_token']);
+    Session::put('REFRESH_TOKEN', $res['refresh_token']);    
+    Session::put('EXPIRES_IN', $res['expires_in']);
+
+    return redirect('/ingreso');
 });
 
 Route::get('/', function () {
-    return redirect('http://localhost:8000/oauth/authorize?client_id=1&redirect_uri=http://127.0.0.1:8001/success&response_type=code&scope=&state=asdfasdfasdfasdfasdfasdfasdfasdfasdfasdf');
+    return redirect(env('URL_REDIRECT_INICIO'));
 });
 
 Route::get('/navbar', function () {
