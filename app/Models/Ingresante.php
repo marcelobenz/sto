@@ -3,6 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Session;
+use App\Http\Controllers\UsuarioInternoController;
+use \stdClass;
 
 class Ingresante extends Model
 {
@@ -12,24 +15,31 @@ class Ingresante extends Model
         $this->cuil = $cuil;
     }
 
-    /* public void ingresar() throws ExcepcionControladaError {
-        UsuarioSession usuarioSession = new UsuarioInternoController().recuperarPorCuilUSesion(this.cuil);
-        Integer activo = new UsuarioInternoController().recuperarPorCuilActivo(this.cuil);
-        if (usuarioSession == null) {
-            throw new RuntimeAlert("El usuario ingresado es incorrecto");
-        }
-        if (activo != 1){
-            throw new RuntimeAlert("El usuario ingresado no esta activo");
-        }
-        this.mantenerUsuarioEnSession(usuarioSession);
-    }
+    public function ingresar() {
+        $usuarioSession = UsuarioInternoController::getUsuarioSessionPorCuil($this->cuil);
 
-    private void mantenerUsuarioEnSession(UsuarioSession usuarioSession) {
-        UsuarioSession usuarioSessionLogueado = ((UsuarioSession) new SessionController().getLoggedUser());
-        if (usuarioSessionLogueado == null) {
-            usuarioSessionLogueado = usuarioSession;
+        if ($usuarioSession === null) {
+            throw new Exception("El usuario ingresado es incorrecto");
         }
-        usuarioSessionLogueado.actualizarUltimoRequest();
-        new SessionController().keepOnSession(usuarioSession);
-    } */
+
+        if ($usuarioSession->getEstado() !== 1){
+            throw new Exception("El usuario ingresado no esta activo");
+        }
+
+        $object = new stdClass();
+
+        $object->id = $usuarioSession->getId();
+        $object->legajo = $usuarioSession->getLegajo();
+        $object->nombre = $usuarioSession->getNombre();
+        $object->apellido = $usuarioSession->getApellido();
+        $object->correo = $usuarioSession->getCorreo();
+        $object->estado = $usuarioSession->getEstado();
+        $object->permisos = $usuarioSession->getPermisos();
+        $object->flagMenu = $usuarioSession->getFlagMenu();
+        $object->limite = $usuarioSession->getLimite();
+
+        Session::put('USUARIO', $object);
+
+        return;
+    }
 }
