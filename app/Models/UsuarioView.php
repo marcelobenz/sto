@@ -32,4 +32,8 @@ class UsuarioView extends Model
             $this->oficina = $oficina;
             $this->user = $user;
     }
+
+    public function getCuil() {
+        return $this->cuil;
+    }
 }
