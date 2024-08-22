@@ -2,27 +2,43 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
-enum Permiso: string
+class Permiso extends Model
 {
-	case VER_REPORTES = "VER REPORTES";
-    case TOMAR_TRAMITE = "TOMAR TRAMITE";
-    case REASIGNAR_TRAMITE = "REASIGNAR TRAMITE";
-    case DAR_DE_BAJA_TRAMITE = "DAR DE BAJA TRAMITE";
-    case VER_TRAMITES_CANCELADOS = "VER TRAMITES CANCELADOS";
-    case VER_TODOS_LOS_TRAMITES = "VER TODOS LOS TRAMITES";
-    case CONFIGURAR_ESTADOS = "CONFIGURAR ESTADOS";
-    case CONFIGURAR_NIVELES = "CONFIGURAR NIVELES";
-    case CONFIGURAR_LIMITES = "CONFIGURAR LIMITES";
-    case CONFIGURAR_USUARIOS = "CONFIGURAR USUARIOS";
-    case CONFIGURAR_MULTINOTA = "CONFIGURAR MULTINOTA";
-    case CONFIGURAR_SECCIONES = "CONFIGURAR SECCIONES";
-    case CONFIGURAR_REQUISITOS = "CONFIGURAR REQUISITOS";
-    case CONFIGURAR_CATEGORIAS = "CONFIGURAR CATEGORIAS";
-    case CONFIGURAR_PRIORIDADES = "CONFIGURAR PRIORIDADES";
-    case CONFIGURAR_CONTRIBUYENTES = "CONFIGURAR CONTRIBUYENTES";
-    case CONFIGURAR_CUESTIONARIO = "CONFIGURAR CUESTIONARIO";
-  
-    
+    use HasFactory;
+
+    // Define the table name if it's not the plural of the model name
+    protected $table = 'usuario_permiso';
+
+    // Define the primary key
+    protected $primaryKey = 'id_usuario_permiso';
+
+    // Disable auto-incrementing as we are using mediumIncrements
+    public $incrementing = false;
+
+    // Define the key type
+    protected $keyType = 'int';
+
+    // Define fillable attributes for mass assignment
+    protected $fillable = [
+        'fecha_sistema',
+        'id_usuario_interno',
+        'permiso',
+    ];
+
+    // Disable timestamps if you are managing them manually
+    public $timestamps = false;
+
+    public static function getPermisosPorId($id) {
+        $res = DB::table("usuario_permiso")
+        ->where("id_usuario_interno", "=", $id)
+        ->get();
+
+        $permisos = $res->toArray();
+        
+        return $permisos;
+    }
 }
