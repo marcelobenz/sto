@@ -11,7 +11,7 @@ class IngresanteBuilder extends Model
 
     public function build() {
         if($this->cuil === null || $this->cuil === "") {
-            //throw new RuntimeAlert("El usuario no posee cuil");
+            throw new Exception("El usuario no posee cuil");
         }
 
         return new Ingresante($this->cuil);
