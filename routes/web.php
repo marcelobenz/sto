@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AutorizacionController;
 use App\Http\Controllers\TramiteController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\BandejaPersonalController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Session;
@@ -53,3 +54,4 @@ Route::get('/ingreso', [AutorizacionController::class, 'index'])->name('ingreso.
 Route::get('/tramites', [TramiteController::class, 'index'])->name('tramites.index');
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
 //Route::get('/dashboard', 'DashboardController@index')->name('dashboard.index');
+Route::get('/bandeja-personal', [BandejaPersonalController::class, 'index'])->name('bandeja-personal.index');
