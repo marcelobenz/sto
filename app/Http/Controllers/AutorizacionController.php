@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Redirect;
 use App\Models\IngresanteBuilder;
 use App\Models\Ingresante;
+use App\Models\RequestLoginEmpleado;
+use App\Models\UsuarioView;
+use \Exception;
 
 class AutorizacionController extends Controller
 {
