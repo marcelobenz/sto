@@ -77,6 +77,12 @@
         </div>
         @endforeach
     </div>
+
+    @if(session('error'))
+        <div class="alert alert-danger mb-0 ml-3">
+            {{ session('error') }}
+        </div>
+    @endif
     <!-- Gráficos -->
     <div class="row chart-row equal-height">
 
