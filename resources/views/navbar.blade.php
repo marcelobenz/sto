@@ -43,7 +43,9 @@
                     </a>
                     <div class="dropdown-menu" aria-labelledby="administracionDropdown">
                         <a class="dropdown-item" href="categorias">Categorias</a>
-                                <a class="dropdown-item" href="usuarios">Usuarios</a>
+                                <a class="dropdown-item" href="usuarios">Administrativos</a>
+                                <a class="dropdown-item" href="limite">Limite de asignaciones</a>
+                                <a class="dropdown-item" href="limite">Usuarios</a>
                     </div>
                 </li>
             </ul>

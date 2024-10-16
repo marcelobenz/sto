@@ -8,7 +8,10 @@ use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\LicenciaController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\LimiteController;
+<<<<<<< HEAD
 use App\Http\Controllers\ContribuyenteMultinotaController;
+=======
+>>>>>>> de21b17 (se agrega limite de asignaciones)
 
 
 /*
@@ -31,6 +34,7 @@ Route::get('/', function () {
 });*/
 
 Route::get('/tramites', [TramiteController::class, 'index'])->name('tramites.index');
+Route::get('/tramites/data', [TramiteController::class, 'getTramitesData'])->name('tramites.data');
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
 Route::get('/categorias', [CategoriaController::class, 'index'])->name('categorias.index');
 Route::put('/categorias/{id}/desactivar', [CategoriaController::class, 'desactivar'])->name('categorias.desactivar');

@@ -24,6 +24,7 @@ class UsuarioInterno extends Model
         'estado',
         'nombre',
         'apellido',
+        'limite',
         'id_rol',
     ];
 
