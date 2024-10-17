@@ -7,6 +7,8 @@ use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\LicenciaController;
 use App\Http\Controllers\RolController;
+use App\Http\Controllers\LimiteController;
+use App\Http\Controllers\ContribuyenteMultinotaController;
 
 
 /*
@@ -49,6 +51,10 @@ Route::get('roles/create', [RolController::class, 'create'])->name('roles.create
 Route::post('roles', [RolController::class, 'store'])->name('roles.store');
 Route::get('/roles/{id}/edit', [RolController::class, 'edit'])->name('roles.edit');
 Route::put('/roles/{id}', [RolController::class, 'update'])->name('roles.update');
+Route::get('limite', [LimiteController::class, 'index'])->name('limites.index');
+Route::post('/guardar-limite', [LimiteController::class, 'guardarLimite'])->name('guardar.limite');
+Route::get('usuario', [ContribuyenteMultinotaController::class, 'index'])->name('contribuyente.index');
+Route::post('/usuario', [ContribuyenteMultinotaController::class, 'buscar'])->name('contribuyente.buscar');
 
 Route::get('/set-usuario-interno', [UsuarioController::class, 'setUsuarioInterno']);
 Route::get('/clear-session', [UsuarioController::class, 'clearSession']); // Para limpiar la sesión
