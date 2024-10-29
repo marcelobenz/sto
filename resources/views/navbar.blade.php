@@ -45,7 +45,8 @@
                         <a class="dropdown-item" href="categorias">Categorias</a>
                                 <a class="dropdown-item" href="usuarios">Administrativos</a>
                                 <a class="dropdown-item" href="limite">Limite de asignaciones</a>
-                                <a class="dropdown-item" href="limite">Usuarios</a>
+                                <a class="dropdown-item" href="usuario">Usuarios</a>
+                                <a class="dropdown-item" href="cuestionarios">Cuestionarios</a>
                     </div>
                 </li>
             </ul>
