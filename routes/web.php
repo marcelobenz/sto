@@ -61,7 +61,8 @@ Route::get('/cuestionarios/crear', [CuestionarioController::class, 'create'])->n
 Route::post('/cuestionarios', [CuestionarioController::class, 'store'])->name('cuestionarios.store');
 Route::get('/cuestionarios/{id}/editar', [CuestionarioController::class, 'edit'])->name('cuestionarios.edit');
 Route::put('/cuestionarios/{id}', [CuestionarioController::class, 'update'])->name('cuestionarios.update');
-Route::delete('/cuestionarios/{id}', [CuestionarioController::class, 'destroy'])->name('cuestionarios.destroy');
+Route::put('/cuestionarios/{id}/activar', [CuestionarioController::class, 'activar'])->name('cuestionarios.activar');
+Route::put('/cuestionarios/{id}/desactivar', [CuestionarioController::class, 'desactivar'])->name('cuestionarios.desactivar');
 
 Route::get('/set-usuario-interno', [UsuarioController::class, 'setUsuarioInterno']);
 Route::get('/clear-session', [UsuarioController::class, 'clearSession']); // Para limpiar la sesión
