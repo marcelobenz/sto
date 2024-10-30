@@ -10,10 +10,11 @@ class CuestionarioController extends Controller
 {
     public function index()
     {
-        $cuestionarios = Cuestionario::where('flag_baja', 0)->get();
-
+        $cuestionarios = Cuestionario::all(); 
+    
         return view('cuestionarios.index', compact('cuestionarios'));
     }
+    
 
     public function create()
     {
@@ -28,29 +29,29 @@ class CuestionarioController extends Controller
             'preguntas' => 'required|json' 
         ]);
         $cuestionario = new Cuestionario();
-        $cuestionario->fecha_sistema = now(); // Fecha actual
-        $cuestionario->flag_baja = 0; // Suponemos que flag_baja es 0 para activos
+        $cuestionario->fecha_sistema = now(); 
+        $cuestionario->flag_baja = 0; 
         $cuestionario->titulo = $request->titulo;
         $cuestionario->descripcion = $request->descripcion;
-        $cuestionario->save(); // Guardamos el cuestionario en la base de datos
+        $cuestionario->save(); 
     
-        // Procesar cada pregunta en el array de preguntas
+       
         $preguntas = json_decode($request->preguntas, true);
     
         foreach ($preguntas as $preguntaData) {
             $pregunta = new Pregunta();
-            $pregunta->id_cuestionario = $cuestionario->id_cuestionario; // Asignamos el ID del cuestionario recién creado
-            $pregunta->fecha_sistema = now(); // Fecha actual
+            $pregunta->id_cuestionario = $cuestionario->id_cuestionario; 
+            $pregunta->fecha_sistema = now(); 
             $pregunta->descripcion = $preguntaData['texto'];
             
-            // Asignar valores de los checkboxes a las flags
+          
             $pregunta->flag_detalle_si = $preguntaData['siDetalle'] ? 1 : 0;
             $pregunta->flag_detalle_no = $preguntaData['noDetalle'] ? 1 : 0;
             $pregunta->flag_finalizacion_si = $preguntaData['finalizaSi'] ? 1 : 0;
             $pregunta->flag_rechazo_no = $preguntaData['rechazaNo'] ? 1 : 0;
-            $pregunta->flag_baja = 0; // Suponemos que flag_baja es 0 para preguntas activas
+            $pregunta->flag_baja = 0; 
     
-            $pregunta->save(); // Guardamos cada pregunta en la base de datos
+            $pregunta->save(); 
     }
         return redirect()->route('cuestionarios.index')->with('success', 'Cuestionario y preguntas guardados exitosamente.');
     }
@@ -89,7 +90,7 @@ class CuestionarioController extends Controller
             }
         }
     
-        // 3. Agregar nuevas preguntas
+       
         if ($request->has('nuevas_preguntas')) {
             foreach ($request->nuevas_preguntas as $preguntaData) {
                 $nuevaPregunta = new Pregunta();
@@ -110,10 +111,19 @@ class CuestionarioController extends Controller
     
     
 
-    public function destroy($id)
+    public function activar($id)
     {
         $cuestionario = Cuestionario::findOrFail($id);
-        $cuestionario->flag_baja = 1;
+        $cuestionario->flag_baja = 0; 
+        $cuestionario->save();
+    
+        return redirect()->route('cuestionarios.index')->with('success', 'Cuestionario activado exitosamente.');
+    }
+    
+    public function desactivar($id)
+    {
+        $cuestionario = Cuestionario::findOrFail($id);
+        $cuestionario->flag_baja = 1; 
         $cuestionario->save();
     
         return redirect()->route('cuestionarios.index')->with('success', 'Cuestionario desactivado exitosamente.');

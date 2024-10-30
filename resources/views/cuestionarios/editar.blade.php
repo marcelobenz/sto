@@ -14,7 +14,7 @@
         margin-right: 5px;
     }
     .usuarios-list {
-        display: none; /* Ocultamos la lista de usuarios por defecto */
+        display: none; 
     }
     .grupo-label {
         cursor: pointer;
@@ -33,19 +33,19 @@
         @csrf
         @method('PUT')
 
-        <!-- Campo de título -->
+       
         <div class="mb-3">
             <label for="titulo" class="form-label">Título</label>
             <input type="text" name="titulo" class="form-control" value="{{ $cuestionario->titulo }}" required>
         </div>
 
-        <!-- Campo de descripción -->
+       
         <div class="mb-3">
             <label for="descripcion" class="form-label">Descripción</label>
             <textarea name="descripcion" class="form-control">{{ $cuestionario->descripcion }}</textarea>
         </div>
 
-        <!-- Sección para agregar nueva pregunta -->
+        
         <div class="mb-3">
             <h4>Nueva Pregunta</h4>
             <div class="input-group mb-2">
@@ -54,7 +54,7 @@
             </div>
         </div>
 
-        <!-- Tabla única para mostrar las preguntas existentes y nuevas -->
+       
         <h4>Preguntas</h4>
         <table class="table table-striped mt-3" id="tablaPreguntas">
             <thead>
@@ -69,7 +69,7 @@
                 </tr>
             </thead>
             <tbody>
-                <!-- Mostrar preguntas existentes -->
+              
                 @foreach($cuestionario->preguntas as $pregunta)
                     <tr>
                         <td>{{ $pregunta->id_pregunta }}</td>
@@ -93,7 +93,7 @@
 
 @section('scripting')
 <script>
-    let contador = {{ $cuestionario->preguntas->count() + 1 }}; // Iniciar el contador a partir del total de preguntas existentes
+    let contador = {{ $cuestionario->preguntas->count() + 1 }}; 
 
     function agregarPregunta() {
         const preguntaTexto = document.getElementById('preguntaInput').value.trim();
@@ -123,7 +123,7 @@
         celdaRechazaNo.innerHTML = `<input type="checkbox" name="nuevas_preguntas[${contador}][rechazaNo]">`;
         celdaAcciones.innerHTML = `<button type="button" class="btn btn-danger btn-sm" onclick="eliminarPreguntaNueva(this)">Eliminar</button>`;
 
-        // Limpiar el campo de entrada y aumentar el contador
+       
         document.getElementById('preguntaInput').value = '';
         contador++;
     }

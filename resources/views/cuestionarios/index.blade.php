@@ -27,47 +27,47 @@
 <div class="container mt-5">
     <br/>
     <br/>
-        <h1>Cuestionarios Activos</h1>
-        
-        <!-- Botón para agregar un nuevo cuestionario -->
-        <a href="{{ route('cuestionarios.create') }}" class="btn btn-primary mb-3">Agregar Nuevo Cuestionario</a>
-        
-        <!-- Tabla de cuestionarios activos -->
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Fecha de Sistema</th>
-                    <th>Título</th>
-                    <th>Descripción</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($cuestionarios as $cuestionario)
-                    <tr>
-                        <td>{{ $cuestionario->id_cuestionario }}</td>
-                        <td>{{ $cuestionario->fecha_sistema }}</td>
-                        <td>{{ $cuestionario->titulo }}</td>
-                        <td>{{ $cuestionario->descripcion }}</td>
-                        <td>
-                            
-                            <a href="{{ route('cuestionarios.edit', $cuestionario->id_cuestionario) }}" class="btn btn-sm btn-warning">Editar</a>
+    <h1>Listado de Cuestionarios</h1>
 
-                          
-                            <form action="{{ route('cuestionarios.destroy', $cuestionario->id_cuestionario) }}" method="POST" style="display:inline-block;">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de querer desactivar este cuestionario?')">Eliminar</button>
-                        </form>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="5" class="text-center">No hay cuestionarios activos</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-    @endsection
+    <table class="table table-striped mt-3">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Título</th>
+                <th>Descripción</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($cuestionarios as $cuestionario)
+                <tr>
+                    <td>{{ $cuestionario->id_cuestionario }}</td>
+                    <td>{{ $cuestionario->titulo }}</td>
+                    <td>{{ $cuestionario->descripcion }}</td>
+                    <td>
+                        {{ $cuestionario->flag_baja ? 'Inactivo' : 'Activo' }}
+                    </td>
+                    <td>
+                        <a href="{{ route('cuestionarios.edit', $cuestionario->id_cuestionario) }}" class="btn btn-primary btn-sm">Editar</a>
+
+                        
+                        @if ($cuestionario->flag_baja)
+                            <form action="{{ route('cuestionarios.activar', $cuestionario->id_cuestionario) }}" method="POST" style="display:inline-block;">
+                                @csrf
+                                @method('PUT')
+                                <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('¿Estás seguro de querer activar este cuestionario?')">Activar</button>
+                            </form>
+                        @else
+                            <form action="{{ route('cuestionarios.desactivar', $cuestionario->id_cuestionario) }}" method="POST" style="display:inline-block;">
+                                @csrf
+                                @method('PUT')
+                                <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm('¿Estás seguro de querer desactivar este cuestionario?')">Desactivar</button>
+                            </form>
+                        @endif
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+</div>
