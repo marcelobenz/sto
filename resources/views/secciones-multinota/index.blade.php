@@ -31,7 +31,7 @@
             </div>
             <button class="btn btn-primary">+</button>
         </div>
-        <table id="seccionesMultinotaTable" class="table table-bordered table-striped table-hover">
+        <table id="secciones-multinota-table" class="table table-bordered table-striped table-hover">
             <thead>
                 <tr>
                     <th>Título</th>
@@ -53,7 +53,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function() {
-            $('#seccionesMultinotaTable').DataTable({
+            $('#secciones-multinota-table').DataTable({
                 "processing": true,
                 "serverSide": true,
                 "ajax": "{{ route('secciones-multinota.index') }}",

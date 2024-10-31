@@ -10,21 +10,36 @@ use DB;
 
 class SeccionesMultinotaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request) {
-        // Obtiene todas las categorias activas de la base de datos
-        //$categorias = Categoria::all();
+    private $seccion;
+    private $campos;
 
-        // Obtiene las categorias con paginación
-        // $categorias = Categoria::paginate(10); // Cambia el 10 por el número de elementos que quieres por página
+    public function index(Request $request) {
+        $data = null;
 
         if ($request->ajax()) {
             $data = SeccionMultinota::select('seccion.*')
             ->where('seccion.activo', true)
             ->where('seccion.temporal', false)
             ->get();
+
+            foreach ($data as &$d) {
+                $camposString = '';
+
+                $campos = Campo::select('*')
+                ->where('id_seccion', $d->id_seccion)
+                ->orderBy('orden', 'ASC')
+                ->get();
+
+                foreach ($campos as &$c) {
+                    if($campos[count($campos)-1]->id_campo == $c->id_campo) {
+                        $camposString = $camposString . $c->nombre;
+                    } else {
+                        $camposString = $camposString . $c->nombre . ', ';    
+                    }
+                }
+    
+                $d['campos'] = $camposString;
+            }
 
             return DataTables::of($data)
                 ->addIndexColumn()
@@ -34,8 +49,7 @@ class SeccionesMultinotaController extends Controller
         return view('secciones-multinota.index');
     }
 
-    public function edit($id)
-    {
+    public function edit($id) {
         $seccion = SeccionMultinota::findOrFail($id);
         $campos = Campo::select('*')
         ->where('id_seccion', $id)
