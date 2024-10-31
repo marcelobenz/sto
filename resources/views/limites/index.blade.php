@@ -24,104 +24,141 @@
 @endsection
 
 @section('contenidoPrincipal')
-<div class="container">
-    <div class="d-flex">
-        <div class="treeview" style="width: 30%;">
-            <h1>Usuarios por Grupo</h1>
-            <ul id="treeview">
-                @foreach ($grupos as $grupo)
-                    <li>
-                        <!-- Ícono de expandir/colapsar y nombre del grupo -->
-                        <span class="toggle-icon">+</span>
-                        <span class="grupo-label" data-id="{{ $grupo->id_grupo_interno }}">{{ $grupo->descripcion }}</span>
-                        <ul class="usuarios-list">
-                            @foreach ($grupo->usuarios as $usuario)
-                                <li>
-                                    <input type="checkbox" class="usuario-checkbox" id="usuario-{{ $usuario->id_usuario_interno }}" data-nombre="{{ $usuario->nombre }}" value="{{ $usuario->id_usuario_interno }}">
-                                    <label for="usuario-{{ $usuario->id_usuario_interno }}">{{ $usuario->nombre }} (Legajo: {{ $usuario->legajo }})</label>
-                                </li>
-                            @endforeach
-                        </ul>
-                    </li>
-                @endforeach
-            </ul>
+<div class="container-fluid">
+    <div class="row">
+       
+        <div class="col-lg-4 col-md-5 mb-4">
+            <div class="border rounded bg-light p-3 h-100">
+                <br/>
+                <br/>
+                <br/>
+                <h1 class="h5">Usuarios por Grupo</h1>
+
+               
+                <input type="text" id="user-search" class="form-control mb-3" placeholder="Buscar usuario...">
+
+               
+                <ul id="treeview" class="list-unstyled">
+                    @foreach ($grupos as $grupo)
+                        <li class="mb-2">
+                            <span class="toggle-icon font-weight-bold">+</span>
+                            <span class="grupo-label" data-id="{{ $grupo->id_grupo_interno }}">{{ $grupo->descripcion }}</span>
+                            <ul class="usuarios-list pl-4" style="display: none;">
+                                @foreach ($grupo->usuarios as $usuario)
+                                    <li class="usuario-item">
+                                        <input type="checkbox" class="usuario-checkbox" id="usuario-{{ $usuario->id_usuario_interno }}" data-nombre="{{ $usuario->nombre }}" data-apellido="{{ $usuario->apellido }}" data-legajo="{{ $usuario->legajo }}" value="{{ $usuario->id_usuario_interno }}">
+                                        <label for="usuario-{{ $usuario->id_usuario_interno }}">{{ $usuario->nombre }} {{ $usuario->apellido }} (Legajo: {{ $usuario->legajo }})</label>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
         </div>
 
-        <div class="table-container">
-            <h2>Elementos seleccionados</h2>
-            <table class="table table-striped" id="selected-items-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Tipo</th>
-                        <th>Límite</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-            <button id="save-button" class="btn btn-primary">Guardar</button>
+        
+        <div class="col-lg-8 col-md-7">
+            <div class="table-container">
+                <br/>
+                <br/>
+                <br/>
+                <h2 class="h5">Elementos seleccionados</h2>
+                <table class="table table-striped" id="selected-items-table">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Límite</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <button id="save-button" class="btn btn-primary mt-2">Guardar</button>
+            </div>
         </div>
     </div>
 </div>
+
 @endsection
 
 @section('scripting')
 <script>
-    $(document).ready(function() {
-        console.log("DOM completamente cargado con jQuery"); 
+   $(document).ready(function() {
+    console.log("DOM completamente cargado con jQuery"); 
 
-        // Lógica de expandir/colapsar para los grupos al hacer clic en el nombre del grupo
-        $('#treeview').on('click', '.grupo-label', function() {
-            const icon = $(this).prev('.toggle-icon'); // Ícono de expansión/colapso
-            const usuariosList = $(this).next('.usuarios-list'); // Lista de usuarios asociada
+    $('#treeview').on('click', '.grupo-label', function() {
+        const icon = $(this).prev('.toggle-icon'); 
+        const usuariosList = $(this).next('.usuarios-list'); 
 
-            if (usuariosList.is(':visible')) {
-                usuariosList.hide(); // Ocultar la lista de usuarios
-                icon.text('+'); // Cambiar el ícono a "+"
-            } else {
-                usuariosList.show(); // Mostrar la lista de usuarios
-                icon.text('-'); // Cambiar el ícono a "-"
-            }
-        });
-
-        // Manejo de selección de checkboxes de los usuarios
-        $('#treeview').on('change', '.usuario-checkbox', function() {
-            const checkbox = $(this);
-            console.log("Usuario seleccionado:", checkbox.val(), "Nombre:", checkbox.data('nombre'), "Estado:", checkbox.is(':checked')); // Depuración
-
-            const id = checkbox.val();
-            const nombre = checkbox.data('nombre');
-            const tipo = 'Usuario';
-
-            if (checkbox.is(':checked')) {
-                addItemToTable(id, nombre, tipo);
-            } else {
-                removeItemFromTable(id);
-            }
-        });
-
-        function addItemToTable(id, nombre, tipo) {
-            if ($('#selected-item-' + id).length) {
-                return; 
-            }
-            const newRow = `<tr id="selected-item-${id}">
-                <td>${id}</td>
-                <td>${nombre}</td>
-                <td>${tipo}</td>
-                <td>
-                    <input type="number" min="0" style="width: 100%;" placeholder="Ingrese límite" />
-                </td>
-            </tr>`;
-            $('#selected-items-table tbody').append(newRow);
+        if (usuariosList.is(':visible')) {
+            usuariosList.hide();
+            icon.text('+'); 
+        } else {
+            usuariosList.show(); 
+            icon.text('-'); 
         }
-
-        window.removeItemFromTable = function(id) {
-            $('#selected-item-' + id).remove(); 
-        };
     });
 
-    // Lógica para guardar los límites
+    $('#treeview').on('change', '.usuario-checkbox', function() {
+        const checkbox = $(this);
+        console.log("Usuario seleccionado:", checkbox.val(), "Nombre:", checkbox.data('nombre'), "Apellido:", checkbox.data('apellido'), "Estado:", checkbox.is(':checked')); 
+
+        const id = checkbox.val();
+        const nombre = checkbox.data('nombre');
+        const apellido = checkbox.data('apellido');
+
+        if (checkbox.is(':checked')) {
+            addItemToTable(id, nombre, apellido);
+        } else {
+            removeItemFromTable(id);
+        }
+    });
+
+    function addItemToTable(id, nombre, apellido) {
+        if ($('#selected-item-' + id).length) {
+            return; 
+        }
+        const newRow = `<tr id="selected-item-${id}">
+            <td>${id}</td>
+            <td>${nombre} ${apellido}</td>
+            <td>
+                <input type="number" min="0" style="width: 100%;" placeholder="Ingrese límite" />
+            </td>
+        </tr>`;
+        $('#selected-items-table tbody').append(newRow);
+    }
+
+    window.removeItemFromTable = function(id) {
+        $('#selected-item-' + id).remove(); 
+    };
+
+    
+    $('#user-search').on('keyup', function() {
+        const searchTerm = $(this).val().toLowerCase();
+
+        $('.usuarios-list').hide(); 
+        $('.toggle-icon').text('+'); 
+
+        $('.usuario-item').each(function() {
+            const usuarioCheckbox = $(this).find('.usuario-checkbox');
+            const usuarioNombre = usuarioCheckbox.data('nombre').toLowerCase();
+            const usuarioApellido = usuarioCheckbox.data('apellido').toLowerCase();
+            const usuarioLegajo = usuarioCheckbox.data('legajo').toString();
+            const grupo = $(this).closest('ul.usuarios-list');
+            const grupoIcon = grupo.prev('.toggle-icon');
+
+            
+            if (usuarioNombre.includes(searchTerm) || usuarioApellido.includes(searchTerm) || usuarioLegajo.includes(searchTerm)) {
+                $(this).show(); 
+                grupo.show(); 
+                grupoIcon.text('-'); 
+            } else {
+                $(this).hide(); 
+            }
+        });
+    });
+
     $('#save-button').on('click', function() {
         const data = [];
 
@@ -157,5 +194,6 @@
             alert('No hay límites para guardar');
         }
     });
+});
 </script>
 @endsection
