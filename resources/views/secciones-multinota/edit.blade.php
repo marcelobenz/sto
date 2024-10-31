@@ -18,7 +18,7 @@
                 <div class="card">
                     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
                         Editar Sección Multinota
-                        <button type="button" class="btn btn-secondary">
+                        <button type="button" id="salir-editar-seccion-multinota" class="btn btn-secondary">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-90deg-left" viewBox="0 0 16 16">
                                 <path fill-rule="evenodd" d="M1.146 4.854a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H12.5A2.5 2.5 0 0 1 15 6.5v8a.5.5 0 0 1-1 0v-8A1.5 1.5 0 0 0 12.5 5H2.707l3.147 3.146a.5.5 0 1 1-.708.708z"/>
                             </svg>
@@ -184,7 +184,49 @@
                         </form>
                     </div>
                 </div>
+
+                <dialog id="modal-salir-editar-seccion-multinota" style="border: none; box-shadow: 0 5px 10px rgba(0, 0, 0, 0.8);">
+                    <form method="dialog">
+                      <section>
+                        <h1 style="font-size: 16px;">Confirmación</h1>
+                        <hr/>
+                        <p>Al salir, perderá todos los cambios realizados ¿está de acuerdo?<p>
+                      </section>
+                      <div style="display: flex; justify-content: space-between;">
+                        <button id="cancel" type="button" class="btn btn-warning">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                            </svg> No
+                        </button>
+                        <a href="/secciones-multinota" class="btn btn-secondary">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16">
+                                <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z"/>
+                            </svg> Si
+                        </a>
+                      </div>
+                    </form>
+                </dialog>
             </div>
         </div>
     </div>
+@endsection
+
+@section('scripting')
+<script>
+    (function () {
+      var salirButton = document.getElementById("salir-editar-seccion-multinota");
+      var cancelButton = document.getElementById("cancel");
+      var modal = document.getElementById("modal-salir-editar-seccion-multinota");
+  
+      // Update button opens a modal dialog
+      salirButton.addEventListener("click", function () {
+        modal.showModal();
+      });
+  
+      // Form cancel button closes the dialog box
+      cancelButton.addEventListener("click", function () {
+        modal.close();
+      });
+    })();
+  </script>
 @endsection
