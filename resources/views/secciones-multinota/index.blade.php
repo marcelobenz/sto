@@ -64,8 +64,8 @@
                         "data": null,
                         "render": function(data, type, row) {
                             return `
-                                <button class="btn btn-sm btn-primary" onclick="editarCategoria(${row.id_categoria})">Editar</button>
-                                <button class="btn btn-sm btn-danger" onclick="confirmarEliminar(${row.id_categoria})">Eliminar</button>
+                                <button class="btn btn-sm btn-primary" onclick="editarSeccionMultinota(${row.id_seccion})">Editar</button>
+                                <button class="btn btn-sm btn-danger" onclick="confirmarEliminar(${row.id_seccion})">Eliminar</button>
                             `;
                         }
                     }
@@ -79,10 +79,9 @@
             });
         });
 
-
-        /* function editarCategoria(id) {
-            window.location.href = `/categorias/${id}/edit`;
-        } */
+        function editarSeccionMultinota(id) {
+            window.location.href = `/secciones-multinota/${id}/edit`;
+        }
 
         /* function confirmarEliminar(id,) {
             Swal.fire({
