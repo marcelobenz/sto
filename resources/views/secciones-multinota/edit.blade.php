@@ -1,4 +1,3 @@
-{{-- @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
 @extends('navbar')
 
 @section('heading')
@@ -26,7 +25,7 @@
                     </div>
 
                     <div class="card-body">
-                        <form method="POST" action="{{ route('categorias.update', $seccion->id_seccion) }}">
+                        <form method="POST" action="{{ route('secciones-multinota.update', $seccion->id_seccion) }}">
                             @csrf
                             @method('PUT')
 
@@ -79,11 +78,14 @@
                                             </td class="border border-slate-300 p-2">
                                             <td class="border border-slate-300 p-2">{{ ($c->obligatorio == 1) ? 'Sí' : 'No' }}</td>
                                             <td class="border border-slate-300 p-2">
-                                                <button type="button" class="btn btn-secondary">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
-                                                        <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
-                                                    </svg>
-                                                </button>
+                                                <form method="GET" action="{{ route('secciones-multinota.deleteCampo', $c->id_campo) }}">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-secondary">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                                                            <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
+                                                        </svg>
+                                                    </button>
+                                                </form> 
                                             </td>
                                         </tr>
                                     @endforeach
@@ -179,7 +181,6 @@
                             </div>
                             <div style="display: flex; gap: 0.5rem; justify-content: end;">
                                 <button type="submit" class="btn btn-primary">Actualizar Sección</button>
-                                <a href="{{ route('secciones-multinota.index') }}" class="btn btn-secondary">Volver</a>
                             </div>
                         </form>
                     </div>

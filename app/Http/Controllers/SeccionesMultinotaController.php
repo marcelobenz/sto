@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\SeccionMultinota;
 use App\Models\Campo;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
 use DB;
@@ -55,6 +56,9 @@ class SeccionesMultinotaController extends Controller
         ->where('id_seccion', $id)
         ->get();
 
+        Session::put('SECCION_ACTUAL', $seccion);
+        Session::put('CAMPOS_ACTUALES', $campos);
+
         foreach ($campos as &$c) {
             if($c->tipo == 'INTEGER') {
                 if($c->limite_minimo != null) {
@@ -76,6 +80,19 @@ class SeccionesMultinotaController extends Controller
                         }
                     }
                 }
+            }
+        }
+
+        return view('secciones-multinota.edit', compact('seccion', 'campos'));
+    }
+
+    public function deleteCampo($id) {
+        $seccion = Session::get('SECCION_ACTUAL');
+        $campos = Session::get('CAMPOS_ACTUALES');
+        
+        for ($i = 0; $i <= count($campos); $i++) {
+            if($campos[$i]->id_campo == $id) {
+                unset($campos[$i]);
             }
         }
 

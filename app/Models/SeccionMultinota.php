@@ -28,14 +28,4 @@ class SeccionMultinota extends Model
 
     // Disable timestamps if you are managing them manually
     public $timestamps = false;
-
-    /* public function parent()
-    {
-        return $this->belongsTo(Categoria::class, 'id_padre');
-    }
-
-    public function children()
-    {
-        return $this->hasMany(Categoria::class, 'id_padre');
-    } */
 }
