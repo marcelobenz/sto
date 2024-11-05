@@ -9,6 +9,8 @@ class ContribuyenteMultinota extends Model
 {
     use HasFactory;
 
+    public $timestamps = false;
+
     protected $table = 'contribuyente_multinota';
 
     protected $primaryKey = 'id_contribuyente_multinota';
