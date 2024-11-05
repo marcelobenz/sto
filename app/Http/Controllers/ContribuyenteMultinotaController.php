@@ -2,34 +2,74 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use App\Models\ContribuyenteMultinota;
+use App\Mail\RestablecerClaveMailable;
 
 class ContribuyenteMultinotaController extends Controller
 {
-    // Mostrar la página con la caja de texto
+    
     public function index()
     {
         return view('contribuyentes.index'); 
     }
 
-    // Procesar la búsqueda
+   
     public function buscar(Request $request)
     {
-        // Validar que se ha ingresado un CUIT
+        
         $request->validate([
-            'cuit' => 'required|digits:11', // CUIT debe tener 11 dígitos
+            'cuit' => 'required|digits:11', 
         ]);
 
-        // Buscar el contribuyente en la base de datos
+       
         $contribuyente = ContribuyenteMultinota::where('cuit', $request->cuit)->first();
 
-        // Si no se encuentra, devolver un mensaje de error
+        
         if (!$contribuyente) {
             return back()->with('error', 'No se encontró un contribuyente con ese CUIT.');
         }
 
-        // Si se encuentra, devolver los datos del contribuyente
-        return view('contribuyentes.index', ['contribuyente' => $contribuyente]); // Cambiado a 'index'
+       
+        return view('contribuyentes.index', ['contribuyente' => $contribuyente]); 
     }
+
+
+    public function actualizarCorreo(Request $request, $id)
+    {
+        $request->validate([
+            'correo' => 'required|email'
+        ]);
+
+       
+        $contribuyente = ContribuyenteMultinota::where('id_contribuyente_multinota', $id)->firstOrFail();
+        $contribuyente->correo = $request->input('correo');
+        $contribuyente->save();
+
+        return redirect()->back()->with('success', 'Correo actualizado correctamente');
+    }
+
+
+
+    public function restablecerClave($id)
+{
+    
+    $newPassword = Str::random(12); 
+
+    
+    $encryptedPassword = Hash::make($newPassword);
+
+    
+    $contribuyente = ContribuyenteMultinota::where('id_contribuyente_multinota', $id)->firstOrFail();
+    $contribuyente->clave = $encryptedPassword;
+    $contribuyente->save();
+
+    Mail::to($contribuyente->correo)->send(new RestablecerClaveMailable($newPassword));
+
+    
+    return redirect()->back()->with('success', "La nueva contraseña es: $newPassword");
+}
 }

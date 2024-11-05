@@ -4,7 +4,6 @@
 <link href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <style>
@@ -14,7 +13,7 @@
         margin-right: 5px;
     }
     .usuarios-list {
-        display: none; /* Ocultamos la lista de usuarios por defecto */
+        display: none;
     }
     .grupo-label {
         cursor: pointer;
@@ -25,6 +24,7 @@
 
 @section('contenidoPrincipal')
 <div class="container mt-5">
+    <br/>
     <h1>Buscar Contribuyente</h1>
 
     
@@ -45,6 +45,13 @@
         </div>
     @endif
 
+
+    @if(session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+@endif
+
     
     <form action="{{ route('contribuyente.buscar') }}" method="POST">
         @csrf
@@ -55,7 +62,7 @@
         <button type="submit" class="btn btn-primary">Buscar</button>
     </form>
 
-  
+   
     @isset($contribuyente)
         <div class="mt-5">
             <h3>Datos del Contribuyente</h3>
@@ -63,9 +70,26 @@
                 <li class="list-group-item"><strong>CUIT:</strong> {{ $contribuyente->cuit }}</li>
                 <li class="list-group-item"><strong>Nombre:</strong> {{ $contribuyente->nombre }}</li>
                 <li class="list-group-item"><strong>Apellido:</strong> {{ $contribuyente->apellido }}</li>
-                <li class="list-group-item"><strong>Correo:</strong> {{ $contribuyente->correo }}</li>
+                
+              
+                <li class="list-group-item">
+                    <form action="{{ route('contribuyente.actualizarCorreo', ['id' => $contribuyente->id_contribuyente_multinota]) }}" method="POST" class="form-inline d-flex align-items-center">
+                        @csrf
+                        @method('PUT')
+                        <strong>Correo:</strong>
+                        <input type="email" class="form-control ml-3" name="correo" value="{{ $contribuyente->correo }}" required>
+                        <button type="submit" class="btn btn-success ml-2">Guardar</button>
+                    </form>
+                </li>
+
+
                 <li class="list-group-item"><strong>Teléfono:</strong> {{ $contribuyente->telefono1 }}</li>
             </ul>
+
+            <form action="{{ route('contribuyente.restablecerClave', ['id' => $contribuyente->id_contribuyente_multinota]) }}" method="POST">
+        @csrf
+        <button type="submit" class="btn btn-warning">Restablecer Contraseña</button>
+    </form>
         </div>
     @endisset
 </div>

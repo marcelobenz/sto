@@ -49,6 +49,14 @@
                                 <a class="dropdown-item" href="cuestionarios">Cuestionarios</a>
                     </div>
                 </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="SistemaDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Sistema
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="SistemaDropdown">
+                        <a class="dropdown-item" href="sistema">Configuración Mail</a>
+                    </div>
+                </li>
             </ul>
         </div>
 

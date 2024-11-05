@@ -10,6 +10,7 @@ use App\Http\Controllers\RolController;
 use App\Http\Controllers\LimiteController;
 use App\Http\Controllers\ContribuyenteMultinotaController;
 use App\Http\Controllers\CuestionarioController;
+use App\Http\Controllers\ConfiguracionMailController;
 
 
 /*
@@ -56,6 +57,8 @@ Route::get('limite', [LimiteController::class, 'index'])->name('limites.index');
 Route::post('/guardar-limite', [LimiteController::class, 'guardarLimite'])->name('guardar.limite');
 Route::get('usuario', [ContribuyenteMultinotaController::class, 'index'])->name('contribuyente.index');
 Route::post('/usuario', [ContribuyenteMultinotaController::class, 'buscar'])->name('contribuyente.buscar');
+Route::put('/usuario/{id}/actualizar-correo', [ContribuyenteMultinotaController::class, 'actualizarCorreo'])->name('contribuyente.actualizarCorreo');
+Route::post('/usuario/{id}/restablecer-clave', [ContribuyenteMultinotaController::class, 'restablecerClave'])->name('contribuyente.restablecerClave');
 Route::get('cuestionarios', [CuestionarioController::class, 'index'])->name('cuestionarios.index');
 Route::get('/cuestionarios/crear', [CuestionarioController::class, 'create'])->name('cuestionarios.create');
 Route::post('/cuestionarios', [CuestionarioController::class, 'store'])->name('cuestionarios.store');
@@ -63,6 +66,8 @@ Route::get('/cuestionarios/{id}/editar', [CuestionarioController::class, 'edit']
 Route::put('/cuestionarios/{id}', [CuestionarioController::class, 'update'])->name('cuestionarios.update');
 Route::put('/cuestionarios/{id}/activar', [CuestionarioController::class, 'activar'])->name('cuestionarios.activar');
 Route::put('/cuestionarios/{id}/desactivar', [CuestionarioController::class, 'desactivar'])->name('cuestionarios.desactivar');
+Route::get('/sistema', [ConfiguracionMailController::class, 'edit'])->name('configuracion.edit');
+Route::post('/sistema', [ConfiguracionMailController::class, 'update'])->name('configuracion.update');
 
 Route::get('/set-usuario-interno', [UsuarioController::class, 'setUsuarioInterno']);
 Route::get('/clear-session', [UsuarioController::class, 'clearSession']); // Para limpiar la sesión
