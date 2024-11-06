@@ -4,34 +4,29 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use App\Models\ParametroMail;
-use Illuminate\Support\Facades\Config;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
-    public function register(): void
+    public function register()
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
-    public function boot(): void
+    public function boot()
     {
-        $mailConfig = ParametroMail::first(); 
+        $configuracionMail = ParametroMail::where('activo', 1)->first();
 
-        if ($mailConfig) {
-            Config::set('mail.mailer', 'smtp');
-            Config::set('mail.host', $mailConfig->host);
-            Config::set('mail.port', $mailConfig->puerto);
-            Config::set('mail.username', $mailConfig->usuario);
-            Config::set('mail.password', $mailConfig->clave);
-            Config::set('mail.encryption', 'tls');
-            Config::set('mail.from.address', $mailConfig->usuario);
-            Config::set('mail.from.name', $mailConfig->usuario);
+        if ($configuracionMail) {
+            
+            config([
+                'mail.mailers.smtp.host' => $configuracionMail->host,
+                'mail.mailers.smtp.port' => $configuracionMail->puerto,
+                'mail.mailers.smtp.username' => $configuracionMail->usuario,
+                'mail.mailers.smtp.password' => $configuracionMail->clave,
+                'mail.mailers.smtp.encryption' => 'tls', 
+                'mail.from.address' => 'correo@ejemplo.com', 
+                'mail.from.name' => 'Cognisys',
+            ]);
         }
     }
 }
