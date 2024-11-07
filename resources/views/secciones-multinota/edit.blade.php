@@ -25,9 +25,9 @@
                     </div>
 
                     <div class="card-body">
-                        <form method="POST" action="{{ route('secciones-multinota.update', $seccion->id_seccion) }}">
+                        {{-- <form method="POST" action="{{ route('secciones-multinota.update', $seccion->id_seccion) }}">
                             @csrf
-                            @method('PUT')
+                            @method('PUT') --}}
 
                             <h3>Título</h3>
                             <x-text-input id="input-titulo" style="border-radius: 0.375rem; width: 50%;" type="text" name="titulo" :value="__($seccion->titulo)" required autofocus />
@@ -101,7 +101,7 @@
                             <div style="display: flex; gap: 0.5rem; justify-content: end;">
                                 <button type="submit" class="btn btn-primary">Actualizar Sección</button>
                             </div>
-                        </form>
+                        {{-- </form> --}}
                     </div>
                 </div>
 
