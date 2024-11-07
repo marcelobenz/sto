@@ -93,9 +93,37 @@ class SeccionesMultinotaController extends Controller
         for ($i = 0; $i <= count($campos); $i++) {
             if($campos[$i]->id_campo == $id) {
                 unset($campos[$i]);
+                $camposAux = $campos->values();
+                Session::put('CAMPOS_ACTUALES', $camposAux);
             }
         }
 
+        $campos = Session::get('CAMPOS_ACTUALES');
+
         return view('secciones-multinota.edit', compact('seccion', 'campos'));
+    }
+
+    public function update($id) {
+        error_log('a');
+    }
+
+    public function updateSeccion(Request $request) {
+        $campos = Campo::hydrate($request->input('array'));
+        Session::put('CAMPOS_ACTUALES', $campos);
+        $seccion = Session::get('SECCION_ACTUAL');
+
+        // Render the partial view with updated data
+        $html = view('partials.seccion-campos', compact('campos'))->render();
+
+        // Return JSON response with rendered HTML
+        return response()->json(['html' => $html]);
+    }
+
+    public function refresh() {
+        $campos = Session::get('CAMPOS_ACTUALES');
+
+        return response()->json([
+            'updatedCampos' => $campos,
+        ]);
     }
 }
