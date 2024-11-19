@@ -11,6 +11,7 @@ use App\Http\Controllers\LimiteController;
 use App\Http\Controllers\ContribuyenteMultinotaController;
 use App\Http\Controllers\CuestionarioController;
 use App\Http\Controllers\ConfiguracionMailController;
+use App\Http\Controllers\IngresoExternoController;
 
 
 /*
@@ -68,9 +69,21 @@ Route::put('/cuestionarios/{id}/activar', [CuestionarioController::class, 'activ
 Route::put('/cuestionarios/{id}/desactivar', [CuestionarioController::class, 'desactivar'])->name('cuestionarios.desactivar');
 Route::get('/sistema', [ConfiguracionMailController::class, 'edit'])->name('configuracion.edit');
 Route::post('/sistema', [ConfiguracionMailController::class, 'update'])->name('configuracion.update');
+Route::get('/ingreso-externo', [IngresoExternoController::class, 'showLoginForm'])->name('ingreso-externo');
+Route::post('/ingreso-externo', [IngresoExternoController::class, 'login'])->name('ingreso-externo.login');
+Route::get('/bandeja-usuario-externo', [IngresoExternoController::class, 'showBandeja'])->name('bandeja-usuario-externo');
+Route::get('/cambiar-clave', [ContribuyenteMultinotaController::class, 'showChangePasswordForm'])->name('cambiar-clave');
+Route::post('/cambiar-clave', [ContribuyenteMultinotaController::class, 'changePassword'])->name('cambiar-clave.submit');
+
 
 Route::get('/set-usuario-interno', [UsuarioController::class, 'setUsuarioInterno']);
 Route::get('/clear-session', [UsuarioController::class, 'clearSession']); // Para limpiar la sesión
+
+
+Route::get('/clear-session', function() {
+    session()->forget('contribuyente_multinota');
+    return redirect()->route('ingreso-externo');
+});
 
 Route::view('/navbar','/navbar')->name('navbar');
 
