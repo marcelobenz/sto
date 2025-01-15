@@ -47,7 +47,7 @@
                                 </thead>
                                 <tbody>
                                     @foreach ($campos as $c)
-                                        <tr draggable="true" ondragstart="handleDragStart()" ondragover="handleDragOver()" ondragleave="handleDragLeave()">
+                                        <tr draggable="true" data-id="{{ $c->id_campo }}" ondragstart="handleDragStart()" ondragover="handleDragOver()" ondragleave="handleDragLeave()">
                                             <td class="border border-slate-300 p-2">{{ $c->nombre }}</td>
                                             <td class="border border-slate-300 p-2">
                                                 @if ($c->tipo == 'STRING')
@@ -91,6 +91,10 @@
                                     @endforeach
                                 </tbody>
                             </table>
+
+                            <hr>
+
+                            <div id="editar-campo-container"></div>
 
                             <hr>
 
@@ -154,6 +158,19 @@
     var arrayCampos;
     var isDraggingOver = false;
     let debounceTimer;
+
+    $(document).ready(function() {
+        $('table tr').on('click', function() {
+            var campoId = $(this).data('id'); // Assuming you have data-id attribute on each row
+            $.ajax({
+                type: 'GET',
+                url: '/secciones-multinota/' + campoId + '/select',
+                success: function(data) {
+                    $('#editar-campo-container').html(data); // Replace #details-container with your actual container ID
+                }
+            });
+        });
+    });
 
     function handleDragStart(){  
         row = event.target;

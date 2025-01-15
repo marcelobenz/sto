@@ -38,6 +38,7 @@ Route::put('/categorias/{id}', [CategoriaController::class, 'update'])->name('ca
 Route::get('categorias/create', [CategoriaController::class, 'create'])->name('categorias.create');
 Route::post('categorias', [CategoriaController::class, 'store'])->name('categorias.store');
 Route::get('/secciones-multinota', [SeccionesMultinotaController::class, 'index'])->name('secciones-multinota.index');
+Route::get('/secciones-multinota/{id}/select', [SeccionesMultinotaController::class, 'selectCampo'])->name('secciones-multinota.selectCampo');
 Route::get('/secciones-multinota/{id}/edit', [SeccionesMultinotaController::class, 'edit'])->name('secciones-multinota.edit');
 Route::get('/secciones-multinota/{id}/deleteCampo', [SeccionesMultinotaController::class, 'deleteCampo'])->name('secciones-multinota.deleteCampo');
 Route::post('/secciones-multinota/updateSeccion', [SeccionesMultinotaController::class, 'updateSeccion'])->name('secciones-multinota.updateSeccion');

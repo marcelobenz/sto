@@ -103,6 +103,19 @@ class SeccionesMultinotaController extends Controller
         return view('secciones-multinota.edit', compact('seccion', 'campos'));
     }
 
+    public function selectCampo($id) {
+        $campos = Campo::select('*')
+        ->where('id_campo', $id)
+        ->get();
+
+        $tipos = Campo::select('tipo')->distinct()->get();
+        $tiposWithId = $tipos->map(function ($item, $index) {
+            return ['id' => $index + 1, 'tipo' => $item->tipo];
+        });
+
+        return view('partials.editar-campo', compact('campos', 'tipos'));
+    }
+
     public function update($id) {
         error_log('a');
     }
