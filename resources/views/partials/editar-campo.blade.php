@@ -35,7 +35,20 @@
                     {{-- Revisar --}}<input type="checkbox" name="limitarCaracteres" value="active">
                 </label>
             </div>
-        @elseif($campos[0]->tipo == 'LISTA')
+        @elseif($campos[0]->tipo == 'TEXTAREA')
+            <div style="display: flex; flex-direction: column;">
+                <label>
+                    Limitar caractéres
+                    {{-- Revisar --}}<input type="checkbox" name="limitarCaracteres" value="active">
+                </label>
+            </div>
+        @elseif($campos[0]->tipo == 'TEXTAREA_FIJO')
+            <div style="display: flex; flex-direction: column;">
+                <textarea maxlength="500" placeholder="Ingrese un texto...">
+
+                </textarea>
+            </div>
+        @elseif($campos[0]->tipo == 'LISTA' || $campos[0]->tipo == 'CAJAS_SELECCION')
             <h3>Listas / Cajas de selección</h3>
             {{-- @include('partials.seccion-opciones-campos', ['opcionesCampo' => []]) --}}
             <div id="opciones-campo-container"></div>
@@ -55,19 +68,21 @@
     var campos = @json($campos);
 
     $(document).ready(function() {
-        fetch('/secciones-multinota/getOpcionesCampo/' + campos[0].id_campo + '/' + document.getElementById("select-tipos").value)
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById("opciones-campo-container").innerHTML = data;
-            })
-            .catch(error => console.error('Error:', error));
+        if(document.getElementById("select-tipos").value == 'LISTA') {
+            fetch('/secciones-multinota/getOpcionesCampo/' + campos[0].id_campo + '/' + document.getElementById("select-tipos").value)
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById("opciones-campo-container").innerHTML = data;
+                })
+                .catch(error => console.error('Error:', error));
+        }
     });
 
-    /* document.getElementById('select-tipos').addEventListener('change', function() {
+    document.getElementById('select-tipos').addEventListener('change', function() {
         var selectedValue = this.value;
         fetch('/secciones-multinota/getOpcionesCampo/' + campos[0].id_campo + '/' + selectedValue)
             .then(response => response.text())
-    }); */
+    });
 </script>
 
 
