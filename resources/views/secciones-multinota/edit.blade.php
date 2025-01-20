@@ -47,7 +47,7 @@
                                 </thead>
                                 <tbody>
                                     @foreach ($campos as $c)
-                                        <tr draggable="true" data-id="{{ $c->id_campo }}" ondragstart="handleDragStart()" ondragover="handleDragOver()" ondragleave="handleDragLeave()">
+                                        <tr draggable="true" data-id="{{ $c->id_campo }}" ondragstart="handleDragCamposStart()" ondragover="handleDragCamposOver()" ondragleave="handleDragCamposLeave()">
                                             <td class="border border-slate-300 p-2">{{ $c->nombre }}</td>
                                             <td class="border border-slate-300 p-2">
                                                 @if ($c->tipo == 'STRING')
@@ -99,7 +99,7 @@
                             <hr>
 
                             <h3>Sección</h3>
-                            <div id="seccion" style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 0.75rem; margin: 1rem;">
+                            <div id="seccion-campos" style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 0.75rem; margin: 1rem;">
                                 @include('partials.seccion-campos', ['campos' => $campos]) <!-- Carga inicial -->
                             </div>
                             <div style="display: flex; gap: 0.5rem; justify-content: end;">
@@ -156,6 +156,7 @@
 
     var row;
     var arrayCampos;
+    var arrayOpcionesCampo;
     var isDraggingOver = false;
     let debounceTimer;
 
@@ -172,7 +173,9 @@
         });
     });
 
-    function handleDragStart(){  
+    //Drag handlers de campos
+
+    function handleDragCamposStart(){  
         row = event.target;
 
         fetch("{{ route('secciones-multinota.refresh') }}", {
@@ -189,7 +192,9 @@
         .catch(error => console.error('Error:', error));
     }
 
-    function handleDragOver(){
+    
+
+    function handleDragCamposOver(){
         let e = event;
         e.preventDefault();
 
@@ -220,7 +225,7 @@
         }
     }
 
-    function handleDragLeave() {
+    function handleDragCamposLeave() {
         isDraggingOver = false;
     }
 
@@ -240,7 +245,7 @@
         return arr; // Return the modified array
     }
 
-    function updateSeccion(arrayCampos) {
+    function updateSeccionCampos(arrayCampos) {
         fetch("{{ route('secciones-multinota.updateSeccion') }}", {
             method: 'POST',
             headers: {
@@ -251,7 +256,93 @@
         })
         .then(response => response.json())
         .then(data => {
-            $('#seccion').html(data.html);
+            $('#seccion-campos').html(data.html);
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    //Drag handlers de opciones de campos
+
+    function handleDragOpcionesCampoStart(){  
+        row = event.target;
+
+        fetch("{{ route('secciones-multinota.refreshOpcionesCampo') }}", {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            arrayOpcionesCampo = data.updatedOpcionesCampo;
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function handleDragOpcionesCampoOver(){
+        let e = event;
+        e.preventDefault();
+
+        if (!isDraggingOver) {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                isDraggingOver = true;
+                /* var arrayOpcionesCampo = @json(session('OPCIONES_CAMPO_ACTUALES')); */
+                console.log('Array entrante: ' + JSON.stringify(arrayOpcionesCampo));
+                
+                let children = Array.from(e.target.parentNode.parentNode.children);
+                
+                //row: el que draggeas, e.target.parentNode: el reemplazado
+                if(children.indexOf(e.target.parentNode) > children.indexOf(row)) {
+                    //De arriba hacia abajo
+                    e.target.parentNode.after(row);
+                    moveElement(arrayOpcionesCampo, children.indexOf(row), children.indexOf(e.target.parentNode));
+                    console.log('Array modificado: ' + JSON.stringify(arrayOpcionesCampo));
+                    updateSeccion1(arrayOpcionesCampo);
+                } else {
+                    //De abajo hacia arriba
+                    e.target.parentNode.before(row);
+                    moveElement(arrayOpcionesCampo, children.indexOf(row), children.indexOf(e.target.parentNode));
+                    console.log('Array modificado: ' + JSON.stringify(arrayOpcionesCampo));
+                    updateSeccion1(arrayOpcionesCampo);
+                }
+            }, 500);
+        }
+    }
+
+    function handleDragOpcionesCampoLeave() {
+        isDraggingOver = false;
+    }
+
+    function moveElement(arr, fromIndex, toIndex) {
+        // Check if indices are within bounds
+        if (fromIndex < 0 || fromIndex >= arr.length || toIndex < 0 || toIndex >= arr.length) {
+            console.error("Invalid index");
+            return arr; // Return the original array if indices are invalid
+        }
+
+        // Remove the element from its original position
+        const [element] = arr.splice(fromIndex, 1); // Remove 1 element at fromIndex
+
+        // Insert the element at the new position
+        arr.splice(toIndex, 0, element); // Insert at toIndex
+
+        return arr; // Return the modified array
+    }
+
+    function updateSeccionOpcionesCampo(arrayOpcionesCampo) {
+        fetch("{{ route('secciones-multinota.updateSeccionOpcionesCampo') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ array: arrayOpcionesCampo })
+        })
+        .then(response => response.json())
+        .then(data => {
+            $('#opciones-div').html(data.html);
         })
         .catch(error => console.error('Error:', error));
     }

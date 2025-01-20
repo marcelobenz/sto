@@ -39,10 +39,14 @@ Route::get('categorias/create', [CategoriaController::class, 'create'])->name('c
 Route::post('categorias', [CategoriaController::class, 'store'])->name('categorias.store');
 Route::get('/secciones-multinota', [SeccionesMultinotaController::class, 'index'])->name('secciones-multinota.index');
 Route::get('/secciones-multinota/{id}/select', [SeccionesMultinotaController::class, 'selectCampo'])->name('secciones-multinota.selectCampo');
+Route::get('/secciones-multinota/getOpcionesCampo/{id}/{tipo}', [SeccionesMultinotaController::class, 'getOpcionesCampo'])->name('secciones-multinota.getOpcionesCampo');
+Route::get('/secciones-multinota/{id}/deleteOpcionCampo', [SeccionesMultinotaController::class, 'deleteOpcionCampo'])->name('secciones-multinota.deleteOpcionCampo');
 Route::get('/secciones-multinota/{id}/edit', [SeccionesMultinotaController::class, 'edit'])->name('secciones-multinota.edit');
 Route::get('/secciones-multinota/{id}/deleteCampo', [SeccionesMultinotaController::class, 'deleteCampo'])->name('secciones-multinota.deleteCampo');
 Route::post('/secciones-multinota/updateSeccion', [SeccionesMultinotaController::class, 'updateSeccion'])->name('secciones-multinota.updateSeccion');
+Route::post('/secciones-multinota/updateSeccionOpcionesCampo', [SeccionesMultinotaController::class, 'updateSeccionOpcionesCampo'])->name('secciones-multinota.updateSeccionOpcionesCampo');
 Route::get('/secciones-multinota/refresh', [SeccionesMultinotaController::class, 'refresh'])->name('secciones-multinota.refresh');
+Route::get('/secciones-multinota/refreshOpcionesCampo', [SeccionesMultinotaController::class, 'refreshOpcionesCampo'])->name('secciones-multinota.refreshOpcionesCampo');
 Route::put('/secciones-multinota/{id}', [SeccionesMultinotaController::class, 'update'])->name('secciones-multinota.update');
 Route::get('usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
 Route::get('usuarios/create', [UsuarioController::class, 'create'])->name('usuarios.create');

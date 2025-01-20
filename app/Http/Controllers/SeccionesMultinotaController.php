@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\SeccionMultinota;
 use App\Models\Campo;
+use App\Models\OpcionCampo;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
@@ -116,6 +117,20 @@ class SeccionesMultinotaController extends Controller
         return view('partials.editar-campo', compact('campos', 'tipos'));
     }
 
+    public function getOpcionesCampo($id, $tipo) {
+        $opcionesCampo = OpcionCampo::select('*')
+        ->where('id_campo', $id)
+        ->get();
+
+        Session::put('OPCIONES_CAMPO_ACTUALES', $opcionesCampo);
+
+        return view('partials.seccion-opciones-campos', compact('opcionesCampo'));
+    }
+
+    public function deleteOpcionCampo($id) {
+        error_log('aaa');
+    }
+
     public function update($id) {
         error_log('a');
     }
@@ -132,11 +147,30 @@ class SeccionesMultinotaController extends Controller
         return response()->json(['html' => $html]);
     }
 
+    public function updateSeccionOpcionesCampo(Request $request) {
+        $opcionesCampo = Campo::hydrate($request->input('array'));
+        Session::put('OPCIONES_CAMPO_ACTUALES', $opcionesCampo);
+
+        // Render the partial view with updated data
+        $html = view('partials.seccion-opciones-campos', compact('opcionesCampo'))->render();
+
+        // Return JSON response with rendered HTML
+        return response()->json(['html' => $html]);
+    }
+
     public function refresh() {
         $campos = Session::get('CAMPOS_ACTUALES');
 
         return response()->json([
             'updatedCampos' => $campos,
+        ]);
+    }
+
+    public function refreshOpcionesCampo() {
+        $opcionesCampo = Session::get('OPCIONES_CAMPO_ACTUALES');
+
+        return response()->json([
+            'updatedOpcionesCampo' => $opcionesCampo,
         ]);
     }
 }
