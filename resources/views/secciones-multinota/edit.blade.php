@@ -192,8 +192,6 @@
         .catch(error => console.error('Error:', error));
     }
 
-    
-
     function handleDragCamposOver(){
         let e = event;
         e.preventDefault();
@@ -213,13 +211,13 @@
                     e.target.parentNode.after(row);
                     moveElement(arrayCampos, children.indexOf(row), children.indexOf(e.target.parentNode));
                     console.log('Array modificado: ' + JSON.stringify(arrayCampos));
-                    updateSeccion(arrayCampos);
+                    updateSeccionCampos(arrayCampos);
                 } else {
                     //De abajo hacia arriba
                     e.target.parentNode.before(row);
                     moveElement(arrayCampos, children.indexOf(row), children.indexOf(e.target.parentNode));
                     console.log('Array modificado: ' + JSON.stringify(arrayCampos));
-                    updateSeccion(arrayCampos);
+                    updateSeccionCampos(arrayCampos);
                 }
             }, 500);
         }
@@ -299,13 +297,13 @@
                     e.target.parentNode.after(row);
                     moveElement(arrayOpcionesCampo, children.indexOf(row), children.indexOf(e.target.parentNode));
                     console.log('Array modificado: ' + JSON.stringify(arrayOpcionesCampo));
-                    updateSeccion1(arrayOpcionesCampo);
+                    updateSeccionOpcionesCampo(arrayOpcionesCampo);
                 } else {
                     //De abajo hacia arriba
                     e.target.parentNode.before(row);
                     moveElement(arrayOpcionesCampo, children.indexOf(row), children.indexOf(e.target.parentNode));
                     console.log('Array modificado: ' + JSON.stringify(arrayOpcionesCampo));
-                    updateSeccion1(arrayOpcionesCampo);
+                    updateSeccionOpcionesCampo(arrayOpcionesCampo);
                 }
             }, 500);
         }
