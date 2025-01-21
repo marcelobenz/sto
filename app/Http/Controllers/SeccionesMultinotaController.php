@@ -124,7 +124,24 @@ class SeccionesMultinotaController extends Controller
 
         Session::put('OPCIONES_CAMPO_ACTUALES', $opcionesCampo);
 
-        return view('partials.seccion-opciones-campos', compact('opcionesCampo'));
+        return view('partials.seccion-opciones-campo', compact('opcionesCampo'));
+    }
+
+    public function getOpcionesFormTipoCampo($id, $tipo) {
+        //TO-DO - Evitar tener que recuperar de la base nuevamente
+        //TO-DO - Cambiar estructura de array a objeto ya que el campo seleccionado es 1 solo
+        $campos = Campo::select('*')
+        ->where('id_campo', $id)
+        ->get();
+
+        $campos[0]->setTipo($tipo);
+
+        $tipos = Campo::select('tipo')->distinct()->get();
+        $tiposWithId = $tipos->map(function ($item, $index) {
+            return ['id' => $index + 1, 'tipo' => $item->tipo];
+        });
+
+        return view('partials.editar-campo', compact('campos', 'tipos'));
     }
 
     public function deleteOpcionCampo($id) {
@@ -152,7 +169,7 @@ class SeccionesMultinotaController extends Controller
         Session::put('OPCIONES_CAMPO_ACTUALES', $opcionesCampo);
 
         // Render the partial view with updated data
-        $html = view('partials.seccion-opciones-campos', compact('opcionesCampo'))->render();
+        $html = view('partials.seccion-opciones-campo', compact('opcionesCampo'))->render();
 
         // Return JSON response with rendered HTML
         return response()->json(['html' => $html]);
@@ -173,4 +190,12 @@ class SeccionesMultinotaController extends Controller
             'updatedOpcionesCampo' => $opcionesCampo,
         ]);
     }
+
+    public function setCampos(String $campos) {
+		$this->campos = $campos;
+	}
+
+    public function getCampos() {
+		return $this->campos;
+	}
 }

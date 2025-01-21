@@ -15,31 +15,31 @@
         </div>
         <label>
             Obligatorio
-            {{-- Revisar --}}<input type="checkbox" name="obligatorio" value="active">
+            {{-- TO-DO - Revisar --}}<input type="checkbox" name="obligatorio" value="active">
         </label>
         @if($campos[0]->tipo == 'STRING')
             <div style="display: flex; flex-direction: column;">
                 <label>
                     Lleva máscara
-                    {{-- Revisar --}}<input type="checkbox" name="llevaMascara" value="active">
+                    {{-- TO-DO - Revisar --}}<input type="checkbox" name="llevaMascara" value="active">
                 </label>
                 <label>
                     Limitar caractéres
-                    {{-- Revisar --}}<input type="checkbox" name="limitarCaracteres" value="active">
+                    {{-- TO-DO - Revisar --}}<input type="checkbox" name="limitarCaracteres" value="active">
                 </label>
             </div>
         @elseif($campos[0]->tipo == 'INTEGER')
             <div style="display: flex; flex-direction: column;">
                 <label>
                     Limitar caractéres
-                    {{-- Revisar --}}<input type="checkbox" name="limitarCaracteres" value="active">
+                    {{-- TO-DO - Revisar --}}<input type="checkbox" name="limitarCaracteres" value="active">
                 </label>
             </div>
         @elseif($campos[0]->tipo == 'TEXTAREA')
             <div style="display: flex; flex-direction: column;">
                 <label>
                     Limitar caractéres
-                    {{-- Revisar --}}<input type="checkbox" name="limitarCaracteres" value="active">
+                    {{-- TO-DO - Revisar --}}<input type="checkbox" name="limitarCaracteres" value="active">
                 </label>
             </div>
         @elseif($campos[0]->tipo == 'TEXTAREA_FIJO')
@@ -50,7 +50,6 @@
             </div>
         @elseif($campos[0]->tipo == 'LISTA' || $campos[0]->tipo == 'CAJAS_SELECCION')
             <h3>Listas / Cajas de selección</h3>
-            {{-- @include('partials.seccion-opciones-campos', ['opcionesCampo' => []]) --}}
             <div id="opciones-campo-container"></div>
         @endif
         <div style="display: flex; justify-content: end;">
@@ -78,13 +77,15 @@
         }
     });
 
-    document.getElementById('select-tipos').addEventListener('change', function() {
-        var selectedValue = this.value;
-        fetch('/secciones-multinota/getOpcionesCampo/' + campos[0].id_campo + '/' + selectedValue)
-            .then(response => response.text())
+    document.addEventListener('change', function(event) {
+        if (event.target.id === 'select-tipos') {
+            var selectedValue = event.target.value;
+            fetch('/secciones-multinota/getOpcionesFormTipoCampo/' + campos[0].id_campo + '/' + selectedValue)
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById("editar-campo-container").innerHTML = data;
+                })
+                .catch(error => console.error('Error:', error));
+        }
     });
 </script>
-
-
-
-
