@@ -39,6 +39,7 @@ Route::get('categorias/create', [CategoriaController::class, 'create'])->name('c
 Route::post('categorias', [CategoriaController::class, 'store'])->name('categorias.store');
 Route::get('/secciones-multinota', [SeccionesMultinotaController::class, 'index'])->name('secciones-multinota.index');
 Route::get('/secciones-multinota/{id}/select', [SeccionesMultinotaController::class, 'selectCampo'])->name('secciones-multinota.selectCampo');
+Route::get('/secciones-multinota/addOpcionCampo/{id_campo}/{nueva_opcion}', [SeccionesMultinotaController::class, 'addOpcionCampo'])->name('secciones-multinota.addOpcionCampo');
 Route::get('/secciones-multinota/getOpcionesCampo/{id}/{tipo}', [SeccionesMultinotaController::class, 'getOpcionesCampo'])->name('secciones-multinota.getOpcionesCampo');
 Route::get('/secciones-multinota/getOpcionesFormTipoCampo/{id}/{tipo}', [SeccionesMultinotaController::class, 'getOpcionesFormTipoCampo'])->name('secciones-multinota.getOpcionesFormTipoCampo');
 Route::get('/secciones-multinota/{id}/deleteOpcionCampo', [SeccionesMultinotaController::class, 'deleteOpcionCampo'])->name('secciones-multinota.deleteOpcionCampo');

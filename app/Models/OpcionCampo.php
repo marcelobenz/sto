@@ -13,7 +13,7 @@ class OpcionCampo extends Model
     protected $table = 'opcion_campo';
 
     // Define the primary key
-    protected $primaryKey = 'id_campo';
+    protected $primaryKey = 'id_opcion_campo';
 
     // Disable auto-incrementing as we are using mediumIncrements
     public $incrementing = false;

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use stdClass;
 use App\Models\SeccionMultinota;
 use App\Models\Campo;
 use App\Models\OpcionCampo;
@@ -127,6 +128,23 @@ class SeccionesMultinotaController extends Controller
         return view('partials.seccion-opciones-campo', compact('opcionesCampo'));
     }
 
+    public function addOpcionCampo($id_campo, $nueva_opcion) {
+        //TO-DO - Ver como guardar en atributo de clase y no tener que recuperar de nuevo de base
+        $opcionesCampo = OpcionCampo::select('*')
+        ->where('id_campo', $id_campo)
+        ->get();
+
+        //TO-DO - El id_opcion_campo recuperarlo dinamicamente del ultimo del array y sumarle 1 cada vez
+        $object = new stdClass();
+        $object->id_opcion_campo = 9999;
+        $object->opcion = $nueva_opcion;
+        $opcionesCampo = [...$opcionesCampo, $object];
+
+        Session::put('OPCIONES_CAMPO_ACTUALES', $opcionesCampo);
+
+        return view('partials.seccion-opciones-campo', compact('opcionesCampo'));
+    }
+
     public function getOpcionesFormTipoCampo($id, $tipo) {
         //TO-DO - Evitar tener que recuperar de la base nuevamente
         //TO-DO - Cambiar estructura de array a objeto ya que el campo seleccionado es 1 solo
@@ -165,6 +183,7 @@ class SeccionesMultinotaController extends Controller
     }
 
     public function updateSeccionOpcionesCampo(Request $request) {
+        //TO-DO - Checkear porque estoy usando Campo::hydrate. No se si esta bien
         $opcionesCampo = Campo::hydrate($request->input('array'));
         Session::put('OPCIONES_CAMPO_ACTUALES', $opcionesCampo);
 

@@ -50,6 +50,24 @@
             </div>
         @elseif($campos[0]->tipo == 'LISTA' || $campos[0]->tipo == 'CAJAS_SELECCION')
             <h3>Listas / Cajas de selección</h3>
+            <div style="display: flex; justify-content: space-between;">
+                {{-- TO-DO - Revisar todos los inputs y ver si usar input de HTML o x-text-input --}}
+                {{-- <x-text-input id="nueva-opcion-input" class="block mt-1" type="text" aria-placeholder="Nueva opción..." name="nueva-opcion-input" :value="__($campos[0]->nueva_opcion)" required /> --}}
+                <input 
+                    id="nueva-opcion"
+                    class="block mt-1"
+                    type="text"
+                    placeholder="Nueva opción..."
+                    name="nueva-opcion"
+                    style="width: -webkit-fill-available; margin-right: 10px;"
+                    required
+                />
+                <button id="boton-nueva-opcion" class="btn btn-secondary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-square-fill" viewBox="0 0 16 16">
+                        <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm6.5 4.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3a.5.5 0 0 1 1 0"/>
+                    </svg>
+                </button>
+            </div>
             <div id="opciones-campo-container"></div>
         @endif
         <div style="display: flex; justify-content: end;">
@@ -75,6 +93,17 @@
                 })
                 .catch(error => console.error('Error:', error));
         }
+
+        $('#boton-nueva-opcion').on('click', function(event) {
+            event.preventDefault();
+            const nuevaOpcion = document.getElementById('nueva-opcion').value;
+            fetch(`/secciones-multinota/addOpcionCampo/${campos[0].id_campo}/${nuevaOpcion}`)
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById("opciones-campo-container").innerHTML = data;
+                })
+                .catch(error => console.error('Error:', error));
+        });
     });
 
     document.addEventListener('change', function(event) {
