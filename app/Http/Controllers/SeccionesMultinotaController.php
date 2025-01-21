@@ -129,14 +129,12 @@ class SeccionesMultinotaController extends Controller
     }
 
     public function addOpcionCampo($id_campo, $nueva_opcion) {
-        //TO-DO - Ver como guardar en atributo de clase y no tener que recuperar de nuevo de base
-        $opcionesCampo = OpcionCampo::select('*')
-        ->where('id_campo', $id_campo)
-        ->get();
+        $opcionesCampo = Session::get('OPCIONES_CAMPO_ACTUALES');
 
-        //TO-DO - El id_opcion_campo recuperarlo dinamicamente del ultimo del array y sumarle 1 cada vez
+        $opcionesCampoDummyId = $opcionesCampo[count($opcionesCampo) - 1]->id_opcion_campo;
+
         $object = new stdClass();
-        $object->id_opcion_campo = 9999;
+        $object->id_opcion_campo = $opcionesCampoDummyId + 1;
         $object->opcion = $nueva_opcion;
         $opcionesCampo = [...$opcionesCampo, $object];
 

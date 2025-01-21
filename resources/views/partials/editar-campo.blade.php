@@ -101,6 +101,7 @@
                 .then(response => response.text())
                 .then(data => {
                     document.getElementById("opciones-campo-container").innerHTML = data;
+                    document.getElementById('nueva-opcion').value = '';
                 })
                 .catch(error => console.error('Error:', error));
         });
