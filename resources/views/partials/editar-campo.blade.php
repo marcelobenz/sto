@@ -35,8 +35,8 @@
                         <input type="checkbox" id="limitar-caracteres" name="limitar-caracteres">
                     </div>
                     <div id="limitar-caracteres-input-container" style="display: none;">
-                        <input type="text" name="limitar-caracteres-input-min" placeholder="Mínimo">
-                        <input type="text" name="limitar-caracteres-input-max" placeholder="Máximo">
+                        <input type="number" name="limitar-caracteres-input-min" placeholder="Mínimo">
+                        <input type="number" name="limitar-caracteres-input-max" placeholder="Máximo">
                     </div>
                 </div>
             </div>
