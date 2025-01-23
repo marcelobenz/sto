@@ -128,6 +128,17 @@ class SeccionesMultinotaController extends Controller
         return view('partials.seccion-opciones-campo', compact('opcionesCampo'));
     }
 
+    public function getOpcionesCampoAlfabeticamente($id) {
+        $opcionesCampo = OpcionCampo::select('*')
+        ->where('id_campo', $id)
+        ->orderBy('opcion', 'asc')
+        ->get();
+
+        Session::put('OPCIONES_CAMPO_ACTUALES', $opcionesCampo);
+
+        return view('partials.seccion-opciones-campo', compact('opcionesCampo'));
+    }
+
     public function addOpcionCampo($id_campo, $nueva_opcion) {
         $opcionesCampo = Session::get('OPCIONES_CAMPO_ACTUALES');
 

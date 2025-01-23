@@ -1,7 +1,9 @@
 <div id="opciones-div">
     <table style="width: 100%;" class="border-separate border border-slate-400">
         <thead>
-            <th class="border border-slate-300 p-2">Opción</th>
+            <th class="border border-slate-300 p-2" style="display: flex; justify-content: space-between;">
+                Opción <button class="btn btn-secondary" id="boton-ordenar-opciones" onclick="handleClick">Ordenar alfabéticamente</button>
+            </th>
             <th class="border border-slate-300 p-2">Acciones</th>
         </thead>
         <tbody>

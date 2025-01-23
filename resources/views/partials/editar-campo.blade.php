@@ -107,6 +107,17 @@
         });
     });
 
+    document.addEventListener('click', function(event) {
+        if (event.target.id === 'boton-ordenar-opciones') {
+            fetch(`/secciones-multinota/getOpcionesCampoAlfabeticamente/${campos[0].id_campo}`)
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById("opciones-campo-container").innerHTML = data;
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    });
+
     document.addEventListener('change', function(event) {
         if (event.target.id === 'select-tipos') {
             var selectedValue = event.target.value;
