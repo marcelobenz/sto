@@ -93,6 +93,7 @@
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     var campos = @json($campos);
 
@@ -109,13 +110,22 @@
         $('#boton-nueva-opcion').on('click', function(event) {
             event.preventDefault();
             const nuevaOpcion = document.getElementById('nueva-opcion').value;
-            fetch(`/secciones-multinota/addOpcionCampo/${campos[0].id_campo}/${nuevaOpcion}`)
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById("opciones-campo-container").innerHTML = data;
-                    document.getElementById('nueva-opcion').value = '';
-                })
-                .catch(error => console.error('Error:', error));
+
+            if(nuevaOpcion === '') {
+                Swal.fire(
+                    'Error!',
+                    'No se puede agregar una opción vacía',
+                    'error'
+                )
+            } else {
+                fetch(`/secciones-multinota/addOpcionCampo/${campos[0].id_campo}/${nuevaOpcion}`)
+                    .then(response => response.text())
+                    .then(data => {
+                        document.getElementById("opciones-campo-container").innerHTML = data;
+                        document.getElementById('nueva-opcion').value = '';
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
         });
     });
 
