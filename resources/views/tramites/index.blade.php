@@ -75,6 +75,14 @@
         tr {
             position: relative;
         }
+
+        /* Para poder setear el ancho de las columnas de la datatable */
+        #tramitesTable th, #tramitesTable td {
+        white-space: nowrap; /* Evita que el contenido se divida en varias líneas */
+        #tramitesTable th:nth-child(1), #tramitesTable td:nth-child(1) {
+        width: 50px;
+    }
+    }
 </style>
 @endsection
 
@@ -93,30 +101,21 @@
                 <tr colspan=5><h3 class="text-center" style="background-color: #f0f0f0; padding: 10px;">Todos los Trámites</h3></tr>
                 <tr>
                     <th>ID Trámite</th>
+                    <th>Cuenta</th>
                     <th>Categoría</th>
+                    <th>Tipo</th>
+                    <th>Estado</th>
                     <th>Fecha Alta</th>
-                    <th>Fecha Modif</th>
-                    <th>Correo</th>
                     <th>CUIT </th>
-                    <th>Legajo</th>
-                    <th>Usuario</th>
+                    <th>Nombre</th>
+                    <th>Operador</th>
                     <th></th>
-                </tr>
-                <tr>
-                    <th><input type="text" placeholder="Buscar ID"></th>
-                    <th><input type="text" placeholder="Buscar Categoría"></th>
-                    <th><input type="text" placeholder="Buscar Fecha Alta"></th>
-                    <th><input type="text" placeholder="Buscar Fecha Modif"></th>
-                    <th><input type="text" placeholder="Buscar Correo"></th>
-                    <th><input type="text" placeholder="Buscar CUIT"></th>
-                    <th><input type="text" placeholder="Buscar Legajo"></th>
-                    <th><input type="text" placeholder="Buscar Usuario"></th>
-                    <th></th> <!-- Celda vacía para la columna de acciones -->
                 </tr>
             </thead>
             <tbody>
             </tbody>
         </table>
+    </div>
 
     <!-- Modal para mostrar detalles del trámite -->
     <div class="modal fade" id="detailModal" tabindex="-1" role="dialog" aria-labelledby="detailModalLabel" aria-hidden="true">
@@ -145,96 +144,86 @@
     <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script>
     <script>
-    $(document).ready(function() {
-        var table = $('#tramitesTable').DataTable({
-            processing: true,
-            serverSide: true,
-            ajax: {
-                url: "{{ route('tramites.index') }}",
-                beforeSend: function() {
-                    $('#overlay').show();
+        $(document).ready(function() {
+            $('#tramitesTable').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: "{{ route('tramites.data') }}", // Ruta al método que devuelve los datos
+                    type: 'GET'
                 },
-                complete: function() {
-                    $('#overlay').hide();
-                }
-            },
-            columns: [
-                { data: 'id_tramite' },
-                { data: 'nombre_categoria' },
-                { data: 'fecha_alta' },
-                { data: 'fecha_modificacion' },
-                { data: 'correo' },
-                { data: 'cuit_contribuyente' },
-                { data: 'legajo' },
-                { data: 'usuario' },
-                { 
-                    data: null, // No se necesita un campo de datos específico
-                    orderable: false, // Desactiva el ordenamiento en esta columna
-                    searchable: false, // Desactiva la búsqueda en esta columna
-                    render: function(data, type, row) {
-                        return `
-                            <div class="actions">
-                                <button class="btn btn-primary btn-sm btn-action view-details" title="Ver detalle"><i class="fas fa-eye"></i></button>
-                                <button class="btn btn-success btn-sm btn-action" title="Tomar trámite"><i class="fas fa-hand-paper"></i></button>
-                                <button class="btn btn-warning btn-sm btn-action" title="Reasignar"><i class="fas fa-exchange-alt"></i></button>
-                                <button class="btn btn-danger btn-sm btn-action" title="Dar de Baja"><i class="fas fa-trash"></i></button>
-                            </div>                        `;
+                columns: [
+                    { data: 'id_tramite', name: 'id_tramite' },
+                    { data: 'cuenta', name: 'cuenta' },
+                    { data: 'nombre_categoria', name: 'nombre_categoria' },
+                    { data: 'tipo_tramite', name: 'tipo_tramite' },
+                    { data: 'estado', name: 'estado' },
+                    { data: 'fecha_alta', name: 'fecha_alta' },
+                    { data: 'cuit_contribuyente', name: 'cuit_contribuyente' },
+                    { data: 'contribuyente', name: 'contribuyente' },
+                    { data: 'usuario_interno', name: 'usuario_interno' },
+                    {
+                        data: null,
+                        orderable: false,
+                        searchable: false,
+                        render: function(data, type, row) {
+                            return `
+                                <div class="actions">
+                                    <button class="btn btn-primary btn-sm btn-action view-details" title="Ver detalle"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-success btn-sm btn-action" title="Tomar trámite"><i class="fas fa-hand-paper"></i></button>
+                                    <button class="btn btn-warning btn-sm btn-action" title="Reasignar"><i class="fas fa-exchange-alt"></i></button>
+                                    <button class="btn btn-danger btn-sm btn-action" title="Dar de Baja"><i class="fas fa-trash"></i></button>
+                                </div>`;
+                        }
                     }
+                ],
+                pageLength: 10, // Número de registros por página
+                autoWidth: false,
+                language: {
+                    search: "Buscar:", // Etiqueta personalizada para la barra de búsqueda
+                    paginate: {
+                        previous: "<",
+                        next: ">"
+                    },
+                    processing: "Cargando..."
                 }
-            ],
-            pageLength: 5,
-            language: {
-                paginate: {
-                    previous: "<",
-                    next: ">"
-                }
-            }
+            });
         });
 
-            // Configurar búsqueda en cada columna
-            $('#tramitesTable thead input').on('keyup', function (e) {
-                if (e.key === 'Enter') { // Ejecutar búsqueda solo cuando se presiona Enter
-                    var columnIndex = $(this).parent().index();
-                    table.column(columnIndex).search(this.value,false,true).draw();
-                }
-            });
-            // Evitar que el DataTable se recargue con cada clic en los inputs
-            $('#tramitesTable thead input').on('click', function (e) {
-                e.stopPropagation(); // Previene la propagación del clic que podría estar causando la recarga
-            });
-            // Añadir eventos para posicionar los botones de acción
-            $('#tramitesTable tbody').on('mouseenter', 'tr', function(e) {
-                var $actions = $(this).find('.actions');
-                var cursorX = e.pageX - $(this).offset().left;
-                $actions.css({
-                    left: cursorX + 'px'
-                });
-            });
 
-            $('#tramitesTable tbody').on('mouseleave', 'tr', function() {
-                $(this).find('.actions').css({
-                    left: ''
-                });
-            });        
-
-       // Evento para el botón "Ver detalle"
-       $('#tramitesTable tbody').on('click', '.view-details', function() {
-            var data = table.row($(this).parents('tr')).data();
-            // Puedes hacer una llamada AJAX aquí para obtener más detalles del trámite si es necesario
-            // Por ahora, simplemente mostramos algunos datos en el modal
-            var details = `
-                <strong>ID Trámite:</strong> ${data.id_tramite}<br>
-                <strong>Categoría:</strong> ${data.nombre_categoria}<br>
-                <strong>Fecha Alta:</strong> ${data.fecha_alta}<br>
-                <strong>Fecha Modificación:</strong> ${data.fecha_modificacion}<br>
-                <strong>Correo:</strong> ${data.correo}<br>
-                <strong>CUIT:</strong> ${data.cuit_contribuyente}<br>
-                <strong>Legajo:</strong> ${data.legajo}<br>
-                <strong>Usuario:</strong> ${data.usuario}
-            `;
-            $('#tramiteDetails').html(details);
-            $('#detailModal').modal('show');
+        // Añadir eventos para posicionar los botones de acción
+        $('#tramitesTable tbody').on('mouseenter', 'tr', function(e) {
+            var $actions = $(this).find('.actions');
+            var cursorX = e.pageX - $(this).offset().left;
+            $actions.css({
+                left: cursorX + 'px'
+            });
         });
-    });
+
+        $('#tramitesTable tbody').on('mouseleave', 'tr', function() {
+            $(this).find('.actions').css({
+                left: ''
+            });
+        });        
+
+        // Evento para el botón "Ver detalle"
+        $('#tramitesTable tbody').on('click', '.view-details', function() {
+                var data = table.row($(this).parents('tr')).data();
+                // Puedes hacer una llamada AJAX aquí para obtener más detalles del trámite si es necesario
+                // Por ahora, simplemente mostramos algunos datos en el modal
+                var details = `
+                    <strong>ID Trámite:</strong> ${data.id_tramite}<br>
+                    <strong>ID Trámite:</strong> ${data.cuenta}<br>
+                    <strong>Categoría:</strong> ${data.nombre_categoria}<br>
+                    <strong>Categoría:</strong> ${data.tipo_tramite}<br>
+                    <strong>Fecha Alta:</strong> ${data.fecha_alta}<br>
+                    <strong>CUIT:</strong> ${data.cuit_contribuyente}<br>
+                    <strong>Legajo:</strong> ${data.contribuyente}<br>
+                    <strong>Usuario:</strong> ${data.usuario_interno}
+                `;
+                $('#tramiteDetails').html(details);
+                $('#detailModal').modal('show');
+            });
+
     </script>
 @endsection
