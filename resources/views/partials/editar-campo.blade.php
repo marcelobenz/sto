@@ -18,15 +18,27 @@
             {{-- TO-DO - Revisar --}}<input type="checkbox" name="obligatorio" value="active">
         </label>
         @if($campos[0]->tipo == 'STRING')
-            <div style="display: flex; flex-direction: column;">
-                <label>
-                    Lleva máscara
-                    {{-- TO-DO - Revisar --}}<input type="checkbox" name="llevaMascara" value="active">
-                </label>
-                <label>
-                    Limitar caractéres
-                    {{-- TO-DO - Revisar --}}<input type="checkbox" name="limitarCaracteres" value="active">
-                </label>
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <div style="display: flex; gap: 2rem; height: 30px;">
+                    <div style="display: flex; gap: 10px;">
+                        <label style="margin-bottom: 0px !important;" for="lleva-mascara">Lleva máscara</label>
+                        <input type="checkbox" id="lleva-mascara" name="lleva-mascara">
+                    </div>
+                    <div id="lleva-mascara-input-container" style="display: none;">
+                        <input type="text" name="lleva-mascara-input-container" placeholder="Máscara">
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 2rem; height: 30px;">
+                    <div style="display: flex; gap: 10px;">
+                        <label style="margin-bottom: 0px !important;" for="limitar-caracteres">Limitar caractéres</label>
+                        <input type="checkbox" id="limitar-caracteres" name="limitar-caracteres">
+                    </div>
+                    <div id="limitar-caracteres-input-container" style="display: none;">
+                        <input type="text" name="limitar-caracteres-input-min" placeholder="Mínimo">
+                        <input type="text" name="limitar-caracteres-input-max" placeholder="Máximo">
+                    </div>
+                </div>
             </div>
         @elseif($campos[0]->tipo == 'INTEGER')
             <div style="display: flex; flex-direction: column;">
@@ -129,4 +141,30 @@
                 .catch(error => console.error('Error:', error));
         }
     });
+
+    document.getElementById('lleva-mascara').addEventListener('click', function() {
+        var inputContainer = document.getElementById('lleva-mascara-input-container');
+        if (this.checked) {
+            inputContainer.style.display = 'block';
+        } else {
+            inputContainer.style.display = 'none';
+        }
+    });
+
+    document.getElementById('limitar-caracteres').addEventListener('click', function() {
+        var inputContainer = document.getElementById('limitar-caracteres-input-container');
+        if (this.checked) {
+            inputContainer.style.display = 'block';
+        } else {
+            inputContainer.style.display = 'none';
+        }
+    });
+
+    /* document.getElementById('icon-container').addEventListener('mouseover', function() {
+        document.getElementById('tooltip').style.display = 'block';
+    });
+
+    document.getElementById('icon-container').addEventListener('mouseout', function() {
+        document.getElementById('tooltip').style.display = 'none';
+    }); */
 </script>
