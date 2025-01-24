@@ -20,11 +20,12 @@ class TramiteController extends Controller
      */
     public function getTramitesData(Request $request)
     {
-        $start = $request->get('start', 0); // Índice inicial
-        $length = $request->get('length', 10); // Número de registros por página
-        $search = $request->get('search')['value']; // Valor de búsqueda
+        $columnIndex = $request->get('order')[0]['column']; // Índice de la columna a ordenar
+        $columnName = $request->get('columns')[$columnIndex]['data']; // Nombre de la columna
+        $columnSortOrder = $request->get('order')[0]['dir']; // Orden (asc o desc)
+        $searchValue = $request->get('search')['value']; // Valor de búsqueda
     
-        // Construir consulta base
+        // Construir la consulta base
         $query = DB::table('multinota as m')
             ->join('tramite as t', 'm.id_tramite', '=', 't.id_tramite')
             ->join('tipo_tramite_multinota as tt', 'm.id_tipo_tramite_multinota', '=', 'tt.id_tipo_tramite_multinota')
@@ -36,45 +37,59 @@ class TramiteController extends Controller
             ->select(
                 'm.id_tramite',
                 'm.cuenta',
+                'c.nombre as nombre_categoria',
+                'tt.nombre as tipo_tramite',
+                'e.nombre as estado',
                 'm.fecha_alta',
                 't.cuit_contribuyente',
-                DB::raw("CONCAT(ce.nombre, ' ', ce.apellido) AS contribuyente"),
-                DB::raw("CONCAT(u.nombre, ' ', u.apellido) AS usuario_interno"),
-                'c.nombre as nombre_categoria',
-                'e.nombre as estado',
-                'tt.nombre as tipo_tramite'
+                DB::raw("CONCAT(ce.nombre, ' ', ce.apellido) as contribuyente"),
+                DB::raw("CONCAT(u.nombre, ' ', u.apellido) as usuario_interno")
             )
             ->where('te.activo', 1);
     
         // Filtro de búsqueda
-        if (!empty($search)) {
-            $query->where(function ($q) use ($search) {
-                $q->where('m.id_tramite', 'like', "%{$search}%")
-                  ->orWhere('m.cuenta', 'like', "%{$search}%")
-                  ->orWhere('t.cuit_contribuyente', 'like', "%{$search}%")
-                  ->orWhere('c.nombre', 'like', "%{$search}%")
-                  ->orWhere('e.nombre', 'like', "%{$search}%");
+        if (!empty($searchValue)) {
+            $query->where(function ($q) use ($searchValue) {
+                $q->where('m.id_tramite', 'like', "%{$searchValue}%")
+                  ->orWhere('m.cuenta', 'like', "%{$searchValue}%")
+                  ->orWhere('c.nombre', 'like', "%{$searchValue}%")
+                  ->orWhere('tt.nombre', 'like', "%{$searchValue}%")
+                  ->orWhere('e.nombre', 'like', "%{$searchValue}%")
+                  ->orWhere(DB::raw("CONCAT(ce.nombre, ' ', ce.apellido)"), 'like', "%{$searchValue}%")
+                  ->orWhere(DB::raw("CONCAT(u.nombre, ' ', u.apellido)"), 'like', "%{$searchValue}%");
             });
         }
     
-        // Contar total de registros filtrados
+        // Ordenar por columna seleccionada
+        $query->orderBy($columnName, $columnSortOrder);
+    
+        // Total de registros después del filtro
         $totalFiltered = $query->count();
     
-        // Obtener datos paginados
-        $data = $query->skip($start)->take($length)->get();
-    
-        // Contar total de registros sin filtros
+        // Paginación
+        $data = $query->skip($request->get('start'))->take($request->get('length'))->get();
+
+        // Reemplazar "A finalizar" con "Finalizado" en la columna estado
+        $data = collect($data)->map(function ($item) {
+            $item = (array) $item; // Convertir a array
+            if ($item['estado'] === "A Finalizar") {
+                $item['estado'] = "Finalizado";
+            }
+            return (object) $item; // Convertir de nuevo a objeto si es necesario
+        });
+        
+        // Total de registros sin filtro
         $totalData = DB::table('multinota as m')
             ->join('tramite_estado_tramite as te', 'm.id_tramite', '=', 'te.id_tramite')
             ->where('te.activo', 1)
             ->count();
     
-        // Formatear respuesta para DataTable
+        // Respuesta en formato JSON
         return response()->json([
-            'draw' => $request->get('draw'), // Enviar el número de draw para sincronización
-            'recordsTotal' => $totalData, // Total de registros sin filtro
-            'recordsFiltered' => $totalFiltered, // Total de registros filtrados
-            'data' => $data // Datos a mostrar en la tabla
+            "draw" => intval($request->get('draw')),
+            "recordsTotal" => $totalData,
+            "recordsFiltered" => $totalFiltered,
+            "data" => $data
         ]);
     }
 }

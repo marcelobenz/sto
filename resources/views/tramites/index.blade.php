@@ -59,30 +59,36 @@
             color: #000; /* Ajusta el color del texto según sea necesario */
         }
 
-        /* Para el render de los botones flotantes */
-        /* Ocultar los botones de acción por defecto */
         .actions {
-            display: none;
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
+            display: flex; /* Cambiar a flexbox para alinearlos horizontalmente */
+            justify-content: center; /* Centrar los botones dentro de la celda */
+            gap: 5px; /* Espacio entre botones */
         }
-        /* Mostrar los botones de acción cuando el mouse está sobre la fila */
-        tr:hover .actions {
-            display: inline-block;
-        }
-        /* Asegurar que las filas tengan position relative para que las acciones sean absolutas respecto a ellas */
+
         tr {
             position: relative;
         }
 
+        #tramitesTable td:last-child {
+            text-align: center; /* Centrar el contenido de la última columna */
+            vertical-align: middle; /* Centrar verticalmente los botones */
+        }
         /* Para poder setear el ancho de las columnas de la datatable */
         #tramitesTable th, #tramitesTable td {
         white-space: nowrap; /* Evita que el contenido se divida en varias líneas */
         #tramitesTable th:nth-child(1), #tramitesTable td:nth-child(1) {
         width: 50px;
+        }
     }
+
+    /* Truncar texto largo con "..." */
+    .table td {
+        max-width: 150px; /* Ajusta el ancho máximo de las celdas */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
+
 </style>
 @endsection
 
@@ -100,7 +106,7 @@
             <thead>
                 <tr colspan=5><h3 class="text-center" style="background-color: #f0f0f0; padding: 10px;">Todos los Trámites</h3></tr>
                 <tr>
-                    <th>ID Trámite</th>
+                    <th>ID</th>
                     <th>Cuenta</th>
                     <th>Categoría</th>
                     <th>Tipo</th>
@@ -145,18 +151,45 @@
     <script src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script>
     <script>
         $(document).ready(function() {
-            $('#tramitesTable').DataTable({
+            var table = $('#tramitesTable').DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: {
-                    url: "{{ route('tramites.data') }}", // Ruta al método que devuelve los datos
+                    url: "{{ route('tramites.data') }}",
                     type: 'GET'
                 },
+                autoWidth: false, // Desactiva el ajuste automático
+                columnDefs: [
+                    { width: "5%", targets: 0, orderable: true },  // Habilitar orden en la columna ID
+                    { width: "10%", targets: 1, orderable: true }, // Cuenta
+                    { width: "20%", targets: 2, orderable: true }, // Categoría
+                    { width: "15%", targets: 3, orderable: true }, // Tipo
+                    { width: "10%", targets: 4, orderable: true }, // Estado
+                    { width: "10%", targets: 5, orderable: true }, // Fecha Alta
+                    { width: "10%", targets: 6, orderable: true }, // CUIT
+                    { width: "15%", targets: 7, orderable: true }, // Nombre
+                    { width: "15%", targets: 8, orderable: true }, // Operador
+                    { width: "10%", targets: 9, orderable: false }  // Desactivar orden en controles
+                ],
                 columns: [
                     { data: 'id_tramite', name: 'id_tramite' },
                     { data: 'cuenta', name: 'cuenta' },
-                    { data: 'nombre_categoria', name: 'nombre_categoria' },
-                    { data: 'tipo_tramite', name: 'tipo_tramite' },
+                    {
+                        data: 'nombre_categoria',
+                        name: 'nombre_categoria',
+                        render: function(data, type, row) {
+                            // Trunca el texto y añade el tooltip
+                            return `<span title="${data}" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; max-width: 150px;">${data}</span>`;
+                        }
+                    },
+                    {
+                        data: 'tipo_tramite',
+                        name: 'tipo_tramite',
+                        render: function(data, type, row) {
+                            // Trunca el texto y añade el tooltip
+                            return `<span title="${data}" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; max-width: 150px;">${data}</span>`;
+                        }
+                    },
                     { data: 'estado', name: 'estado' },
                     { data: 'fecha_alta', name: 'fecha_alta' },
                     { data: 'cuit_contribuyente', name: 'cuit_contribuyente' },
@@ -168,7 +201,7 @@
                         searchable: false,
                         render: function(data, type, row) {
                             return `
-                                <div class="actions">
+                                <div class="actions text-center">
                                     <button class="btn btn-primary btn-sm btn-action view-details" title="Ver detalle"><i class="fas fa-eye"></i></button>
                                     <button class="btn btn-success btn-sm btn-action" title="Tomar trámite"><i class="fas fa-hand-paper"></i></button>
                                     <button class="btn btn-warning btn-sm btn-action" title="Reasignar"><i class="fas fa-exchange-alt"></i></button>
@@ -177,10 +210,10 @@
                         }
                     }
                 ],
-                pageLength: 10, // Número de registros por página
-                autoWidth: false,
+                order: [[0, 'desc']], // Orden predeterminado por la columna ID en forma ascendente
+                pageLength: 10,
                 language: {
-                    search: "Buscar:", // Etiqueta personalizada para la barra de búsqueda
+                    search: "Buscar:",
                     paginate: {
                         previous: "<",
                         next: ">"
@@ -188,9 +221,30 @@
                     processing: "Cargando..."
                 }
             });
+
+            // Evento para el botón "Ver detalle"
+            $('#tramitesTable tbody').on('click', '.view-details', function() {
+                // Usa la instancia global `table`
+                var data = table.row($(this).parents('tr')).data();
+
+                // Construye el contenido del detalle
+                var details = `
+                    <strong>ID Trámite:</strong> ${data.id_tramite}<br>
+                    <strong>Cuenta:</strong> ${data.cuenta}<br>
+                    <strong>Categoría:</strong> ${data.nombre_categoria}<br>
+                    <strong>Tipo:</strong> ${data.tipo_tramite}<br>
+                    <strong>Estado:</strong> ${data.estado}<br>
+                    <strong>Fecha Alta:</strong> ${data.fecha_alta}<br>
+                    <strong>CUIT:</strong> ${data.cuit_contribuyente}<br>
+                    <strong>Nombre:</strong> ${data.contribuyente}<br>
+                    <strong>Operador:</strong> ${data.usuario_interno}
+                `;
+
+                // Muestra los detalles en el modal
+                $('#tramiteDetails').html(details);
+                $('#detailModal').modal('show');
+            });
         });
-
-
         // Añadir eventos para posicionar los botones de acción
         $('#tramitesTable tbody').on('mouseenter', 'tr', function(e) {
             var $actions = $(this).find('.actions');
@@ -205,25 +259,6 @@
                 left: ''
             });
         });        
-
-        // Evento para el botón "Ver detalle"
-        $('#tramitesTable tbody').on('click', '.view-details', function() {
-                var data = table.row($(this).parents('tr')).data();
-                // Puedes hacer una llamada AJAX aquí para obtener más detalles del trámite si es necesario
-                // Por ahora, simplemente mostramos algunos datos en el modal
-                var details = `
-                    <strong>ID Trámite:</strong> ${data.id_tramite}<br>
-                    <strong>ID Trámite:</strong> ${data.cuenta}<br>
-                    <strong>Categoría:</strong> ${data.nombre_categoria}<br>
-                    <strong>Categoría:</strong> ${data.tipo_tramite}<br>
-                    <strong>Fecha Alta:</strong> ${data.fecha_alta}<br>
-                    <strong>CUIT:</strong> ${data.cuit_contribuyente}<br>
-                    <strong>Legajo:</strong> ${data.contribuyente}<br>
-                    <strong>Usuario:</strong> ${data.usuario_interno}
-                `;
-                $('#tramiteDetails').html(details);
-                $('#detailModal').modal('show');
-            });
 
     </script>
 @endsection
