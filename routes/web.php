@@ -8,7 +8,6 @@ use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\LicenciaController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\LimiteController;
-<<<<<<< HEAD
 use App\Http\Controllers\ContribuyenteMultinotaController;
 use App\Http\Controllers\CuestionarioController;
 
@@ -70,6 +69,5 @@ Route::get('/set-usuario-interno', [UsuarioController::class, 'setUsuarioInterno
 Route::get('/clear-session', [UsuarioController::class, 'clearSession']); // Para limpiar la sesión
 
 Route::view('/navbar','/navbar')->name('navbar');
-
 
 //Route::get('/dashboard', 'DashboardController@index')->name('dashboard.index');
