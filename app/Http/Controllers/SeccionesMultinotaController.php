@@ -129,10 +129,7 @@ class SeccionesMultinotaController extends Controller
     }
 
     public function getOpcionesCampoAlfabeticamente($id) {
-        $opcionesCampo = OpcionCampo::select('*')
-        ->where('id_campo', $id)
-        ->orderBy('opcion', 'asc')
-        ->get();
+        $opcionesCampo = Session::get('OPCIONES_CAMPO_ACTUALES')->sortBy('opcion')->values();
 
         Session::put('OPCIONES_CAMPO_ACTUALES', $opcionesCampo);
 
@@ -144,10 +141,11 @@ class SeccionesMultinotaController extends Controller
 
         $opcionesCampoDummyId = $opcionesCampo[count($opcionesCampo) - 1]->id_opcion_campo;
 
-        $object = new stdClass();
-        $object->id_opcion_campo = $opcionesCampoDummyId + 1;
-        $object->opcion = $nueva_opcion;
-        $opcionesCampo = [...$opcionesCampo, $object];
+        $nuevaOpcion = new OpcionCampo();
+        $nuevaOpcion->id_opcion_campo = $opcionesCampoDummyId + 1;
+        $nuevaOpcion->opcion = $nueva_opcion;
+
+        $opcionesCampo->push($nuevaOpcion);
 
         Session::put('OPCIONES_CAMPO_ACTUALES', $opcionesCampo);
 
