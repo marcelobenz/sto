@@ -5,7 +5,21 @@
             <x-text-input id="nombre" class="block mt-1" style="width: 48%;" type="text" name="nombre" :value="__($campos[0]->nombre)" required />
             <select id="select-tipos" name="select-tipos" class="block mt-1" style="width: 48%;">
                 @foreach ($tipos as $t)
-                    <option value="{{ $t->tipo }}" @selected($campos[0]->tipo == $t->tipo)>{{ $t->tipo }}</option> 
+                    <option value="{{ $t->tipo }}" @selected($campos[0]->tipo == $t->tipo)>
+                        @if ($t->tipo == 'STRING')
+                            Texto
+                        @elseif ($t->tipo == 'INTEGER')
+                            Número
+                        @elseif ($t->tipo == 'LISTA')
+                            Lista desplegable
+                        @elseif ($t->tipo == 'CAJAS_SELECCION')
+                            Caja de selección múltiple
+                        @elseif ($t->tipo == 'DATE')
+                            Fecha
+                        @elseif ($t->tipo == 'TEXTAREA_FIJO')
+                            Área de texto fijo
+                        @endif
+                    </option> 
                 @endforeach
             </select>
         </div>

@@ -54,8 +54,14 @@
                                                     Texto
                                                 @elseif ($c->tipo == 'INTEGER')
                                                     Número
-                                                @else
+                                                @elseif ($c->tipo == 'LISTA')
                                                     Lista desplegable
+                                                @elseif ($c->tipo == 'CAJAS_SELECCION')
+                                                    Caja de selección múltiple
+                                                @elseif ($c->tipo == 'DATE')
+                                                    Fecha
+                                                @elseif ($c->tipo == 'TEXTAREA_FIJO')
+                                                    Área de texto fijo
                                                 @endif
                                             </td>
                                             <td class="border border-slate-300 p-2">{{ $c->dimension }}</td>
