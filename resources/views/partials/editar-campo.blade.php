@@ -141,6 +141,18 @@
                     .catch(error => console.error('Error:', error));
             }
         });
+
+        $('#opciones-campo-container').on('click', '.boton-eliminar-opcion', function() {
+            let idOpcionCampo = $(this).attr('data-row-id');
+
+            fetch(`/secciones-multinota/deleteOpcionCampo/${idOpcionCampo}`)
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById("opciones-campo-container").innerHTML = data;
+                    document.getElementById("opciones-div").innerHTML = data;
+                })
+                .catch(error => console.error('Error:', error));
+        });
     });
 
     document.addEventListener('click', function(event) {
@@ -149,18 +161,6 @@
                 .then(response => response.text())
                 .then(data => {
                     document.getElementById("opciones-campo-container").innerHTML = data;
-                })
-                .catch(error => console.error('Error:', error));
-        }
-
-        if (event.target.classList.contains('boton-eliminar-opcion')) {
-            let idOpcionCampo = event.target.getAttribute('data-row-id');
-
-            fetch(`/secciones-multinota/deleteOpcionCampo/${idOpcionCampo}`)
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById("opciones-campo-container").innerHTML = data;
-                    document.getElementById("opciones-div").innerHTML = data;
                 })
                 .catch(error => console.error('Error:', error));
         }
