@@ -152,6 +152,18 @@
                 })
                 .catch(error => console.error('Error:', error));
         }
+
+        if (event.target.classList.contains('boton-eliminar-opcion')) {
+            let idOpcionCampo = event.target.getAttribute('data-row-id');
+
+            fetch(`/secciones-multinota/deleteOpcionCampo/${idOpcionCampo}`)
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById("opciones-campo-container").innerHTML = data;
+                    document.getElementById("opciones-div").innerHTML = data;
+                })
+                .catch(error => console.error('Error:', error));
+        }
     });
 
     document.addEventListener('change', function(event) {

@@ -170,7 +170,17 @@ class SeccionesMultinotaController extends Controller
     }
 
     public function deleteOpcionCampo($id) {
-        error_log('aaa');
+        $opcionesCampo = Session::get('OPCIONES_CAMPO_ACTUALES');
+
+        $nuevasOpciones = $opcionesCampo->reject(function ($opc) use ($id) {
+            return (string)$opc->id_opcion_campo === $id;
+        });
+
+        $opcionesCampo = $nuevasOpciones->values();
+
+        Session::put('OPCIONES_CAMPO_ACTUALES', $opcionesCampo);
+
+        return view('partials.seccion-opciones-campo', compact('opcionesCampo'));
     }
 
     public function update($id) {
