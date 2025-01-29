@@ -125,21 +125,23 @@ class SeccionesMultinotaController extends Controller
     }
 
     public function actualizarDatosCampo(Request $request) {
-        $seccion = Session::get('SECCION_ACTUAL');
-        $campos = Session::get('CAMPOS_ACTUALES');
-        $campoSelected = Session::get('CAMPO_SELECTED');
+        if($request->has('actualizar-datos-campo')) { 
+            $seccion = Session::get('SECCION_ACTUAL');
+            $campos = Session::get('CAMPOS_ACTUALES');
+            $campoSelected = Session::get('CAMPO_SELECTED');
 
-        //TO-DO - Hacer validaciones (revisar metodo validar() de ConfigurarCamposMultinotaBean)
-        $campoSelected->dimension = (int)request()->query('tamaño');
+            //TO-DO - Hacer validaciones (revisar metodo validar() de ConfigurarCamposMultinotaBean)
+            $campoSelected->dimension = (int)$request->post('tamaño');
 
-        //TO-DO - Asignar tambien valores de checkboxes, opciones, etc
-        for ($i=0; $i<count($campos); $i++) { 
-            if($campos[$i]->id_campo == $campoSelected->id_campo) {
-                $campos[$i] = $campoSelected;
+            //TO-DO - Asignar tambien valores de checkboxes, opciones, etc
+            for ($i=0; $i<count($campos); $i++) { 
+                if($campos[$i]->id_campo == $campoSelected->id_campo) {
+                    $campos[$i] = $campoSelected;
+                }
             }
-        }
 
-        return view('secciones-multinota.edit', compact('seccion', 'campos'));
+            return view('secciones-multinota.edit', compact('seccion', 'campos'));
+        }
     }
 
     public function getOpcionesCampo($id, $tipo) {
