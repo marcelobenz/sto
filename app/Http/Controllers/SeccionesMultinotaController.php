@@ -110,6 +110,8 @@ class SeccionesMultinotaController extends Controller
         ->where('id_campo', $id)
         ->get();
 
+        Session::put('ID_CAMPO_SELECTED', $campos[0]->id_campo);
+
         $tipos = Campo::select('tipo')->distinct()->get();
         $tiposWithId = $tipos->map(function ($item, $index) {
             return ['id' => $index + 1, 'tipo' => $item->tipo];
@@ -136,10 +138,18 @@ class SeccionesMultinotaController extends Controller
         return view('partials.seccion-opciones-campo', compact('opcionesCampo'));
     }
 
-    public function addOpcionCampo($id_campo, $nueva_opcion) {
+    public function addOpcionCampo($nueva_opcion) {
         $opcionesCampo = Session::get('OPCIONES_CAMPO_ACTUALES');
 
-        $opcionesCampoDummyId = $opcionesCampo[count($opcionesCampo) - 1]->id_opcion_campo;
+        if($opcionesCampo == null) {
+            $opcionesCampo = collect();
+        }
+
+        if(count($opcionesCampo) != 0) {
+            $opcionesCampoDummyId = $opcionesCampo[count($opcionesCampo) - 1]->id_opcion_campo;
+        } else {
+            $opcionesCampoDummyId = -1;
+        }
 
         $nuevaOpcion = new OpcionCampo();
         $nuevaOpcion->id_opcion_campo = $opcionesCampoDummyId + 1;
@@ -165,6 +175,14 @@ class SeccionesMultinotaController extends Controller
         $tiposWithId = $tipos->map(function ($item, $index) {
             return ['id' => $index + 1, 'tipo' => $item->tipo];
         });
+
+        if($tipo == 'LISTA') {
+            /* $collection = collect();
+            // Add Eloquent models to it
+            $collection->push(new OpcionCampo()); */
+
+            Session::put('OPCIONES_CAMPO_ACTUALES', null);
+        }
 
         return view('partials.editar-campo', compact('campos', 'tipos'));
     }

@@ -132,7 +132,7 @@
                     'error'
                 )
             } else {
-                fetch(`/secciones-multinota/addOpcionCampo/${campos[0].id_campo}/${nuevaOpcion}`)
+                fetch(`/secciones-multinota/addOpcionCampo/${nuevaOpcion}`)
                     .then(response => response.text())
                     .then(data => {
                         document.getElementById("opciones-campo-container").innerHTML = data;
@@ -173,6 +173,39 @@
                 .then(response => response.text())
                 .then(data => {
                     document.getElementById("editar-campo-container").innerHTML = data;
+
+                    $('#boton-nueva-opcion').on('click', function(event) {
+                        event.preventDefault();
+                        const nuevaOpcion = document.getElementById('nueva-opcion').value;
+
+                        if(nuevaOpcion === '') {
+                            Swal.fire(
+                                'Error!',
+                                'No se puede agregar una opción vacía',
+                                'error'
+                            )
+                        } else {
+                            fetch(`/secciones-multinota/addOpcionCampo/${nuevaOpcion}`)
+                                .then(response => response.text())
+                                .then(data => {
+                                    document.getElementById("opciones-campo-container").innerHTML = data;
+                                    document.getElementById('nueva-opcion').value = '';
+                                })
+                                .catch(error => console.error('Error:', error));
+                        }
+                    });
+
+                    $('#opciones-campo-container').on('click', '.boton-eliminar-opcion', function() {
+                        let idOpcionCampo = $(this).attr('data-row-id');
+
+                        fetch(`/secciones-multinota/deleteOpcionCampo/${idOpcionCampo}`)
+                            .then(response => response.text())
+                            .then(data => {
+                                document.getElementById("opciones-campo-container").innerHTML = data;
+                                document.getElementById("opciones-div").innerHTML = data;
+                            })
+                            .catch(error => console.error('Error:', error));
+                    });
                 })
                 .catch(error => console.error('Error:', error));
         }
