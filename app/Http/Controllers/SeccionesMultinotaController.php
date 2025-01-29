@@ -57,9 +57,11 @@ class SeccionesMultinotaController extends Controller
         $campos = Campo::select('*')
         ->where('id_seccion', $id)
         ->get();
+        $tipos = Campo::select('tipo')->distinct()->get();
 
         Session::put('SECCION_ACTUAL', $seccion);
         Session::put('CAMPOS_ACTUALES', $campos);
+        Session::put('TIPOS', $tipos);
 
         foreach ($campos as &$c) {
             if($c->tipo == 'INTEGER') {
@@ -85,7 +87,7 @@ class SeccionesMultinotaController extends Controller
             }
         }
 
-        return view('secciones-multinota.edit', compact('seccion', 'campos'));
+        return view('secciones-multinota.edit', compact('seccion', 'campos', 'tipos'));
     }
 
     public function deleteCampo($id) {
@@ -106,18 +108,35 @@ class SeccionesMultinotaController extends Controller
     }
 
     public function selectCampo($id) {
-        $campos = Campo::select('*')
-        ->where('id_campo', $id)
-        ->get();
+        $campos = Session::get('CAMPOS_ACTUALES');
+        
+        for ($i = 0; $i < count($campos); $i++) {
+            if($campos[$i]->id_campo == $id) {
+                $campoSelected = $campos[$i];
+            }
+        }
 
-        Session::put('ID_CAMPO_SELECTED', $campos[0]->id_campo);
+        $tipos = Session::get('TIPOS');
 
-        $tipos = Campo::select('tipo')->distinct()->get();
-        $tiposWithId = $tipos->map(function ($item, $index) {
-            return ['id' => $index + 1, 'tipo' => $item->tipo];
-        });
+        Session::put('ID_CAMPO_SELECTED', $campoSelected->id_campo);
+        Session::put('CAMPO_SELECTED', $campoSelected);
+        
+        return view('partials.editar-campo', compact('campoSelected', 'tipos'));
+    }
 
-        return view('partials.editar-campo', compact('campos', 'tipos'));
+    public function actualizarDatosCampo($id) {
+        $seccion = Session::get('SECCION_ACTUAL');
+        $campos = Session::get('CAMPOS_ACTUALES');
+
+        //TO-DO - Hacer validaciones (revisar metodo validar() de ConfigurarCamposMultinotaBean)
+        //TO-DO - Asignar tambien valores de checkboxes, opciones, etc
+        for ($i=0; $i<count($campos); $i++) { 
+            if($campos[$i]->id_campo == Session::get('CAMPO_SELECTED')->id_campo) {
+                $campos[$i] = Session::get('CAMPO_SELECTED');
+            }
+        }
+
+        return view('secciones-multinota.edit', compact('seccion', 'campos'));
     }
 
     public function getOpcionesCampo($id, $tipo) {
@@ -163,28 +182,18 @@ class SeccionesMultinotaController extends Controller
     }
 
     public function getOpcionesFormTipoCampo($id, $tipo) {
-        //TO-DO - Evitar tener que recuperar de la base nuevamente
         //TO-DO - Cambiar estructura de array a objeto ya que el campo seleccionado es 1 solo
-        $campos = Campo::select('*')
-        ->where('id_campo', $id)
-        ->get();
+        $campoSelected = Session::get('CAMPO_SELECTED');
 
-        $campos[0]->setTipo($tipo);
+        $campoSelected->setTipo($tipo);
 
-        $tipos = Campo::select('tipo')->distinct()->get();
-        $tiposWithId = $tipos->map(function ($item, $index) {
-            return ['id' => $index + 1, 'tipo' => $item->tipo];
-        });
+        $tipos = Session::get('TIPOS');
 
         if($tipo == 'LISTA') {
-            /* $collection = collect();
-            // Add Eloquent models to it
-            $collection->push(new OpcionCampo()); */
-
             Session::put('OPCIONES_CAMPO_ACTUALES', null);
         }
 
-        return view('partials.editar-campo', compact('campos', 'tipos'));
+        return view('partials.editar-campo', compact('campoSelected', 'tipos'));
     }
 
     public function deleteOpcionCampo($id) {

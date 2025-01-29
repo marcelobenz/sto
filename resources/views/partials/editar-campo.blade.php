@@ -2,10 +2,10 @@
     <h3>Datos del Campo</h3>
     <div class="border-separate border border-slate-400 p-4" style="display: flex; flex-direction: column; gap: 15px;">
         <div style="display: flex; justify-content: space-between;">
-            <x-text-input id="nombre" class="block mt-1" style="width: 48%;" type="text" name="nombre" :value="__($campos[0]->nombre)" required />
+            <x-text-input id="nombre" class="block mt-1" style="width: 48%;" type="text" name="nombre" :value="__($campoSelected->nombre)" required />
             <select id="select-tipos" name="select-tipos" class="block mt-1" style="width: 48%;">
                 @foreach ($tipos as $t)
-                    <option value="{{ $t->tipo }}" @selected($campos[0]->tipo == $t->tipo)>
+                    <option value="{{ $t->tipo }}" @selected($campoSelected->tipo == $t->tipo)>
                         @if ($t->tipo == 'STRING')
                             Texto
                         @elseif ($t->tipo == 'INTEGER')
@@ -25,13 +25,13 @@
         </div>
         <div>
             <h6>Tamaño</h6>
-            <x-text-input id="tamaño" class="block mt-1" style="width: 48%;" type="number" min="1" max="12" name="tamaño" :value="__($campos[0]->dimension)" required /><label>(solo valores de 1 a 12)</label>
+            <x-text-input id="tamaño" class="block mt-1" style="width: 48%;" type="number" min="1" max="12" name="tamaño" :value="__($campoSelected->dimension)" required /><label>(solo valores de 1 a 12)</label>
         </div>
         <label>
             Obligatorio
             {{-- TO-DO - Revisar --}}<input type="checkbox" name="obligatorio" value="active">
         </label>
-        @if($campos[0]->tipo == 'STRING')
+        @if($campoSelected->tipo == 'STRING')
             <div style="display: flex; flex-direction: column; gap: 1rem;">
                 <div style="display: flex; gap: 2rem; height: 30px;">
                     <div style="display: flex; gap: 10px;">
@@ -54,31 +54,31 @@
                     </div>
                 </div>
             </div>
-        @elseif($campos[0]->tipo == 'INTEGER')
+        @elseif($campoSelected->tipo == 'INTEGER')
             <div style="display: flex; flex-direction: column;">
                 <label>
                     Limitar caractéres
                     {{-- TO-DO - Revisar --}}<input type="checkbox" name="limitarCaracteres" value="active">
                 </label>
             </div>
-        @elseif($campos[0]->tipo == 'TEXTAREA')
+        @elseif($campoSelected->tipo == 'TEXTAREA')
             <div style="display: flex; flex-direction: column;">
                 <label>
                     Limitar caractéres
                     {{-- TO-DO - Revisar --}}<input type="checkbox" name="limitarCaracteres" value="active">
                 </label>
             </div>
-        @elseif($campos[0]->tipo == 'TEXTAREA_FIJO')
+        @elseif($campoSelected->tipo == 'TEXTAREA_FIJO')
             <div style="display: flex; flex-direction: column;">
                 <textarea maxlength="500" placeholder="Ingrese un texto...">
 
                 </textarea>
             </div>
-        @elseif($campos[0]->tipo == 'LISTA' || $campos[0]->tipo == 'CAJAS_SELECCION')
+        @elseif($campoSelected->tipo == 'LISTA' || $campoSelected->tipo == 'CAJAS_SELECCION')
             <h3>Listas / Cajas de selección</h3>
             <div style="display: flex; justify-content: space-between;">
                 {{-- TO-DO - Revisar todos los inputs y ver si usar input de HTML o x-text-input --}}
-                {{-- <x-text-input id="nueva-opcion-input" class="block mt-1" type="text" aria-placeholder="Nueva opción..." name="nueva-opcion-input" :value="__($campos[0]->nueva_opcion)" required /> --}}
+                {{-- <x-text-input id="nueva-opcion-input" class="block mt-1" type="text" aria-placeholder="Nueva opción..." name="nueva-opcion-input" :value="__($campoSelected->nueva_opcion)" required /> --}}
                 <input 
                     id="nueva-opcion"
                     class="block mt-1"
@@ -97,11 +97,14 @@
             <div id="opciones-campo-container"></div>
         @endif
         <div style="display: flex; justify-content: end;">
-            <button class="btn btn-secondary">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16">
-                    <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
-                </svg>
-            </button>
+            <form method="GET" action="{{ route('secciones-multinota.actualizarDatosCampo', $campoSelected->id_campo) }}">
+                @csrf
+                <button type="submit" class="btn btn-secondary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16">
+                        <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
+                    </svg>
+                </button>
+            </form> 
         </div>
     </div>
 </div>
@@ -109,11 +112,11 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    var campos = @json($campos);
+    var campoSelected = @json($campoSelected);
 
     $(document).ready(function() {
         if(document.getElementById("select-tipos").value == 'LISTA') {
-            fetch('/secciones-multinota/getOpcionesCampo/' + campos[0].id_campo + '/' + document.getElementById("select-tipos").value)
+            fetch('/secciones-multinota/getOpcionesCampo/' + campoSelected.id_campo + '/' + document.getElementById("select-tipos").value)
                 .then(response => response.text())
                 .then(data => {
                     document.getElementById("opciones-campo-container").innerHTML = data;
@@ -157,7 +160,7 @@
 
     document.addEventListener('click', function(event) {
         if (event.target.id === 'boton-ordenar-opciones') {
-            fetch(`/secciones-multinota/getOpcionesCampoAlfabeticamente/${campos[0].id_campo}`)
+            fetch(`/secciones-multinota/getOpcionesCampoAlfabeticamente/${campoSelected.id_campo}`)
                 .then(response => response.text())
                 .then(data => {
                     document.getElementById("opciones-campo-container").innerHTML = data;
@@ -169,7 +172,7 @@
     document.addEventListener('change', function(event) {
         if (event.target.id === 'select-tipos') {
             var selectedValue = event.target.value;
-            fetch('/secciones-multinota/getOpcionesFormTipoCampo/' + campos[0].id_campo + '/' + selectedValue)
+            fetch('/secciones-multinota/getOpcionesFormTipoCampo/' + campoSelected.id_campo + '/' + selectedValue)
                 .then(response => response.text())
                 .then(data => {
                     document.getElementById("editar-campo-container").innerHTML = data;
