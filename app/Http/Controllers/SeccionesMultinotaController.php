@@ -124,15 +124,18 @@ class SeccionesMultinotaController extends Controller
         return view('partials.editar-campo', compact('campoSelected', 'tipos'));
     }
 
-    public function actualizarDatosCampo($id) {
+    public function actualizarDatosCampo(Request $request) {
         $seccion = Session::get('SECCION_ACTUAL');
         $campos = Session::get('CAMPOS_ACTUALES');
+        $campoSelected = Session::get('CAMPO_SELECTED');
 
         //TO-DO - Hacer validaciones (revisar metodo validar() de ConfigurarCamposMultinotaBean)
+        $campoSelected->dimension = (int)request()->query('tamaño');
+
         //TO-DO - Asignar tambien valores de checkboxes, opciones, etc
         for ($i=0; $i<count($campos); $i++) { 
-            if($campos[$i]->id_campo == Session::get('CAMPO_SELECTED')->id_campo) {
-                $campos[$i] = Session::get('CAMPO_SELECTED');
+            if($campos[$i]->id_campo == $campoSelected->id_campo) {
+                $campos[$i] = $campoSelected;
             }
         }
 

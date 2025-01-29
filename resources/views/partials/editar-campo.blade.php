@@ -1,111 +1,110 @@
 <div>
     <h3>Datos del Campo</h3>
     <div class="border-separate border border-slate-400 p-4" style="display: flex; flex-direction: column; gap: 15px;">
-        <div style="display: flex; justify-content: space-between;">
-            <x-text-input id="nombre" class="block mt-1" style="width: 48%;" type="text" name="nombre" :value="__($campoSelected->nombre)" required />
-            <select id="select-tipos" name="select-tipos" class="block mt-1" style="width: 48%;">
-                @foreach ($tipos as $t)
-                    <option value="{{ $t->tipo }}" @selected($campoSelected->tipo == $t->tipo)>
-                        @if ($t->tipo == 'STRING')
-                            Texto
-                        @elseif ($t->tipo == 'INTEGER')
-                            Número
-                        @elseif ($t->tipo == 'LISTA')
-                            Lista desplegable
-                        @elseif ($t->tipo == 'CAJAS_SELECCION')
-                            Caja de selección múltiple
-                        @elseif ($t->tipo == 'DATE')
-                            Fecha
-                        @elseif ($t->tipo == 'TEXTAREA_FIJO')
-                            Área de texto fijo
-                        @endif
-                    </option> 
-                @endforeach
-            </select>
-        </div>
-        <div>
-            <h6>Tamaño</h6>
-            <x-text-input id="tamaño" class="block mt-1" style="width: 48%;" type="number" min="1" max="12" name="tamaño" :value="__($campoSelected->dimension)" required /><label>(solo valores de 1 a 12)</label>
-        </div>
-        <label>
-            Obligatorio
-            {{-- TO-DO - Revisar --}}<input type="checkbox" name="obligatorio" value="active">
-        </label>
-        @if($campoSelected->tipo == 'STRING')
-            <div style="display: flex; flex-direction: column; gap: 1rem;">
-                <div style="display: flex; gap: 2rem; height: 30px;">
-                    <div style="display: flex; gap: 10px;">
-                        <label style="margin-bottom: 0px !important;" for="lleva-mascara">Lleva máscara</label>
-                        <input type="checkbox" id="lleva-mascara" name="lleva-mascara">
-                    </div>
-                    <div id="lleva-mascara-input-container" style="display: none;">
-                        <input type="text" name="lleva-mascara-input-container" placeholder="Máscara">
-                    </div>
-                </div>
-
-                <div style="display: flex; gap: 2rem; height: 30px;">
-                    <div style="display: flex; gap: 10px;">
-                        <label style="margin-bottom: 0px !important;" for="limitar-caracteres">Limitar caractéres</label>
-                        <input type="checkbox" id="limitar-caracteres" name="limitar-caracteres">
-                    </div>
-                    <div id="limitar-caracteres-input-container" style="display: none;">
-                        <input type="number" name="limitar-caracteres-input-min" placeholder="Mínimo">
-                        <input type="number" name="limitar-caracteres-input-max" placeholder="Máximo">
-                    </div>
-                </div>
-            </div>
-        @elseif($campoSelected->tipo == 'INTEGER')
-            <div style="display: flex; flex-direction: column;">
-                <label>
-                    Limitar caractéres
-                    {{-- TO-DO - Revisar --}}<input type="checkbox" name="limitarCaracteres" value="active">
-                </label>
-            </div>
-        @elseif($campoSelected->tipo == 'TEXTAREA')
-            <div style="display: flex; flex-direction: column;">
-                <label>
-                    Limitar caractéres
-                    {{-- TO-DO - Revisar --}}<input type="checkbox" name="limitarCaracteres" value="active">
-                </label>
-            </div>
-        @elseif($campoSelected->tipo == 'TEXTAREA_FIJO')
-            <div style="display: flex; flex-direction: column;">
-                <textarea maxlength="500" placeholder="Ingrese un texto...">
-
-                </textarea>
-            </div>
-        @elseif($campoSelected->tipo == 'LISTA' || $campoSelected->tipo == 'CAJAS_SELECCION')
-            <h3>Listas / Cajas de selección</h3>
+        <form method="GET" action="{{ route('secciones-multinota.actualizarDatosCampo') }}">
+        @csrf
             <div style="display: flex; justify-content: space-between;">
-                {{-- TO-DO - Revisar todos los inputs y ver si usar input de HTML o x-text-input --}}
-                {{-- <x-text-input id="nueva-opcion-input" class="block mt-1" type="text" aria-placeholder="Nueva opción..." name="nueva-opcion-input" :value="__($campoSelected->nueva_opcion)" required /> --}}
-                <input 
-                    id="nueva-opcion"
-                    class="block mt-1"
-                    type="text"
-                    placeholder="Nueva opción..."
-                    name="nueva-opcion"
-                    style="width: -webkit-fill-available; margin-right: 10px;"
-                    required
-                />
-                <button id="boton-nueva-opcion" class="btn btn-secondary">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-square-fill" viewBox="0 0 16 16">
-                        <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm6.5 4.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3a.5.5 0 0 1 1 0"/>
-                    </svg>
-                </button>
+                <x-text-input id="nombre" class="block mt-1" style="width: 48%;" type="text" name="nombre" :value="__($campoSelected->nombre)" required />
+                <select id="select-tipos" name="select-tipos" class="block mt-1" style="width: 48%;">
+                    @foreach ($tipos as $t)
+                        <option value="{{ $t->tipo }}" @selected($campoSelected->tipo == $t->tipo)>
+                            @if ($t->tipo == 'STRING')
+                                Texto
+                            @elseif ($t->tipo == 'INTEGER')
+                                Número
+                            @elseif ($t->tipo == 'LISTA')
+                                Lista desplegable
+                            @elseif ($t->tipo == 'CAJAS_SELECCION')
+                                Caja de selección múltiple
+                            @elseif ($t->tipo == 'DATE')
+                                Fecha
+                            @elseif ($t->tipo == 'TEXTAREA_FIJO')
+                                Área de texto fijo
+                            @endif
+                        </option> 
+                    @endforeach
+                </select>
             </div>
-            <div id="opciones-campo-container"></div>
-        @endif
-        <div style="display: flex; justify-content: end;">
-            <form method="GET" action="{{ route('secciones-multinota.actualizarDatosCampo', $campoSelected->id_campo) }}">
-                @csrf
+            <div>
+                <h6>Tamaño</h6>
+                <x-text-input id="tamaño" class="block mt-1" style="width: 48%;" type="number" min="1" max="12" name="tamaño" :value="__($campoSelected->dimension)" required /><label>(solo valores de 1 a 12)</label>
+            </div>
+            <label>
+                Obligatorio
+                {{-- TO-DO - Revisar --}}<input type="checkbox" name="obligatorio" value="active">
+            </label>
+            @if($campoSelected->tipo == 'STRING')
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div style="display: flex; gap: 2rem; height: 30px;">
+                        <div style="display: flex; gap: 10px;">
+                            <label style="margin-bottom: 0px !important;" for="lleva-mascara">Lleva máscara</label>
+                            <input type="checkbox" id="lleva-mascara" name="lleva-mascara">
+                        </div>
+                        <div id="lleva-mascara-input-container" style="display: none;">
+                            <input type="text" name="lleva-mascara-input-container" placeholder="Máscara">
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 2rem; height: 30px;">
+                        <div style="display: flex; gap: 10px;">
+                            <label style="margin-bottom: 0px !important;" for="limitar-caracteres">Limitar caractéres</label>
+                            <input type="checkbox" id="limitar-caracteres" name="limitar-caracteres">
+                        </div>
+                        <div id="limitar-caracteres-input-container" style="display: none;">
+                            <input type="number" name="limitar-caracteres-input-min" placeholder="Mínimo">
+                            <input type="number" name="limitar-caracteres-input-max" placeholder="Máximo">
+                        </div>
+                    </div>
+                </div>
+            @elseif($campoSelected->tipo == 'INTEGER')
+                <div style="display: flex; flex-direction: column;">
+                    <label>
+                        Limitar caractéres
+                        {{-- TO-DO - Revisar --}}<input type="checkbox" name="limitarCaracteres" value="active">
+                    </label>
+                </div>
+            @elseif($campoSelected->tipo == 'TEXTAREA')
+                <div style="display: flex; flex-direction: column;">
+                    <label>
+                        Limitar caractéres
+                        {{-- TO-DO - Revisar --}}<input type="checkbox" name="limitarCaracteres" value="active">
+                    </label>
+                </div>
+            @elseif($campoSelected->tipo == 'TEXTAREA_FIJO')
+                <div style="display: flex; flex-direction: column;">
+                    <textarea maxlength="500" placeholder="Ingrese un texto...">
+
+                    </textarea>
+                </div>
+            @elseif($campoSelected->tipo == 'LISTA' || $campoSelected->tipo == 'CAJAS_SELECCION')
+                <h3>Listas / Cajas de selección</h3>
+                <div style="display: flex; justify-content: space-between;">
+                    {{-- TO-DO - Revisar todos los inputs y ver si usar input de HTML o x-text-input --}}
+                    {{-- <x-text-input id="nueva-opcion-input" class="block mt-1" type="text" aria-placeholder="Nueva opción..." name="nueva-opcion-input" :value="__($campoSelected->nueva_opcion)" required /> --}}
+                    <input 
+                        id="nueva-opcion"
+                        class="block mt-1"
+                        type="text"
+                        placeholder="Nueva opción..."
+                        name="nueva-opcion"
+                        style="width: -webkit-fill-available; margin-right: 10px;"
+                    />
+                    <button id="boton-nueva-opcion" class="btn btn-secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-square-fill" viewBox="0 0 16 16">
+                            <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm6.5 4.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3a.5.5 0 0 1 1 0"/>
+                        </svg>
+                    </button>
+                </div>
+                <div id="opciones-campo-container" style="margin-top: 1rem; margin-bottom: 1rem;"></div>
+            @endif
+            <div style="display: flex; justify-content: end;">
                 <button type="submit" class="btn btn-secondary">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16">
                         <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
                     </svg>
                 </button>
-            </form> 
-        </div>
+            </div>
+        </form>
     </div>
 </div>
 
