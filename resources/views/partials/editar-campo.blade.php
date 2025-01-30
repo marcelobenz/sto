@@ -40,7 +40,7 @@
                         <input type="checkbox" id="lleva-mascara" name="lleva-mascara" {{ $campoSelected->mascara != null ? 'checked' : '' }}>
                     </div>
                     <div id="lleva-mascara-input-container" style="display: {{ $campoSelected->mascara != null ? 'block' : 'none' }};">
-                        <input type="text" value="{{ old('mascara', $campoSelected->mascara) }}" name="lleva-mascara-input-container" placeholder="Máscara">
+                        <input {{ $campoSelected->mascara != null ? 'required' : '' }} id="lleva-mascara-input" type="text" value="{{ old('mascara', $campoSelected->mascara) }}" name="lleva-mascara-input-container" placeholder="Máscara">
                     </div>
                 </div>
             @endif
@@ -54,8 +54,8 @@
                     </div>
                     <div id="limitar-caracteres-input-container" 
                         style="display: {{ ($campoSelected->limite_minimo != null && $campoSelected->limite_maximo != null) ? 'block' : 'none' }};">
-                            <input min="1" max="9999" type="number" value="{{ old('limite_minimo', $campoSelected->limite_minimo) }}" name="limitar-caracteres-input-min" placeholder="Mínimo">
-                            <input min="1" max="9999" type="number" value="{{ old('limite_maximo', $campoSelected->limite_maximo) }}" name="limitar-caracteres-input-max" placeholder="Máximo">
+                            <input {{ $campoSelected->limite_minimo != null ? 'required' : '' }} min="1" max="9999" type="number" value="{{ old('limite_minimo', $campoSelected->limite_minimo) }}" id="limitar-caracteres-input-min" name="limitar-caracteres-input-min" placeholder="Mínimo">
+                            <input {{ $campoSelected->limite_maximo != null ? 'required' : '' }} min="1" max="9999" type="number" value="{{ old('limite_maximo', $campoSelected->limite_maximo) }}" id="limitar-caracteres-input-max" name="limitar-caracteres-input-max" placeholder="Máximo">
                     </div>
                 </div>
             @endif
@@ -208,10 +208,22 @@
     if(campoSelected.tipo === 'STRING') {
         document.getElementById('lleva-mascara').addEventListener('click', function() {
             let inputContainer = document.getElementById('lleva-mascara-input-container');
+            let input = document.getElementById('lleva-mascara-input');
+
             if (this.checked) {
                 inputContainer.style.display = 'block';
+                input.setAttribute('required', 'required');
             } else {
                 inputContainer.style.display = 'none';
+                input.removeAttribute('required');
+            }
+        });
+    }
+
+    function preventNegativeNumbers(inputId) {
+        document.getElementById(inputId).addEventListener('keypress', function(event) {
+            if (event.key === '-' || event.key === 'e' || event.key === 'E') {
+                event.preventDefault(); // Prevent typing negative sign and scientific notation
             }
         });
     }
@@ -219,13 +231,25 @@
     if(campoSelected.tipo === 'STRING' || campoSelected.tipo === 'INTEGER' || campoSelected.tipo === 'TEXTAREA') {
         document.getElementById('limitar-caracteres').addEventListener('click', function() {
             let inputContainer = document.getElementById('limitar-caracteres-input-container');
+            let inputMinimo = document.getElementById('limitar-caracteres-input-min');
+            let inputMaximo = document.getElementById('limitar-caracteres-input-max');
+            
             if (this.checked) {
                 inputContainer.style.display = 'block';
+                inputMinimo.setAttribute('required', 'required');
+                inputMaximo.setAttribute('required', 'required');
             } else {
                 inputContainer.style.display = 'none';
+                inputMinimo.removeAttribute('required');
+                inputMaximo.removeAttribute('required');
             }
         });
-    }    
+
+        preventNegativeNumbers('limitar-caracteres-input-min');
+        preventNegativeNumbers('limitar-caracteres-input-max');
+    }
+
+    preventNegativeNumbers('tamaño');
 
     /* document.getElementById('icon-container').addEventListener('mouseover', function() {
         document.getElementById('tooltip').style.display = 'block';
