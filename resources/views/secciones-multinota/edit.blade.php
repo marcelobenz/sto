@@ -68,18 +68,17 @@
                                             <td class="border border-slate-300 p-2">{{ ($c->mascara == null) ? '-' : $c->mascara }}</td>
                                             <td class="border border-slate-300 p-2">
                                                 @if ($c->tipo == 'INTEGER')
-                                                    @if ($c->limite_minimo_num != null && $c->limite_maximo_num != null)
+                                                    @if ($c->limite_minimo != null && $c->limite_maximo != null)
                                                         {{ 'Min ' . $c->limite_minimo . ' (' . $c->limite_minimo_num . ')' . ' / ' . 'Max ' . $c->limite_maximo . ' (' . $c->limite_maximo_num . ')' }}
                                                     @else
                                                         {{ '-' }}
                                                     @endif
                                                 @else
-                                                    @if ($c->limite_minimo != null && $c->limite_minimo != null)
+                                                    @if ($c->limite_minimo != null && $c->limite_maximo != null)
                                                         {{ 'Min ' . $c->limite_minimo . ' / ' . 'Max ' . $c->limite_maximo  }}
                                                     @else
                                                         {{ '-' }}
                                                     @endif
-                                                    
                                                 @endif
                                             </td class="border border-slate-300 p-2">
                                             <td class="border border-slate-300 p-2">{{ ($c->obligatorio == 1) ? 'Sí' : 'No' }}</td>

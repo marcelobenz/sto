@@ -31,52 +31,44 @@
             </div>
             <label>
                 Obligatorio
-                {{-- TO-DO - Revisar --}}<input type="checkbox" name="obligatorio" value="active">
+                <input type="checkbox" name="obligatorio" {{ $campoSelected->obligatorio == 1 ? 'checked' : '' }}>
             </label>
             @if($campoSelected->tipo == 'STRING')
-                <div style="display: flex; flex-direction: column; gap: 1rem;">
-                    <div style="display: flex; gap: 2rem; height: 30px;">
-                        <div style="display: flex; gap: 10px;">
-                            <label style="margin-bottom: 0px !important;" for="lleva-mascara">Lleva máscara</label>
-                            <input type="checkbox" id="lleva-mascara" name="lleva-mascara">
-                        </div>
-                        <div id="lleva-mascara-input-container" style="display: none;">
-                            <input type="text" name="lleva-mascara-input-container" placeholder="Máscara">
-                        </div>
+                <div>
+                    <div>
+                        <label for="lleva-mascara">Lleva máscara</label>
+                        <input type="checkbox" id="lleva-mascara" name="lleva-mascara" {{ $campoSelected->mascara != null ? 'checked' : '' }}>
                     </div>
+                    <div id="lleva-mascara-input-container" style="display: {{ $campoSelected->mascara != null ? 'block' : 'none' }};">
+                        <input type="text" value="{{ old('mascara', $campoSelected->mascara) }}" name="lleva-mascara-input-container" placeholder="Máscara">
+                    </div>
+                </div>
+            @endif
 
-                    <div style="display: flex; gap: 2rem; height: 30px;">
-                        <div style="display: flex; gap: 10px;">
-                            <label style="margin-bottom: 0px !important;" for="limitar-caracteres">Limitar caractéres</label>
-                            <input type="checkbox" id="limitar-caracteres" name="limitar-caracteres">
-                        </div>
-                        <div id="limitar-caracteres-input-container" style="display: none;">
-                            <input type="number" name="limitar-caracteres-input-min" placeholder="Mínimo">
-                            <input type="number" name="limitar-caracteres-input-max" placeholder="Máximo">
-                        </div>
+            @if($campoSelected->tipo == 'STRING' || $campoSelected->tipo == 'INTEGER' || $campoSelected->tipo == 'TEXTAREA')
+                <div>
+                    <div>
+                        <label for="limitar-caracteres">Limitar caractéres</label>
+                        <input type="checkbox" id="limitar-caracteres" name="limitar-caracteres"
+                            {{ ($campoSelected->limite_minimo != null && $campoSelected->limite_maximo != null) ? 'checked' : '' }}>
+                    </div>
+                    <div id="limitar-caracteres-input-container" 
+                        style="display: {{ ($campoSelected->limite_minimo != null && $campoSelected->limite_maximo != null) ? 'block' : 'none' }};">
+                            <input min="1" max="9999" type="number" value="{{ old('limite_minimo', $campoSelected->limite_minimo) }}" name="limitar-caracteres-input-min" placeholder="Mínimo">
+                            <input min="1" max="9999" type="number" value="{{ old('limite_maximo', $campoSelected->limite_maximo) }}" name="limitar-caracteres-input-max" placeholder="Máximo">
                     </div>
                 </div>
-            @elseif($campoSelected->tipo == 'INTEGER')
-                <div style="display: flex; flex-direction: column;">
-                    <label>
-                        Limitar caractéres
-                        {{-- TO-DO - Revisar --}}<input type="checkbox" name="limitarCaracteres" value="active">
-                    </label>
-                </div>
-            @elseif($campoSelected->tipo == 'TEXTAREA')
-                <div style="display: flex; flex-direction: column;">
-                    <label>
-                        Limitar caractéres
-                        {{-- TO-DO - Revisar --}}<input type="checkbox" name="limitarCaracteres" value="active">
-                    </label>
-                </div>
-            @elseif($campoSelected->tipo == 'TEXTAREA_FIJO')
+            @endif
+            
+            @if($campoSelected->tipo == 'TEXTAREA_FIJO')
                 <div style="display: flex; flex-direction: column;">
                     <textarea maxlength="500" placeholder="Ingrese un texto...">
 
                     </textarea>
                 </div>
-            @elseif($campoSelected->tipo == 'LISTA' || $campoSelected->tipo == 'CAJAS_SELECCION')
+            @endif
+
+            @if($campoSelected->tipo == 'LISTA' || $campoSelected->tipo == 'CAJAS_SELECCION')
                 <h3>Listas / Cajas de selección</h3>
                 <div style="display: flex; justify-content: space-between;">
                     {{-- TO-DO - Revisar todos los inputs y ver si usar input de HTML o x-text-input --}}
@@ -213,17 +205,19 @@
         }
     });
 
-    document.getElementById('lleva-mascara').addEventListener('click', function() {
-        var inputContainer = document.getElementById('lleva-mascara-input-container');
-        if (this.checked) {
-            inputContainer.style.display = 'block';
-        } else {
-            inputContainer.style.display = 'none';
-        }
-    });
+    if(campoSelected.tipo === 'STRING') {
+        document.getElementById('lleva-mascara').addEventListener('click', function() {
+            var inputContainer = document.getElementById('lleva-mascara-input-container');
+            if (this.checked) {
+                inputContainer.style.display = 'block';
+            } else {
+                inputContainer.style.display = 'none';
+            }
+        });
+    }
 
     document.getElementById('limitar-caracteres').addEventListener('click', function() {
-        var inputContainer = document.getElementById('limitar-caracteres-input-container');
+        let inputContainer = document.getElementById('limitar-caracteres-input-container');
         if (this.checked) {
             inputContainer.style.display = 'block';
         } else {

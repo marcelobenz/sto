@@ -132,6 +132,53 @@ class SeccionesMultinotaController extends Controller
 
             //TO-DO - Hacer validaciones (revisar metodo validar() de ConfigurarCamposMultinotaBean)
             $campoSelected->dimension = (int)$request->post('tamaño');
+            if($request->post('obligatorio') == 'on') {
+                $campoSelected->obligatorio = 1;    
+            } else {
+                $campoSelected->obligatorio = 0;
+            }
+
+            if($request->post('lleva-mascara') == 'on') {
+                if($request->post('lleva-mascara-input-container') != null) {
+                    $campoSelected->mascara = $request->post('lleva-mascara-input-container');
+                } else {
+                    //TO-DO - Validacion: 'La mascara no puede ser nula'
+                }
+            } else {
+                $campoSelected->mascara = null;
+            }
+
+            if($request->post('limitar-caracteres') == 'on') {
+                if($request->post('limitar-caracteres-input-min') != null && $request->post('limitar-caracteres-input-max') != null) {
+                    $campoSelected->limite_minimo = $request->post('limitar-caracteres-input-min');
+                    $campoSelected->limite_maximo = $request->post('limitar-caracteres-input-max');
+
+                    if($campoSelected->tipo == 'INTEGER') {
+                        $campoSelected['limite_minimo_num'] = '1';
+                        if($campoSelected->limite_minimo == 1) {
+                            $campoSelected->limite_minimo_num = '0';
+                        } else {
+                            for ($i = 0; $i < $campoSelected->limite_minimo; $i++) {
+                                $campoSelected->limite_minimo_num = $campoSelected->limite_minimo_num . '0';
+                            }
+                        }
+                        
+                        if($campoSelected->limite_maximo != null) {
+                            $campoSelected['limite_maximo_num'] = '9';
+                            if($campoSelected->limite_maximo != 1) {
+                                for ($i = 1; $i < $campoSelected->limite_maximo; $i++) {
+                                    $campoSelected->limite_maximo_num = $campoSelected->limite_maximo_num . '9';
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    //TO-DO - Validacion: 'Los limites de caracteres no pueden ser nulos'
+                }
+            } else {
+                $campoSelected->limite_minimo = null;
+                $campoSelected->limite_maximo = null;
+            }
 
             //TO-DO - Asignar tambien valores de checkboxes, opciones, etc
             for ($i=0; $i<count($campos); $i++) { 
