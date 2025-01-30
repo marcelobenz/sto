@@ -62,6 +62,7 @@ class SeccionesMultinotaController extends Controller
         Session::put('SECCION_ACTUAL', $seccion);
         Session::put('CAMPOS_ACTUALES', $campos);
         Session::put('TIPOS', $tipos);
+        Session::put('OPCIONES_CAMPO_ACTUALES', null);
 
         foreach ($campos as &$c) {
             if($c->tipo == 'INTEGER') {
@@ -192,11 +193,15 @@ class SeccionesMultinotaController extends Controller
     }
 
     public function getOpcionesCampo($id, $tipo) {
-        $opcionesCampo = OpcionCampo::select('*')
-        ->where('id_campo', $id)
-        ->get();
+        if(Session::get('OPCIONES_CAMPO_ACTUALES') == null) {
+            $opc = OpcionCampo::select('*')
+            ->where('id_campo', $id)
+            ->get();
 
-        Session::put('OPCIONES_CAMPO_ACTUALES', $opcionesCampo);
+            Session::put('OPCIONES_CAMPO_ACTUALES', $opc);
+        }
+        
+        $opcionesCampo = Session::get('OPCIONES_CAMPO_ACTUALES');
 
         return view('partials.seccion-opciones-campo', compact('opcionesCampo'));
     }

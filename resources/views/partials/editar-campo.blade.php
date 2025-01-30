@@ -207,7 +207,7 @@
 
     if(campoSelected.tipo === 'STRING') {
         document.getElementById('lleva-mascara').addEventListener('click', function() {
-            var inputContainer = document.getElementById('lleva-mascara-input-container');
+            let inputContainer = document.getElementById('lleva-mascara-input-container');
             if (this.checked) {
                 inputContainer.style.display = 'block';
             } else {
@@ -216,14 +216,16 @@
         });
     }
 
-    document.getElementById('limitar-caracteres').addEventListener('click', function() {
-        let inputContainer = document.getElementById('limitar-caracteres-input-container');
-        if (this.checked) {
-            inputContainer.style.display = 'block';
-        } else {
-            inputContainer.style.display = 'none';
-        }
-    });
+    if(campoSelected.tipo === 'STRING' || campoSelected.tipo === 'INTEGER' || campoSelected.tipo === 'TEXTAREA') {
+        document.getElementById('limitar-caracteres').addEventListener('click', function() {
+            let inputContainer = document.getElementById('limitar-caracteres-input-container');
+            if (this.checked) {
+                inputContainer.style.display = 'block';
+            } else {
+                inputContainer.style.display = 'none';
+            }
+        });
+    }    
 
     /* document.getElementById('icon-container').addEventListener('mouseover', function() {
         document.getElementById('tooltip').style.display = 'block';
