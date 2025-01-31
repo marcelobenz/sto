@@ -33,8 +33,15 @@
                             <x-text-input id="input-titulo" style="border-radius: 0.375rem; width: 50%;" type="text" name="titulo" :value="__($seccion->titulo)" required autofocus />
 
                             <hr>
-
-                            <h3>Campos</h3>
+                            
+                            <div class="p-2" style="display: flex; justify-content: space-between;">
+                                <h3>Campos</h3>
+                                <button id="boton-nuevo-campo" type="button" class="btn btn-secondary">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-square-fill" viewBox="0 0 16 16">
+                                        <path d="M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm6.5 4.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3a.5.5 0 0 1 1 0"/>
+                                    </svg>
+                                </button>
+                            </div>
                             <table style="width: 100%;" class="border-separate border border-slate-400">
                                 <thead>
                                     <th class="border border-slate-300 p-2">Etiqueta</th>
@@ -171,6 +178,16 @@
             $.ajax({
                 type: 'GET',
                 url: '/secciones-multinota/' + campoId + '/select',
+                success: function(data) {
+                    $('#editar-campo-container').html(data); // Replace #details-container with your actual container ID
+                }
+            });
+        });
+
+        $('#boton-nuevo-campo').on('click', function() {
+            $.ajax({
+                type: 'GET',
+                url: '/secciones-multinota/nuevoCampo',
                 success: function(data) {
                     $('#editar-campo-container').html(data); // Replace #details-container with your actual container ID
                 }

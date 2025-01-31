@@ -91,23 +91,6 @@ class SeccionesMultinotaController extends Controller
         return view('secciones-multinota.edit', compact('seccion', 'campos', 'tipos'));
     }
 
-    public function deleteCampo($id) {
-        $seccion = Session::get('SECCION_ACTUAL');
-        $campos = Session::get('CAMPOS_ACTUALES');
-        
-        for ($i = 0; $i <= count($campos); $i++) {
-            if($campos[$i]->id_campo == $id) {
-                unset($campos[$i]);
-                $camposAux = $campos->values();
-                Session::put('CAMPOS_ACTUALES', $camposAux);
-            }
-        }
-
-        $campos = Session::get('CAMPOS_ACTUALES');
-
-        return view('secciones-multinota.edit', compact('seccion', 'campos'));
-    }
-
     public function selectCampo($id) {
         $campos = Session::get('CAMPOS_ACTUALES');
         
@@ -125,13 +108,47 @@ class SeccionesMultinotaController extends Controller
         return view('partials.editar-campo', compact('campoSelected', 'tipos'));
     }
 
+    public function nuevoCampo() {
+        $tipos = Session::get('TIPOS');
+
+        $campoSelected = new Campo();
+        $campoSelected->nombre = '';
+        $campoSelected->tipo = 'STRING';
+        $campoSelected->dimension = 1;
+        $campoSelected->limite_minimo = null;
+        $campoSelected->limite_maximo = null;
+        $campoSelected->mascara = null;
+        $campoSelected->obligatorio = 0;
+        Session::put('CAMPO_SELECTED', $campoSelected);
+
+        return view('partials.editar-campo', compact('campoSelected', 'tipos'));
+    }
+
+    public function deleteCampo($id) {
+        $seccion = Session::get('SECCION_ACTUAL');
+        $campos = Session::get('CAMPOS_ACTUALES');
+        
+        for ($i = 0; $i <= count($campos); $i++) {
+            if($campos[$i]->id_campo == $id) {
+                unset($campos[$i]);
+                $camposAux = $campos->values();
+                Session::put('CAMPOS_ACTUALES', $camposAux);
+            }
+        }
+
+        $campos = Session::get('CAMPOS_ACTUALES');
+
+        return view('secciones-multinota.edit', compact('seccion', 'campos'));
+    }
+
     public function actualizarDatosCampo(Request $request) {
         if($request->has('actualizar-datos-campo')) { 
             $seccion = Session::get('SECCION_ACTUAL');
             $campos = Session::get('CAMPOS_ACTUALES');
             $campoSelected = Session::get('CAMPO_SELECTED');
 
-            //TO-DO - Hacer validaciones (revisar metodo validar() de ConfigurarCamposMultinotaBean)
+            $campoSelected->nombre = $request->post('nombre');
+
             $campoSelected->dimension = (int)$request->post('tamaño');
             if($request->post('obligatorio') == 'on') {
                 $campoSelected->obligatorio = 1;    
@@ -142,8 +159,6 @@ class SeccionesMultinotaController extends Controller
             if($request->post('lleva-mascara') == 'on') {
                 if($request->post('lleva-mascara-input-container') != null) {
                     $campoSelected->mascara = $request->post('lleva-mascara-input-container');
-                } else {
-                    //TO-DO - Validacion: 'La mascara no puede ser nula'
                 }
             } else {
                 $campoSelected->mascara = null;
@@ -173,19 +188,26 @@ class SeccionesMultinotaController extends Controller
                             }
                         }
                     }
-                } else {
-                    //TO-DO - Validacion: 'Los limites de caracteres no pueden ser nulos'
                 }
             } else {
                 $campoSelected->limite_minimo = null;
                 $campoSelected->limite_maximo = null;
             }
 
-            //TO-DO - Asignar tambien valores de checkboxes, opciones, etc
+            $existeElCampo = false;
+
             for ($i=0; $i<count($campos); $i++) { 
                 if($campos[$i]->id_campo == $campoSelected->id_campo) {
                     $campos[$i] = $campoSelected;
+                    $existeElCampo = true;
                 }
+            }
+
+            if(!$existeElCampo) {
+                //TO-DO - Revisar en el guardado real si esto es asi o rompe algo
+                $id_campo = $campos[count($campos)-1]->id_campo + 1;
+                $campos[count($campos)] = $campoSelected;
+                $campos[count($campos)-1]->id_campo = $id_campo;
             }
 
             return view('secciones-multinota.edit', compact('seccion', 'campos'));
@@ -238,7 +260,7 @@ class SeccionesMultinotaController extends Controller
         return view('partials.seccion-opciones-campo', compact('opcionesCampo'));
     }
 
-    public function getOpcionesFormTipoCampo($id, $tipo) {
+    public function getOpcionesFormTipoCampo($tipo) {
         //TO-DO - Cambiar estructura de array a objeto ya que el campo seleccionado es 1 solo
         $campoSelected = Session::get('CAMPO_SELECTED');
 
