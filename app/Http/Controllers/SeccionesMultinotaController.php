@@ -86,6 +86,17 @@ class SeccionesMultinotaController extends Controller
                     }
                 }
             }
+
+            if($c->tipo == 'LISTA' || $c->tipo == 'CAJAS_SELECCION') {
+                $opc = OpcionCampo::select('*')
+                ->where('id_campo', $c->id_campo)
+                ->get();
+                
+                $c['opciones_campo'] = $opc;
+                Session::put('OPCIONES_CAMPO_ACTUALES', $opc);
+            } else {
+                $c['opciones_campo'] = null;
+            }
         }
 
         return view('secciones-multinota.edit', compact('seccion', 'campos', 'tipos'));
@@ -98,6 +109,10 @@ class SeccionesMultinotaController extends Controller
             if($campos[$i]->id_campo == $id) {
                 $campoSelected = $campos[$i];
             }
+        }
+
+        if($campoSelected->tipo == 'LISTA' || $campoSelected->tipo == 'CAJAS_SELECCION') {
+            Session::put('OPCIONES_CAMPO_ACTUALES', $campoSelected->opciones_campo);
         }
 
         $tipos = Session::get('TIPOS');
@@ -119,6 +134,7 @@ class SeccionesMultinotaController extends Controller
         $campoSelected->limite_maximo = null;
         $campoSelected->mascara = null;
         $campoSelected->obligatorio = 0;
+        $campoSelected['opciones_campo'] = null;
         Session::put('CAMPO_SELECTED', $campoSelected);
 
         return view('partials.editar-campo', compact('campoSelected', 'tipos'));
@@ -148,6 +164,10 @@ class SeccionesMultinotaController extends Controller
             $campoSelected = Session::get('CAMPO_SELECTED');
 
             $campoSelected->nombre = $request->post('nombre');
+            
+            if($campoSelected->tipo == 'LISTA' || $campoSelected->tipo == 'CAJAS_SELECCION') {
+                $campoSelected['opciones_campo'] = Session::get('OPCIONES_CAMPO_ACTUALES');
+            }
 
             $campoSelected->dimension = (int)$request->post('tamaño');
             if($request->post('obligatorio') == 'on') {
@@ -214,21 +234,13 @@ class SeccionesMultinotaController extends Controller
         }
     }
 
-    public function getOpcionesCampo($id, $tipo) {
-        if(Session::get('OPCIONES_CAMPO_ACTUALES') == null) {
-            $opc = OpcionCampo::select('*')
-            ->where('id_campo', $id)
-            ->get();
-
-            Session::put('OPCIONES_CAMPO_ACTUALES', $opc);
-        }
-        
+    public function getOpcionesCampo() {
         $opcionesCampo = Session::get('OPCIONES_CAMPO_ACTUALES');
 
         return view('partials.seccion-opciones-campo', compact('opcionesCampo'));
     }
 
-    public function getOpcionesCampoAlfabeticamente($id) {
+    public function getOpcionesCampoAlfabeticamente() {
         $opcionesCampo = Session::get('OPCIONES_CAMPO_ACTUALES')->sortBy('opcion')->values();
 
         Session::put('OPCIONES_CAMPO_ACTUALES', $opcionesCampo);
@@ -268,8 +280,9 @@ class SeccionesMultinotaController extends Controller
 
         $tipos = Session::get('TIPOS');
 
-        if($tipo == 'LISTA') {
-            Session::put('OPCIONES_CAMPO_ACTUALES', null);
+        if($tipo == 'LISTA' || $campoSelected->tipo == 'CAJAS_SELECCION') {
+            Session::put('OPCIONES_CAMPO_ACTUALES', []);
+            $campoSelected->opciones_campo = [];
         }
 
         return view('partials.editar-campo', compact('campoSelected', 'tipos'));

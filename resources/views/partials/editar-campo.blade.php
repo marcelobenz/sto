@@ -106,8 +106,8 @@
     var campoSelected = @json($campoSelected);
 
     $(document).ready(function() {
-        if(document.getElementById("select-tipos").value == 'LISTA') {
-            fetch('/secciones-multinota/getOpcionesCampo/' + campoSelected.id_campo + '/' + document.getElementById("select-tipos").value)
+        if(document.getElementById("select-tipos").value == 'LISTA' || document.getElementById("select-tipos").value == 'CAJAS_SELECCION') {
+            fetch('/secciones-multinota/getOpcionesCampo')
                 .then(response => response.text())
                 .then(data => {
                     document.getElementById("opciones-campo-container").innerHTML = data;
@@ -161,7 +161,7 @@
 
     document.addEventListener('click', function(event) {
         if (event.target.id === 'boton-ordenar-opciones') {
-            fetch(`/secciones-multinota/getOpcionesCampoAlfabeticamente/${campoSelected.id_campo}`)
+            fetch(`/secciones-multinota/getOpcionesCampoAlfabeticamente`)
                 .then(response => response.text())
                 .then(data => {
                     document.getElementById("opciones-campo-container").innerHTML = data;
