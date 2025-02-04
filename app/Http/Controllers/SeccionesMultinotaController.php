@@ -90,6 +90,7 @@ class SeccionesMultinotaController extends Controller
             if($c->tipo == 'LISTA' || $c->tipo == 'CAJAS_SELECCION') {
                 $opc = OpcionCampo::select('*')
                 ->where('id_campo', $c->id_campo)
+                ->orderBy('orden', 'asc')
                 ->get();
                 
                 $c['opciones_campo'] = $opc;
@@ -228,6 +229,7 @@ class SeccionesMultinotaController extends Controller
                 $id_campo = $campos[count($campos)-1]->id_campo + 1;
                 $campos[count($campos)] = $campoSelected;
                 $campos[count($campos)-1]->id_campo = $id_campo;
+                $campos[count($campos)-1]->orden = $campos[count($campos)-2]->orden + 1;
             }
 
             return view('secciones-multinota.edit', compact('seccion', 'campos'));
@@ -242,6 +244,10 @@ class SeccionesMultinotaController extends Controller
 
     public function getOpcionesCampoAlfabeticamente() {
         $opcionesCampo = Session::get('OPCIONES_CAMPO_ACTUALES')->sortBy('opcion')->values();
+
+        foreach ($opcionesCampo as $index => $opc) {
+            $opc->orden = $index;
+        }
 
         Session::put('OPCIONES_CAMPO_ACTUALES', $opcionesCampo);
 
@@ -302,12 +308,64 @@ class SeccionesMultinotaController extends Controller
         return view('partials.seccion-opciones-campo', compact('opcionesCampo'));
     }
 
-    public function update($id) {
-        error_log('a');
+    public function editarSeccion(Request $request) {
+        $seccionActual = Session::get('SECCION_ACTUAL');
+        $campos = Session::get('CAMPOS_ACTUALES');
+        $opcionesCampo = Session::get('OPCIONES_CAMPO_ACTUALES');
+
+        //1) Actualizar seccion actual, seteando activo = 0
+        $seccion = SeccionMultinota::find($seccionActual->id_seccion);
+        $seccion->activo = 0;
+        $seccion->save();
+
+        //2) Insertar nueva seccion, seteando activo = 1
+        $nuevaSeccion = new SeccionMultinota();
+        $nuevaSeccion->titulo = $request->titulo;
+        $nuevaSeccion->temporal = 0;
+        $nuevaSeccion->activo = 1;
+        $nuevaSeccion->save();
+
+        $nuevaSeccion = SeccionMultinota::where('activo', 1)
+        ->where('titulo', $request->titulo)
+        ->get();
+
+        //3) Se insertan los campos de manera asociada al nuevo id de la seccion multinota
+        foreach ($campos as $c) {
+            $nuevoCampo = new Campo();
+            $nuevoCampo->nombre = $c->nombre;
+            $nuevoCampo->tipo = $c->tipo;
+            $nuevoCampo->dimension = $c->dimension;
+            $nuevoCampo->orden = $c->orden;
+            $nuevoCampo->obligatorio = $c->obligatorio;
+            $nuevoCampo->mascara = $c->mascara;
+            $nuevoCampo->limite_minimo = $c->limite_minimo;
+            $nuevoCampo->limite_maximo = $c->limite_maximo;
+            $nuevoCampo->id_seccion = $nuevaSeccion[0]->id_seccion;
+            $nuevoCampo->save();
+
+            //4) Para los campos de tipo LISTA o CAJAS_SELECCION, se insertan nuevos registros en opcion_campo con la referencia del nuevo id_campo correspondiente
+            if($c->tipo == 'LISTA' || $c->tipo == 'CAJAS_SELECCION') {
+                $id_campo = Campo::where('id_seccion', $nuevaSeccion[0]->id_seccion)
+                ->max('id_campo');
+
+                foreach ($opcionesCampo as $opc) {
+                    $opcion = new OpcionCampo();
+                    $opcion->id_campo = $id_campo;
+                    $opcion->opcion = $opc->opcion;
+                    $opcion->orden = $opc->orden;
+                    $opcion->save();
+                }
+            }
+        }
+
+        return view('secciones-multinota.index');
     }
 
     public function updateSeccion(Request $request) {
         $campos = Campo::hydrate($request->input('array'));
+        foreach ($campos as $index => $c) {
+            $c->orden = $index;
+        }
         Session::put('CAMPOS_ACTUALES', $campos);
         $seccion = Session::get('SECCION_ACTUAL');
 
@@ -321,6 +379,9 @@ class SeccionesMultinotaController extends Controller
     public function updateSeccionOpcionesCampo(Request $request) {
         //TO-DO - Checkear porque estoy usando Campo::hydrate. No se si esta bien
         $opcionesCampo = Campo::hydrate($request->input('array'));
+        foreach ($opcionesCampo as $index => $opc) {
+            $opc->orden = $index;
+        }
         Session::put('OPCIONES_CAMPO_ACTUALES', $opcionesCampo);
 
         // Render the partial view with updated data
