@@ -103,6 +103,17 @@ class SeccionesMultinotaController extends Controller
         return view('secciones-multinota.edit', compact('seccion', 'campos', 'tipos'));
     }
 
+    public function desactivarSeccion($id) {
+        $seccion = SeccionMultinota::find($id);
+        if ($seccion) {
+            $seccion->activo = 0; 
+            $seccion->save();
+            return response()->json(['message' => 'Sección desactivada correctamente.'], 200);
+        } else {
+            return response()->json(['message' => 'Sección no encontrada.'], 404);
+        }
+    }
+
     public function selectCampo($id) {
         $campos = Session::get('CAMPOS_ACTUALES');
         

@@ -83,9 +83,9 @@
             window.location.href = `/secciones-multinota/${id}/edit`;
         }
 
-        /* function confirmarEliminar(id,) {
+        function confirmarEliminar(id) {
             Swal.fire({
-                title: '¿Está seguro de que desea eliminar esta categoría?',
+                title: '¿Está seguro que desea eliminar la sección?',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Sí, eliminar',
@@ -94,34 +94,34 @@
                 if (result.isConfirmed) {
                     // Llamada AJAX para actualizar el valor de flag_activo a 0
                     $.ajax({
-                        url: '/categorias/' + id + '/desactivar',
-                        type: 'PUT', // PUT o PATCH dependiendo de tu configuración de rutas
+                        url: '/secciones-multinota/' + id + '/desactivar',
+                        type: 'PUT', 
                         data: {
-                            _token: '{{ csrf_token() }}', // Asegúrate de incluir el token CSRF
+                            _token: '{{ csrf_token() }}',
                         },
                         success: function(response) {
-                            console.log('Categoría desactivada correctamente.');
+                            console.log('Sección desactivada correctamente.');
                             Swal.fire(
                                 'Eliminado!',
-                                'La categoría ha sido eliminada.',
+                                'La sección ha sido eliminada.',
                                 'success'
                             )
                             // Recargar la tabla para reflejar el cambio
-                            $('#categoriasTable').DataTable().ajax.reload(null, false); // false mantiene la página actual
+                            $('#secciones-multinota-table').DataTable().ajax.reload(null, false); // false mantiene la página actual
                         },
                         error: function(err) {
-                            console.error('Error al desactivar la categoría.');
+                            console.error('Error al desactivar la sección.');
                             Swal.fire(
                                 'Error!',
-                                'Hubo un problema al eliminar la categoría.',
+                                'Hubo un problema al eliminar la sección.',
                                 'error'
                             )
                         }
                     });
                 } else {
-                    console.log('Cancelar desactivación de categoría con ID: ' + id);
+                    console.log('Se canceló desactivación de sección con ID: ' + id);
                 }
             });
-        } */
+        }
     </script>
 @endsection
