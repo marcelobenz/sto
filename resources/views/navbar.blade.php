@@ -31,7 +31,7 @@
                     <div class="dropdown-menu" aria-labelledby="bandejasDropdown">
                         <a class="dropdown-item" href="#">Bandeja Personal</a>
                         <a class="dropdown-item" href="#">Trámites en Curso</a>
-                        <a class="dropdown-item" href="tramites">Todos los Trámites</a>
+                        <a class="dropdown-item" href="{{ route('tramites.index') }}">Todos los Trámites</a>
                     </div>
                 </li>
                 <li class="nav-item">

@@ -31,6 +31,7 @@ Route::get('/', function () {
     return view('navbar');
 });*/
 
+Route::get('/tramites/{id}/detalle', [TramiteController::class, 'show'])->name('tramites.detalle');
 Route::get('/tramites', [TramiteController::class, 'index'])->name('tramites.index');
 Route::get('/tramites/data', [TramiteController::class, 'getTramitesData'])->name('tramites.data');
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');

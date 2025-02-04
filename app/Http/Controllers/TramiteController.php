@@ -92,4 +92,18 @@ class TramiteController extends Controller
             "data" => $data
         ]);
     }
+
+    public function show($idTramite)
+    {
+        $detalleTramite = DB::table('multinota_seccion_valor as ms')
+            ->join('seccion as s', 'ms.id_seccion', '=', 's.id_seccion')
+            ->join('campo as c', 'ms.id_campo', '=', 'c.id_campo')
+            ->select('ms.id_multinota_seccion_valor', 's.titulo', 'c.nombre', 'ms.valor')
+            ->where('ms.id_tramite', $idTramite)
+            ->orderBy('ms.id_multinota_seccion_valor', 'asc')
+            ->get();
+    
+        return view('tramites.detalle', compact('detalleTramite'));
+    }
+    
 }
