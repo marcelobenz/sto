@@ -5,6 +5,8 @@
     <!-- Incluye DataTables CSS -->
     <link href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
     <style>
         /* Estilos personalizados para los iconos de flecha */
         .dataTables_wrapper .dataTables_paginate .paginate_button {
@@ -17,6 +19,21 @@
             width: 16px; /* Ajusta el ancho del icono */
             height: 16px; /* Ajusta el alto del icono */
         }
+
+        .rol-info-popup {
+        display: none;
+        position: absolute;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        padding: 10px;
+        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+        z-index: 1;
+    }
+    
+    /* Mostrar el popup cuando se pasa el mouse sobre el icono */
+    .fa-info-circle:hover + .rol-info-popup {
+        display: block;
+    }
     </style>
 @endsection
 
@@ -67,8 +84,8 @@
                         "data": null,
                         "render": function(data, type, row) {
                             return `
-                                <button class="btn btn-sm btn-primary" onclick="editarCategoria(${row.id_categoria})">Editar</button>
-                                <button class="btn btn-sm btn-danger" onclick="confirmarEliminar(${row.id_categoria})">Eliminar</button>
+                                <button class="btn btn-sm btn-primary fa fa-edit" onclick="editarCategoria(${row.id_categoria})" title="Editar Categoria"></button>
+                                <button class="btn btn-sm btn-danger fa fa-trash" onclick="confirmarEliminar(${row.id_categoria})" title="Eliminar"></button>
                             `;
                         }
                     }

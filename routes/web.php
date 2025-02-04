@@ -12,6 +12,7 @@ use App\Http\Controllers\ContribuyenteMultinotaController;
 use App\Http\Controllers\CuestionarioController;
 use App\Http\Controllers\ConfiguracionMailController;
 use App\Http\Controllers\IngresoExternoController;
+use App\Http\Controllers\AdministracionWorkflowController;
 
 
 /*
@@ -74,6 +75,7 @@ Route::post('/ingreso-externo', [IngresoExternoController::class, 'login'])->nam
 Route::get('/bandeja-usuario-externo', [IngresoExternoController::class, 'showBandeja'])->name('bandeja-usuario-externo');
 Route::get('/cambiar-clave', [ContribuyenteMultinotaController::class, 'showChangePasswordForm'])->name('cambiar-clave');
 Route::post('/cambiar-clave', [ContribuyenteMultinotaController::class, 'changePassword'])->name('cambiar-clave.submit');
+Route::get('/estados', [AdministracionWorkflowController::class, 'index'])->name('estados.index');
 
 
 Route::get('/set-usuario-interno', [UsuarioController::class, 'setUsuarioInterno']);

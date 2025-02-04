@@ -9,6 +9,9 @@
         <form method="POST" action="{{ route('roles.store') }}">
             @csrf
 
+        <br/>
+        <br/>
+        <br/>
             <div class="form-group">
                 <label for="nombre">Nombre del Rol</label>
                 <input type="text" class="form-control" id="nombre" name="nombre" required>

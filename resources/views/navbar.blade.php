@@ -47,6 +47,7 @@
                                 <a class="dropdown-item" href="limite">Limite de asignaciones</a>
                                 <a class="dropdown-item" href="usuario">Usuarios</a>
                                 <a class="dropdown-item" href="cuestionarios">Cuestionarios</a>
+                                <a class="dropdown-item" href="estados">Estados</a>
                     </div>
                 </li>
                 <li class="nav-item dropdown">

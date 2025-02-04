@@ -23,10 +23,18 @@
 @endsection
 
 @section('contenidoPrincipal')
+<div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <br/>
+                <br/>
+                <br/>
+                <div class="card">
+                    <div class="card-header">Cambiar clave</div>
+                    
+                    <div class="card-body">
     <form action="{{ route('cambiar-clave.submit') }}" method="POST">
         @csrf
-        <br/>
-        <br/>
         <br/>
 
         @if($errors->any())
@@ -54,4 +62,8 @@
         </div>
         <button type="submit" class="btn btn-primary">Cambiar Contraseña</button>
     </form>
+    </div>
+   </div>
+  </div>
+ </div>
 @endsection
