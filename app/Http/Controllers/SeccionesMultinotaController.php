@@ -303,12 +303,15 @@ class SeccionesMultinotaController extends Controller
 
         if(count($opcionesCampo) != 0) {
             $opcionesCampoDummyId = $opcionesCampo[count($opcionesCampo) - 1]->id_opcion_campo;
+            $orden = $opcionesCampo[count($opcionesCampo) - 1]->orden;
         } else {
             $opcionesCampoDummyId = -1;
+            $orden = -1;
         }
 
         $nuevaOpcion = new OpcionCampo();
         $nuevaOpcion->id_opcion_campo = $opcionesCampoDummyId + 1;
+        $nuevaOpcion->orden = $orden + 1;
         $nuevaOpcion->opcion = $nueva_opcion;
 
         $opcionesCampo->push($nuevaOpcion);
