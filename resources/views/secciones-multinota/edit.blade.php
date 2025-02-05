@@ -29,7 +29,7 @@
                             @csrf
 
                             <h3>Título</h3>
-                            <x-text-input id="input-titulo" style="border-radius: 0.375rem; width: 50%;" type="text" name="titulo" :value="__($seccion->titulo)" required autofocus />
+                            <x-text-input id="input-titulo-seccion" style="border-radius: 0.375rem; width: 50%;" type="text" name="titulo" :value="__($seccion->titulo)" required autofocus />
 
                             <hr>
                             

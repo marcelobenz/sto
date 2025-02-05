@@ -1,8 +1,9 @@
 <div>
     <h3>Datos del Campo</h3>
     <div class="border-separate border border-slate-400 p-4" style="display: flex; flex-direction: column; gap: 15px;">
-        <form method="POST" action="{{ route('secciones-multinota.actualizarDatosCampo') }}">
+        <form id="form-actualizar-datos-campo" method="POST" action="{{ route('secciones-multinota.actualizarDatosCampo') }}">
         @csrf
+            <input type="hidden" name="input-titulo-seccion-backup" id="input-titulo-seccion-backup">
             <div style="display: flex; justify-content: space-between;">
                 <x-text-input id="nombre" class="block mt-1" style="width: 48%;" type="text" name="nombre" :value="__($campoSelected->nombre)" required />
                 <select id="select-tipos" name="select-tipos" class="block mt-1" style="width: 48%;">
@@ -157,6 +158,12 @@
                 })
                 .catch(error => console.error('Error:', error));
         });
+    });
+
+    document.getElementById('form-actualizar-datos-campo').addEventListener('submit', function () {
+        const inputTituloSeccion = document.getElementById('input-titulo-seccion').value;
+        console.log('aver: ', inputTituloSeccion);
+        document.getElementById('input-titulo-seccion-backup').value = inputTituloSeccion;
     });
 
     document.addEventListener('click', function(event) {

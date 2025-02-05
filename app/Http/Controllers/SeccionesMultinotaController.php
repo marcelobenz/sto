@@ -198,6 +198,8 @@ class SeccionesMultinotaController extends Controller
             $campos = Session::get('CAMPOS_ACTUALES');
             $campoSelected = Session::get('CAMPO_SELECTED');
 
+            $seccion->titulo = $request->post('input-titulo-seccion-backup');
+
             $campoSelected->nombre = $request->post('nombre');
             
             if($campoSelected->tipo == 'LISTA' || $campoSelected->tipo == 'CAJAS_SELECCION') {
