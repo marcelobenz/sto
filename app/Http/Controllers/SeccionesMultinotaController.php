@@ -6,6 +6,7 @@ use stdClass;
 use App\Models\SeccionMultinota;
 use App\Models\Campo;
 use App\Models\OpcionCampo;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
@@ -100,6 +101,28 @@ class SeccionesMultinotaController extends Controller
             }
         }
 
+        return view('secciones-multinota.edit', compact('seccion', 'campos', 'tipos'));
+    }
+
+    public function crearNuevaSeccion() {
+        //Se instancia objeto de SeccionMultinota y se asignan atributos vacíos
+        $seccion = new SeccionMultinota();
+        //ID dummy
+        $seccion->id_seccion = 1;
+        $seccion->temporal = 0;
+        $seccion->titulo = '';
+        $seccion->activo = 1;
+
+        //Se instancia una coleccion de Campos vacía
+        $campos = new Collection([]); 
+
+        $tipos = Campo::select('tipo')->distinct()->get();
+
+        Session::put('SECCION_ACTUAL', $seccion);
+        Session::put('CAMPOS_ACTUALES', $campos);
+        Session::put('TIPOS', $tipos);
+        Session::put('OPCIONES_CAMPO_ACTUALES', null);
+    
         return view('secciones-multinota.edit', compact('seccion', 'campos', 'tipos'));
     }
 
@@ -237,10 +260,16 @@ class SeccionesMultinotaController extends Controller
 
             if(!$existeElCampo) {
                 //TO-DO - Revisar en el guardado real si esto es asi o rompe algo
-                $id_campo = $campos[count($campos)-1]->id_campo + 1;
-                $campos[count($campos)] = $campoSelected;
-                $campos[count($campos)-1]->id_campo = $id_campo;
-                $campos[count($campos)-1]->orden = $campos[count($campos)-2]->orden + 1;
+                if(count($campos) == 0) {
+                    $campos[count($campos)] = $campoSelected;
+                    $campos[count($campos)-1]->id_campo = 1;
+                    $campos[count($campos)-1]->orden = 0;
+                } else {
+                    $id_campo = $campos[count($campos)-1]->id_campo + 1;
+                    $campos[count($campos)] = $campoSelected;
+                    $campos[count($campos)-1]->id_campo = $id_campo;
+                    $campos[count($campos)-1]->orden = $campos[count($campos)-2]->orden + 1;
+                }
             }
 
             return view('secciones-multinota.edit', compact('seccion', 'campos'));
@@ -324,10 +353,12 @@ class SeccionesMultinotaController extends Controller
         $campos = Session::get('CAMPOS_ACTUALES');
         $opcionesCampo = Session::get('OPCIONES_CAMPO_ACTUALES');
 
-        //1) Actualizar seccion actual, seteando activo = 0
-        $seccion = SeccionMultinota::find($seccionActual->id_seccion);
-        $seccion->activo = 0;
-        $seccion->save();
+        //1) Actualizar seccion actual, seteando activo = 0. Si la seccion tiene ID = 1 (ID dummy), no se busca en base porque no existe
+        if($seccionActual->id_seccion != 1) {
+            $seccion = SeccionMultinota::find($seccionActual->id_seccion);
+            $seccion->activo = 0;
+            $seccion->save();
+        }
 
         //2) Insertar nueva seccion, seteando activo = 1
         $nuevaSeccion = new SeccionMultinota();

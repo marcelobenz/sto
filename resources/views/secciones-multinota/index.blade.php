@@ -22,14 +22,17 @@
 
 @section('contenidoPrincipal')
     <div class="container-fluid px-3">
-        <div class="row mb-3 px-3" style="justify-content: end;">
+        <div class="row mb-3 px-3" style="justify-content: end;">            
             <div class="col-md-12">
                 <br/>
                     <br/>
                         <br/>
                             <h2>Secciones Multinota</h2>
             </div>
-            <button class="btn btn-primary">+</button>
+            <form method="GET" action="{{ route('secciones-multinota.crearNuevaSeccion') }}">
+                @csrf
+            <button type="submit" id="boton-crear-seccion" class="btn btn-primary">Crear</button>
+            </form>
         </div>
         <table id="secciones-multinota-table" class="table table-bordered table-striped table-hover">
             <thead>
@@ -77,6 +80,16 @@
                     }
                 }
             });
+
+            /* $('#boton-crear-seccion').on('click', function() {
+                $.ajax({
+                    type: 'GET',
+                    url: '/secciones-multinota/crearNuevaSeccion',
+                    success: function(data) {
+                        $('#editar-campo-container').html(data); // Replace #details-container with your actual container ID
+                    }
+                });
+            }); */
         });
 
         function editarSeccionMultinota(id) {
