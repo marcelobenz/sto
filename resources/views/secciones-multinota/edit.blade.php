@@ -116,7 +116,13 @@
                                 @include('partials.seccion-campos', ['campos' => $campos]) <!-- Carga inicial -->
                             </div>
                             <div style="display: flex; gap: 0.5rem; justify-content: end;">
-                                <button type="submit" id="boton-guardar-seccion" class="btn btn-primary">Actualizar Sección</button>
+                                <button type="submit" id="boton-guardar-seccion" class="btn btn-primary">
+                                    @if($isEditar)
+                                        Actualizar Sección
+                                    @elseif(!$isEditar)
+                                        Crear Sección
+                                    @endif
+                                </button>
                             </div>
                         </form>
                     </div>

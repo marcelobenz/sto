@@ -61,6 +61,7 @@ class SeccionesMultinotaController extends Controller
         Session::put('CAMPOS_ACTUALES', $campos);
         Session::put('TIPOS', $tipos);
         Session::put('OPCIONES_CAMPO_ACTUALES', null);
+        Session::put('IS_EDITAR', true);
 
         foreach ($campos as &$c) {
             if($c->tipo == 'INTEGER') {
@@ -98,7 +99,9 @@ class SeccionesMultinotaController extends Controller
             }
         }
 
-        return view('secciones-multinota.edit', compact('seccion', 'campos', 'tipos'));
+        $isEditar = Session::get('IS_EDITAR');
+
+        return view('secciones-multinota.edit', compact('seccion', 'campos', 'tipos', 'isEditar'));
     }
 
     public function crearNuevaSeccion() {
@@ -119,8 +122,11 @@ class SeccionesMultinotaController extends Controller
         Session::put('CAMPOS_ACTUALES', $campos);
         Session::put('TIPOS', $tipos);
         Session::put('OPCIONES_CAMPO_ACTUALES', null);
+        Session::put('IS_EDITAR', false);
+
+        $isEditar = Session::get('IS_EDITAR');
     
-        return view('secciones-multinota.edit', compact('seccion', 'campos', 'tipos'));
+        return view('secciones-multinota.edit', compact('seccion', 'campos', 'tipos', 'isEditar'));
     }
 
     public function desactivarSeccion($id) {
@@ -185,8 +191,9 @@ class SeccionesMultinotaController extends Controller
         }
 
         $campos = Session::get('CAMPOS_ACTUALES');
+        $isEditar = Session::get('IS_EDITAR');
 
-        return view('secciones-multinota.edit', compact('seccion', 'campos'));
+        return view('secciones-multinota.edit', compact('seccion', 'campos', 'isEditar'));
     }
 
     public function actualizarDatosCampo(Request $request) {
@@ -271,7 +278,9 @@ class SeccionesMultinotaController extends Controller
                 }
             }
 
-            return view('secciones-multinota.edit', compact('seccion', 'campos'));
+            $isEditar = Session::get('IS_EDITAR');
+
+            return view('secciones-multinota.edit', compact('seccion', 'campos', 'isEditar'));
         }
     }
 
