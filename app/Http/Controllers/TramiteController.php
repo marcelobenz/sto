@@ -35,7 +35,7 @@ class TramiteController extends Controller
             ->join('categoria as c', 'tt.id_categoria', '=', 'c.id_categoria')
             ->join('estado_tramite as e', 'te.id_estado_tramite', '=', 'e.id_estado_tramite')
             ->select(
-                'm.id_tramite',
+                'm.id_tramite as id_tramite',
                 'm.cuenta',
                 'c.nombre as nombre_categoria',
                 'tt.nombre as tipo_tramite',
@@ -102,8 +102,14 @@ class TramiteController extends Controller
             ->where('ms.id_tramite', $idTramite)
             ->orderBy('ms.id_multinota_seccion_valor', 'asc')
             ->get();
+
+        $tramiteInfo = DB::table('multinota as m')
+            ->where('m.id_tramite', $idTramite)
+            ->join('tipo_tramite_multinota as ttm', 'm.id_tipo_tramite_multinota', '=', 'ttm.id_tipo_tramite_multinota')
+            ->select('ttm.nombre', 'm.fecha_alta')
+            ->first();
     
-        return view('tramites.detalle', compact('detalleTramite'));
+        return view('tramites.detalle', compact('detalleTramite', 'idTramite', 'tramiteInfo'));
     }
     
 }

@@ -10,6 +10,7 @@ use App\Http\Controllers\RolController;
 use App\Http\Controllers\LimiteController;
 use App\Http\Controllers\ContribuyenteMultinotaController;
 use App\Http\Controllers\CuestionarioController;
+use App\Http\Controllers\ComentarioController;
 
 
 /*
@@ -31,6 +32,7 @@ Route::get('/', function () {
     return view('navbar');
 });*/
 
+Route::post('/comentario/guardar', [ComentarioController::class, 'guardarComentario'])->name('comentario.guardar');
 Route::get('/tramites/{id}/detalle', [TramiteController::class, 'show'])->name('tramites.detalle');
 Route::get('/tramites', [TramiteController::class, 'index'])->name('tramites.index');
 Route::get('/tramites/data', [TramiteController::class, 'getTramitesData'])->name('tramites.data');
