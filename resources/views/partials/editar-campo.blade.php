@@ -118,7 +118,8 @@
 
         $('#select-tipos').on('change', function() {
             var selectedValue = $(this).val(); // Get the selected value using jQuery
-            fetch('/secciones-multinota/getOpcionesFormTipoCampo/' + selectedValue)
+            const nombreCampo = document.getElementById('nombre').value;
+            fetch(`/secciones-multinota/getOpcionesFormTipoCampo/${nombreCampo}/${selectedValue}`)
                 .then(response => response.text())
                 .then(data => {
                     $("#editar-campo-container").html(data); // Update the container with the fetched data
