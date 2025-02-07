@@ -36,7 +36,8 @@ class ComentarioController extends Controller
             'fecha_alta' => Carbon::now(),
             'fecha_modificacion' => Carbon::now(),
             'id_tipo_evento' => $id_tipo_evento,
-            'clave' => 'COMENTARIO'
+            'clave' => 'COMENTARIO',
+            'desc_contrib' => $request->mensaje
         ]);
 
         // Crear un registro en la tabla HISTORIAL_TRAMITE

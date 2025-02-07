@@ -32,6 +32,7 @@ Route::get('/', function () {
     return view('navbar');
 });*/
 
+Route::get('/archivo/{id}/descargar', [ArchivoController::class, 'descargar'])->name('archivo.descargar');
 Route::post('/comentario/guardar', [ComentarioController::class, 'guardarComentario'])->name('comentario.guardar');
 Route::get('/tramites/{id}/detalle', [TramiteController::class, 'show'])->name('tramites.detalle');
 Route::get('/tramites', [TramiteController::class, 'index'])->name('tramites.index');

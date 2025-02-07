@@ -108,8 +108,22 @@ class TramiteController extends Controller
             ->join('tipo_tramite_multinota as ttm', 'm.id_tipo_tramite_multinota', '=', 'ttm.id_tipo_tramite_multinota')
             ->select('ttm.nombre', 'm.fecha_alta')
             ->first();
-    
-        return view('tramites.detalle', compact('detalleTramite', 'idTramite', 'tramiteInfo'));
+
+        $historialTramite = DB::table('historial_tramite as h')
+            ->join('evento as e', 'h.id_evento', '=', 'e.id_evento')
+            ->selectRaw('COALESCE(e.descripcion, e.desc_contrib) AS descripcion, e.fecha_alta, e.clave')
+            ->where('h.id_tramite', $idTramite)
+            ->orderBy('e.fecha_alta', 'desc') // Ordenar por fecha de forma descendente
+            ->get();
+
+        $tramiteArchivo = DB::table('archivo as a')
+            ->join('tramite_archivo as ta', 'a.id_archivo', '=','ta.id_archivo')
+            ->select('a.id_archivo', 'a.fecha_alta', 'a.nombre', 'a.descripcion')
+            ->where('ta.id_tramite', $idTramite)
+            ->orderBy('a.descripcion')
+            ->get();
+
+        return view('tramites.detalle', compact('detalleTramite', 'idTramite', 'tramiteInfo', 'historialTramite', 'tramiteArchivo'));
     }
     
 }
