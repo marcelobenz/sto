@@ -8,6 +8,7 @@ use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\LicenciaController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\SeccionesMultinotaController;
+use App\Http\Controllers\MultinotaController;
 
 
 /*
@@ -58,6 +59,8 @@ Route::get('/secciones-multinota/refreshOpcionesCampo', [SeccionesMultinotaContr
 Route::get('/secciones-multinota/crearNuevaSeccion', [SeccionesMultinotaController::class, 'crearNuevaSeccion'])->name('secciones-multinota.crearNuevaSeccion');
 Route::post('/secciones-multinota/editarSeccion', [SeccionesMultinotaController::class, 'editarSeccion'])->name('secciones-multinota.editarSeccion');
 Route::put('/secciones-multinota/{id}/desactivar', [SeccionesMultinotaController::class, 'desactivarSeccion'])->name('secciones-multinota.desactivarSeccion');
+
+Route::get('/multinotas', [MultinotaController::class, 'index'])->name('multinotas.index');
 
 Route::get('usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
 Route::get('usuarios/create', [UsuarioController::class, 'create'])->name('usuarios.create');

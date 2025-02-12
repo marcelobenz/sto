@@ -45,6 +45,7 @@
                         <a class="dropdown-item" href="categorias">Categorias</a>
                         <a class="dropdown-item" href="usuarios">Usuarios</a>
                         <a class="dropdown-item" href="secciones-multinota">Secciones Multinota</a>
+                        <a class="dropdown-item" href="multinotas">Multinotas</a>
                     </div>
                 </li>
             </ul>
