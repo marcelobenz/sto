@@ -111,7 +111,8 @@ class TramiteController extends Controller
 
         $historialTramite = DB::table('historial_tramite as h')
             ->join('evento as e', 'h.id_evento', '=', 'e.id_evento')
-            ->selectRaw('COALESCE(e.descripcion, e.desc_contrib) AS descripcion, e.fecha_alta, e.clave')
+            ->join('usuario_interno as u', 'h.id_usuario_interno_asignado', '=', 'u.id_usuario_interno')
+            ->selectRaw('COALESCE(e.descripcion, e.desc_contrib) AS descripcion, e.fecha_alta, e.clave, u.legajo, CONCAT(u.nombre, u.apellido) as usuario')
             ->where('h.id_tramite', $idTramite)
             ->orderBy('e.fecha_alta', 'desc') // Ordenar por fecha de forma descendente
             ->get();

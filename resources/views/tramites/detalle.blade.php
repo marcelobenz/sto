@@ -3,11 +3,12 @@
 @section('heading')
 <!-- En el <head> -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
 <!-- Antes del cierre de </body> -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 @endsection
 
 @section('contenidoPrincipal')
@@ -27,10 +28,29 @@
     @endif
 
     <div class="row gx-4 align-items-start mt-4">
-        <h4>
-            Trámite Nro {{ $idTramite }} - {{ optional($tramiteInfo)->nombre ?? 'Sin nombre' }} - 
-            {{ optional($tramiteInfo)->fecha_alta ? date('d/m/Y', strtotime($tramiteInfo->fecha_alta)) : 'Sin fecha' }}
-        </h4>
+        <div class="d-flex justify-content-between align-items-center">
+            <h4>
+                Trámite Nro {{ $idTramite }} - {{ optional($tramiteInfo)->nombre ?? 'Sin nombre' }} - 
+                {{ optional($tramiteInfo)->fecha_alta ? date('d/m/Y', strtotime($tramiteInfo->fecha_alta)) : 'Sin fecha' }}
+            </h4>
+            <div class="btn-group">
+                <button class="btn btn-warning mx-1" data-bs-toggle="tooltip" title="Reasignar el Trámite">
+                    <i class="fas fa-random"></i>
+                </button>
+                <button class="btn btn-warning mx-1" data-bs-toggle="tooltip" title="Cambiar prioridad del trámite">
+                    <i class="fas fa-exclamation"></i>
+                </button>
+                <button class="btn btn-primary mx-1" data-bs-toggle="tooltip" title="Tomar el Trámite">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+                <button class="btn btn-danger mx-1" data-bs-toggle="tooltip" title="Dar de baja el Trámite">
+                    <i class="fas fa-ban"></i>
+                </button>
+                <button class="btn btn-danger mx-1" data-bs-toggle="tooltip" title="Generar solicitud">
+                    <i class="fas fa-print"></i>
+                </button>
+            </div>
+        </div>
 
         <!-- Columna izquierda: Datos del Trámite -->
         <div class="col-md-6 col-lg-6" id="datosTramite">
@@ -166,7 +186,7 @@
                         <table class="table table-striped table-hover">
                             <thead class="table-dark">
                                 <tr>
-                                    <th colspan="3" class="text-center fs-4">Historial</th>
+                                    <th colspan="4" class="text-center fs-4">Historial</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -175,10 +195,11 @@
                                         <td>{{ $evento->descripcion }}</td>
                                         <td><span class="badge bg-primary">{{ $evento->clave }}</span></td>
                                         <td>{{ date('d/m/Y H:i', strtotime($evento->fecha_alta)) }}</td>
+                                        <td class="text-center">{{ $evento->legajo }} - {{ $evento->usuario }} </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="3" class="text-center text-muted">No hay eventos en el historial.</td>
+                                        <td colspan="4" class="text-center text-muted">No hay eventos en el historial.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
