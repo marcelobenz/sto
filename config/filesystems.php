@@ -56,6 +56,12 @@ return [
             'throw' => false,
         ],
 
+        'adjuntos' => [
+            'driver' => 'local',
+            'root' => storage_path('app/adjuntos'), // Carpeta donde se guardarán los adjuntos
+            'visibility' => 'private',
+        ],
+                
     ],
 
     /*

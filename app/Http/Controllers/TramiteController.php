@@ -118,7 +118,7 @@ class TramiteController extends Controller
 
         $tramiteArchivo = DB::table('archivo as a')
             ->join('tramite_archivo as ta', 'a.id_archivo', '=','ta.id_archivo')
-            ->select('a.id_archivo', 'a.fecha_alta', 'a.nombre', 'a.descripcion')
+            ->select('a.id_archivo', 'a.fecha_alta', 'a.nombre', 'a.descripcion', 'a.path_archivo')
             ->where('ta.id_tramite', $idTramite)
             ->orderBy('a.descripcion')
             ->get();

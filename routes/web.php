@@ -11,6 +11,7 @@ use App\Http\Controllers\LimiteController;
 use App\Http\Controllers\ContribuyenteMultinotaController;
 use App\Http\Controllers\CuestionarioController;
 use App\Http\Controllers\ComentarioController;
+use App\Http\Controllers\ArchivoController;
 
 
 /*
@@ -32,7 +33,8 @@ Route::get('/', function () {
     return view('navbar');
 });*/
 
-Route::get('/archivo/{id}/descargar', [ArchivoController::class, 'descargar'])->name('archivo.descargar');
+Route::post('/archivo/subir', [ArchivoController::class, 'subirArchivo'])->name('archivo.subir');
+Route::get('/archivo/descargar/{id}', [ArchivoController::class, 'descargar'])->name('archivo.descargar');
 Route::post('/comentario/guardar', [ComentarioController::class, 'guardarComentario'])->name('comentario.guardar');
 Route::get('/tramites/{id}/detalle', [TramiteController::class, 'show'])->name('tramites.detalle');
 Route::get('/tramites', [TramiteController::class, 'index'])->name('tramites.index');

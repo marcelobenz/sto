@@ -11,15 +11,13 @@ class TramiteArchivo extends Model
 
     protected $table = 'tramite_archivo'; // Nombre de la tabla en la base de datos
 
-    protected $primaryKey = 'id'; // Llave primaria (ajústala si es diferente en tu DB)
+    protected $primaryKey = 'id_relacion'; // Llave primaria (ajústala si es diferente en tu DB)
 
     public $timestamps = false; // Si la tabla no tiene `created_at` y `updated_at`
 
     protected $fillable = [
         'id_tramite',
-        'nombre',
-        'descripcion',
-        'ruta', // Ruta del archivo en almacenamiento
+        'id_archivo',
         'fecha_alta'
     ];
 
@@ -30,4 +28,13 @@ class TramiteArchivo extends Model
     {
         return $this->belongsTo(Tramite::class, 'id_tramite');
     }
+
+    /**
+     * Relación con Archivo
+     */
+    public function archivo()
+    {
+        return $this->belongsTo(Archivo::class, 'id_archivo');
+    }
+    
 }

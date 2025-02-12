@@ -14,6 +14,18 @@
 <br><br>
 
 <div class="container-fluid">
+    @if(session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
+    @endif
+
     <div class="row gx-4 align-items-start mt-4">
         <h4>
             Trámite Nro {{ $idTramite }} - {{ optional($tramiteInfo)->nombre ?? 'Sin nombre' }} - 
@@ -95,7 +107,23 @@
                         </table>
                     </div>
 
-                    <a href="{{ route('tramites.index') }}" class="btn btn-secondary mt-3">Volver</a>
+                    <div class="d-flex justify-content-between mt-4">
+                        <!-- Botón Volver -->
+                        <a href="{{ route('tramites.index') }}" class="btn btn-secondary">Volver</a>
+
+                        <!-- Botón Subir Archivo -->
+                        <form action="{{ route('archivo.subir') }}" method="POST" enctype="multipart/form-data" class="d-flex align-items-center">
+                            @csrf
+                            <input type="hidden" name="id_tramite" value="{{ $idTramite }}">
+
+                            <div class="input-group">
+                                <input type="file" name="archivo" class="form-control" required>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-upload"></i> Subir Archivo
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -162,5 +190,19 @@
         </div>
     </div>
 </div>
+
+@endsection
+
+@section('scripting')
+
+<script>
+    $(document).ready(function() {
+        setTimeout(function() {
+            $(".alert").fadeOut(500, function() {
+                $(this).remove();
+            });
+        }, 2000);
+    });
+</script>
 
 @endsection

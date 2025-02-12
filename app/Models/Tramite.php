@@ -42,4 +42,16 @@ class Tramite extends Model
 
     // Disable timestamps if you are managing them manually
     public $timestamps = false;
+
+    /**
+     * Relación con Archivo
+     * Un trámite puede tener múltiples archivos.
+     */
+    public function archivos()
+    {
+        return $this->belongsToMany(Archivo::class, 'tramite_archivo', 'id_tramite', 'id_archivo')
+                    ->withPivot('fecha_alta')
+                    ->as('relacion');
+    }
+        
 }
