@@ -46,7 +46,8 @@
                 <button class="btn btn-danger mx-1" data-bs-toggle="tooltip" title="Dar de baja el Trámite">
                     <i class="fas fa-ban"></i>
                 </button>
-                <button class="btn btn-danger mx-1" data-bs-toggle="tooltip" title="Generar solicitud">
+                <button class="btn btn-danger mx-1" data-bs-toggle="tooltip" title="Generar solicitud"
+                    onclick="window.open('{{ route('reporte.constancia', ['idTramite' => $idTramite]) }}', '_blank')">
                     <i class="fas fa-print"></i>
                 </button>
             </div>
