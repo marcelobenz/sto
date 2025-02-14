@@ -126,5 +126,46 @@ class TramiteController extends Controller
 
         return view('tramites.detalle', compact('detalleTramite', 'idTramite', 'tramiteInfo', 'historialTramite', 'tramiteArchivo'));
     }
+
+    public function darDeBaja(Request $request)
+    {
+        try {
+            $idTramite = $request->input('idTramite');
+    
+            DB::beginTransaction(); // 1️⃣ Iniciar transacción
+    
+            // 2️⃣ Actualizar el trámite
+            DB::table('tramite')
+                ->where('id_tramite', $idTramite)
+                ->update([
+                    'flag_cancelado' => 1,
+                    'flag_ingreso' => 1,
+                    'fecha_modificacion' => now()
+                ]);
+    
+            // 3️⃣ Insertar el evento
+            $idEvento = DB::table('evento')->insertGetId([
+                'descripcion' => 'Se dio de baja el trámite',
+                'fecha_alta' => now(),
+                'fecha_modificacion' => now(),
+                'id_tipo_evento' => 14,
+                'clave' => 'CANCELAR'
+            ]);
+    
+            // 4️⃣ Registrar en historial_tramite
+            DB::table('historial_tramite')->insert([
+                'fecha' => now(),
+                'id_tramite' => $idTramite,
+                'id_evento' => $idEvento
+            ]);
+    
+            DB::commit(); // 5️⃣ Confirmar cambios
+    
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            DB::rollBack(); // 6️⃣ Revertir cambios en caso de error
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
     
 }

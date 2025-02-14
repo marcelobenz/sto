@@ -34,6 +34,7 @@ Route::get('/', function () {
     return view('navbar');
 });*/
 
+Route::post('/tramites/darDeBaja', [TramiteController::class, 'darDeBaja'])->name('tramites.darDeBaja');
 Route::get('/reporte/constancia/{idTramite}', [ReporteController::class, 'generarPDF'])->name('reporte.constancia');
 Route::post('/archivo/subir', [ArchivoController::class, 'subirArchivo'])->name('archivo.subir');
 Route::get('/archivo/descargar/{id}', [ArchivoController::class, 'descargar'])->name('archivo.descargar');

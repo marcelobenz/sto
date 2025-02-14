@@ -43,7 +43,8 @@
                 <button class="btn btn-primary mx-1" data-bs-toggle="tooltip" title="Tomar el Trámite">
                     <i class="fas fa-sign-out-alt"></i>
                 </button>
-                <button class="btn btn-danger mx-1" data-bs-toggle="tooltip" title="Dar de baja el Trámite">
+                <button class="btn btn-danger mx-1" data-bs-toggle="tooltip" title="Dar de baja el Trámite"
+                    onclick="darDeBajaTramite({{ $idTramite }})">
                     <i class="fas fa-ban"></i>
                 </button>
                 <button class="btn btn-danger mx-1" data-bs-toggle="tooltip" title="Generar solicitud"
@@ -225,6 +226,30 @@
             });
         }, 2000);
     });
+
+    function darDeBajaTramite(idTramite) {
+        if (confirm("¿Estás seguro de que deseas dar de baja este trámite?")) {
+            fetch("{{ route('tramites.darDeBaja') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                body: JSON.stringify({ idTramite: idTramite })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("El trámite ha sido dado de baja correctamente.");
+                    location.reload(); // Recargar la página para ver cambios
+                } else {
+                    alert("Error: " + data.message);
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+    }
+
 </script>
 
 @endsection
