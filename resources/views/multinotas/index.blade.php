@@ -33,23 +33,43 @@
             <div id="filtros-multinota" style="background-color: #ededed; padding: 40px 10px;">
                 <h3>FILTROS</h1>
                 <div style="display: flex; width: 100%; justify-content: space-between; gap: 50px;">
-                    <input id="nombre" type="text" placeholder="Buscar..." style="flex-grow: 1;" />
-                    <select name="categorias" id="select-categorias" style="flex-grow: 1;">
-                        {{-- TO-DO - Recuperar categorias y cargar opciones --}}
-                        <option value="1">1</option>
-                    </select>
-                    <select name="publicas" id="select-publicas" style="flex-grow: 1;">
-                        {{-- TO-DO - Cargar opciones correspondientes --}}
-                        <option value="1">1</option>
-                    </select>
-                    <select name="mensaje-inicial" id="select-mensaje-inicial" style="flex-grow: 1;">
-                        {{-- TO-DO - Cargar opciones correspondientes --}}
-                        <option value="1">1</option>
-                    </select>
-                    <select name="expediente" id="select-expediente" style="flex-grow: 1;">
-                        {{-- TO-DO - Cargar opciones correspondientes --}}
-                        <option value="1">1</option>
-                    </select>
+                    <div style="display: flex; flex-direction: column; flex-grow: 1;">
+                        <label style="font-weight: bold;">Nombre</label>
+                        <input id="nombre" type="text" placeholder="Buscar..." />
+                    </div>
+                    <div style="display: flex; flex-direction: column; flex-grow: 1;">
+                        <label style="font-weight: bold;">Categorías</label>
+                        <select name="categorias" id="select-categorias">
+                            <option value="null">Seleccione una categoría</option>
+                            @foreach($categorias as $cat)
+                                <option value="{{ $cat->id_categorias }}">{{ $cat->nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div style="display: flex; flex-direction: column; flex-grow: 1;">
+                        <label style="font-weight: bold;">Públicas</label>
+                        <select name="publicas" id="select-publicas">
+                            <option value="Todas">Todas</option>
+                            <option value="Públicas">Públicas</option>
+                            <option value="No públicas">No públicas</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; flex-direction: column; flex-grow: 1;">
+                        <label style="font-weight: bold;">Mensaje Inicial</label>
+                        <select name="mensaje-inicial" id="select-mensaje-inicial">
+                            <option value="Todas">Todas</option>
+                            <option value="Muestran mensaje inicial">Muestran mensaje inicial</option>
+                            <option value="No muestran mensaje inicial">No muestran mensaje inicial</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; flex-direction: column; flex-grow: 1;">
+                        <label style="font-weight: bold;">Expediente</label>
+                        <select name="expediente" id="select-expediente">
+                            <option value="Todas">Todas</option>
+                            <option value="Llevan expediente">Llevan expediente</option>
+                            <option value="No llevan expediente">No llevan expediente</option>
+                        </select>
+                    </div>
                 </div>
             </div>
             <div style="background-color: #ededed; padding: 40px 10px;">
@@ -91,7 +111,12 @@
             $('#multinotas-table').DataTable({
                 "processing": true,
                 "serverSide": true,
-                "ajax": "{{ route('multinotas.index') }}",
+                "ajax": {
+                    "url": "{{ route('multinotas.index') }}",
+                    "data": function(d) {
+                        d.nombre = $('#nombre').val(); // Add input value to request
+                    }
+                },
                 "columns": [
                     { "data": "codigo" },
                     { "data": "nombre" },
@@ -130,6 +155,12 @@
                         "next": ">"
                     }
                 }
+            });
+
+            var table = $('#multinotas-table').DataTable();
+
+            $('#nombre').on('keyup change', function() {
+                table.draw();
             });
         });
     </script>
