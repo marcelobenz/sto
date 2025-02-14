@@ -15,6 +15,8 @@ use DB;
 class MultinotaController extends Controller
 {
     public function index(Request $request) {
+        $dataFiltrada = null;
+
         $data = TipoTramiteMultinota::distinct()
             ->where('baja_logica', 0)
             ->orderBy('nombre')
@@ -54,24 +56,39 @@ class MultinotaController extends Controller
             }
         }
 
-        if($request->has('nombre') && !empty($request->nombre)) {
-            $nombre = Str::lower($request->nombre);
+        if(($request->has('nombre') && !empty($request->nombre))
+        || $request->has('categoria') && !empty($request->categoria)) {
+            $dataFiltrada = $data;
 
-            $dataFiltrada = $data->filter(function ($d) use ($nombre) {
-                return str_contains(Str::lower($d->nombre), $nombre);
-            });
+            if($request->has('nombre') && !empty($request->nombre)) {
+                $nombre = Str::lower($request->nombre);
 
-            return DataTables::of($dataFiltrada)
-                    ->addIndexColumn()
-                    ->make(true);
-        } else {
-            if ($request->ajax()) {
-                return DataTables::of($data)
-                    ->addIndexColumn()
-                    ->make(true);
+                $dataFiltrada = $dataFiltrada->filter(function ($d) use ($nombre) {
+                    return str_contains(Str::lower($d->nombre), $nombre);
+                });
+            }
+
+            if($request->has('categoria') && !empty($request->categoria)) {
+                $idCategoria = intval($request->categoria);
+
+                $dataFiltrada = $dataFiltrada->filter(function ($d) use ($idCategoria) {
+                    return str_contains(Str::lower($d->id_categoria), $idCategoria);
+                });
             }
         }
 
+        if($dataFiltrada != null) {
+            return DataTables::of($dataFiltrada)
+                    ->addIndexColumn()
+                    ->make(true);
+        }
+        
+        if ($request->ajax()) {
+            return DataTables::of($data)
+                ->addIndexColumn()
+                ->make(true);
+        }
+        
         return view('multinotas.index', compact('categorias'));
     }
 }

@@ -39,10 +39,10 @@
                     </div>
                     <div style="display: flex; flex-direction: column; flex-grow: 1;">
                         <label style="font-weight: bold;">Categorías</label>
-                        <select name="categorias" id="select-categorias">
-                            <option value="null">Seleccione una categoría</option>
+                        <select id="categoria">
+                            <option value="">Seleccione una categoría</option>
                             @foreach($categorias as $cat)
-                                <option value="{{ $cat->id_categorias }}">{{ $cat->nombre }}</option>
+                                <option value="{{ $cat->id_categoria }}">{{ $cat->nombre }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -114,7 +114,8 @@
                 "ajax": {
                     "url": "{{ route('multinotas.index') }}",
                     "data": function(d) {
-                        d.nombre = $('#nombre').val(); // Add input value to request
+                        d.nombre = $('#nombre').val();
+                        d.categoria = $('#categoria').val();
                     }
                 },
                 "columns": [
@@ -159,7 +160,7 @@
 
             var table = $('#multinotas-table').DataTable();
 
-            $('#nombre').on('keyup change', function() {
+            $('#nombre, #categoria').on('keyup change', function() {
                 table.draw();
             });
         });
