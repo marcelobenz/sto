@@ -53,5 +53,23 @@ class Tramite extends Model
                     ->withPivot('fecha_alta')
                     ->as('relacion');
     }
+
+    public function estados()
+    {
+        //return $this->hasMany(TramiteEstadoTramite::class, 'id_tramite', 'id_tramite');
+        return $this->belongsTo(Estado::class, 'id_estado_tramite', 'id_estado_tramite');
+
+    }
+    
+    public function estadoActual()
+    {
+        return $this->hasOne(TramiteEstadoTramite::class, 'id_tramite', 'id_tramite')
+                    ->latestOfMany('fecha_sistema') // 📌 Ordena por la fecha más reciente
+                    ->with('estado');
+    }
+    
+    
+    
         
+
 }

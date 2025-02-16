@@ -4,9 +4,82 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use DB;
+use App\Services\OpenAIService;
+use App\Models\Tramite;
+use App\Models\Estado;
 
 class TramiteController extends Controller
 {
+
+    /*Definicion de funciones para prueba de openAI*/
+    protected $openAIService;
+
+    public function __construct(OpenAIService $openAIService) {
+        $this->openAIService = $openAIService;
+    }
+
+    public function consultar(Request $request) {
+        $pregunta = $request->input('pregunta', '');
+        \Log::info("❓ Pregunta recibida: {$pregunta}");
+    
+        // 🔍 Detectar si menciona un estado
+        $estadosValidos = ['Iniciado', 'En Análisis', 'En Aprobación', 'A Finalizar', 'Finalizado'];
+        foreach ($estadosValidos as $estado) {
+            if (stripos($pregunta, $estado) !== false) {
+                $url = url("/tramites?estado=" . urlencode($estado));
+                \Log::info("🔄 Redirigiendo a listado por estado:", ['url' => $url]);
+                return response()->json([
+                    'tipo' => 'redirect',
+                    'url' => $url
+                ]);
+            }
+        }
+    
+        // 🔍 Detectar si el usuario menciona un número de trámite
+        preg_match('/(\d+)/', $pregunta, $matches);
+        $codigoTramite = $matches[0] ?? null;
+        \Log::info("❓ ID Tramite recibida: {$codigoTramite}");
+    
+        if ($codigoTramite) {
+            \Log::info("🔎 Buscando trámite con ID: {$codigoTramite}");
+            $tramite = Tramite::with(['estadoActual.estado'])->where('id_tramite', $codigoTramite)->first();
+    
+            if ($tramite) {
+                $estadoNombre = optional($tramite->estadoActual->estado)->nombre; // ✅ Evita errores si no hay estado
+                if ($estadoNombre) {
+                    \Log::info("✅ Trámite encontrado. Estado: {$estadoNombre}");
+                    return response()->json([
+                        'tipo' => 'texto',
+                        'respuesta' => "El estado del trámite {$codigoTramite} es: {$estadoNombre}."
+                    ]);
+                }
+            }
+    
+            \Log::warning("❌ Trámite no encontrado o sin estado: {$codigoTramite}");
+            return response()->json([
+                'tipo' => 'texto',
+                'respuesta' => "No encontré el trámite *{$codigoTramite}*. Verifica el número e intenta nuevamente."
+            ]);
+        }
+    
+        // 🟢 Si no es una consulta de filtro ni de trámite, responder con OpenAI
+        \Log::info("💬 Enviando consulta a OpenAI");
+        $respuesta = $this->openAIService->consultarTramite($pregunta);
+    
+        return response()->json([
+            'tipo' => 'texto',
+            'respuesta' => $respuesta
+        ]);
+    }
+    
+    public function mostrarVistaConsulta()
+    {
+        return view('tramites.consulta');
+    }
+
+    /*Definicion de funciones para prueba de openAI*/
+
+
     /**
      * Muestra la vista principal.
      */
@@ -20,12 +93,29 @@ class TramiteController extends Controller
      */
     public function getTramitesData(Request $request)
     {
-        $columnIndex = $request->get('order')[0]['column']; // Índice de la columna a ordenar
-        $columnName = $request->get('columns')[$columnIndex]['data']; // Nombre de la columna
-        $columnSortOrder = $request->get('order')[0]['dir']; // Orden (asc o desc)
-        $searchValue = $request->get('search')['value']; // Valor de búsqueda
+        \Log::info('Entrando a getTramitesData');
+        \Log::info('Parámetros recibidos en la petición:', $request->all());
     
-        // Construir la consulta base
+        // Verificar si 'order' está presente en la petición
+        $order = $request->get('order') ?? [];
+        if (!empty($order) && isset($order[0]['column'])) {
+            $columnIndex = $order[0]['column'];
+            $columnName = $request->get('columns')[$columnIndex]['data'];
+            $columnSortOrder = $order[0]['dir'];
+        } else {
+            // Valores por defecto si no viene la ordenación
+            $columnIndex = 0;
+            $columnName = 'id_tramite';
+            $columnSortOrder = 'desc';
+        }
+    
+        // Verificar si 'search' está presente
+        $searchValue = $request->get('search')['value'] ?? null;
+    
+        // Verificar si 'estado' está presente
+        $estadoFiltro = strtolower($request->get('estado', ''));
+    
+        // Construcción de la consulta
         $query = DB::table('multinota as m')
             ->join('tramite as t', 'm.id_tramite', '=', 't.id_tramite')
             ->join('tipo_tramite_multinota as tt', 'm.id_tipo_tramite_multinota', '=', 'tt.id_tipo_tramite_multinota')
@@ -47,7 +137,12 @@ class TramiteController extends Controller
             )
             ->where('te.activo', 1);
     
-        // Filtro de búsqueda
+        // Aplicar filtro de estado si se recibe
+        if (!empty($estadoFiltro)) {
+            $query->whereRaw('LOWER(e.nombre) LIKE LOWER(?)', ["%{$estadoFiltro}%"]);
+        }
+    
+        // Aplicar búsqueda si se recibe
         if (!empty($searchValue)) {
             $query->where(function ($q) use ($searchValue) {
                 $q->where('m.id_tramite', 'like', "%{$searchValue}%")
@@ -60,25 +155,16 @@ class TramiteController extends Controller
             });
         }
     
-        // Ordenar por columna seleccionada
+        // Ordenar los resultados
         $query->orderBy($columnName, $columnSortOrder);
     
-        // Total de registros después del filtro
+        // Obtener total de registros después del filtro
         $totalFiltered = $query->count();
     
         // Paginación
-        $data = $query->skip($request->get('start'))->take($request->get('length'))->get();
-
-        // Reemplazar "A finalizar" con "Finalizado" en la columna estado
-        $data = collect($data)->map(function ($item) {
-            $item = (array) $item; // Convertir a array
-            if ($item['estado'] === "A Finalizar") {
-                $item['estado'] = "Finalizado";
-            }
-            return (object) $item; // Convertir de nuevo a objeto si es necesario
-        });
-        
-        // Total de registros sin filtro
+        $data = $query->skip($request->get('start', 0))->take($request->get('length', 10))->get();
+    
+        // Obtener total de registros sin filtro
         $totalData = DB::table('multinota as m')
             ->join('tramite_estado_tramite as te', 'm.id_tramite', '=', 'te.id_tramite')
             ->where('te.activo', 1)
@@ -86,12 +172,13 @@ class TramiteController extends Controller
     
         // Respuesta en formato JSON
         return response()->json([
-            "draw" => intval($request->get('draw')),
+            "draw" => intval($request->get('draw', 1)),
             "recordsTotal" => $totalData,
             "recordsFiltered" => $totalFiltered,
             "data" => $data
         ]);
     }
+        
 
     public function show($idTramite)
     {

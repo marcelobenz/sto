@@ -151,45 +151,55 @@
     <script src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script>
     <script>
         $(document).ready(function() {
+            let estadoFiltro = new URLSearchParams(window.location.search).get('estado') || '';
+
             var table = $('#tramitesTable').DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: {
                     url: "{{ route('tramites.data') }}",
-                    type: 'GET'
+                    type: 'GET',
+                    data: function (d) {
+                        d.draw = d.draw || 1; // 🔹 Asegura que siempre haya un draw
+                        d.start = d.start || 0; // 🔹 Controla la paginación
+                        d.length = d.length || 10; // 🔹 Controla cuántos registros se cargan
+                        d.order = d.order || [{column: 0, dir: "desc"}]; // 🔹 Orden por defecto
+                        d.columns = d.columns || [
+                            {data: 'id_tramite'},
+                            {data: 'cuenta'},
+                            {data: 'nombre_categoria'},
+                            {data: 'tipo_tramite'},
+                            {data: 'estado'},
+                            {data: 'fecha_alta'},
+                            {data: 'cuit_contribuyente'},
+                            {data: 'contribuyente'},
+                            {data: 'usuario_interno'}
+                        ];
+                        d.estado = new URLSearchParams(window.location.search).get('estado') || '';
+                        console.log("🔍 Parámetros enviados a AJAX:", d); // 🔹 DEBUG
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("❌ Error en AJAX:", error, xhr.responseText);
+                    }
                 },
-                autoWidth: false, // Desactiva el ajuste automático
+                autoWidth: false,
                 columnDefs: [
-                    { width: "5%", targets: 0, orderable: true },  // Habilitar orden en la columna ID
-                    { width: "10%", targets: 1, orderable: true }, // Cuenta
-                    { width: "20%", targets: 2, orderable: true }, // Categoría
-                    { width: "15%", targets: 3, orderable: true }, // Tipo
-                    { width: "10%", targets: 4, orderable: true }, // Estado
-                    { width: "10%", targets: 5, orderable: true }, // Fecha Alta
-                    { width: "10%", targets: 6, orderable: true }, // CUIT
-                    { width: "15%", targets: 7, orderable: true }, // Nombre
-                    { width: "15%", targets: 8, orderable: true }, // Operador
-                    { width: "10%", targets: 9, orderable: false }  // Desactivar orden en controles
+                    { width: "5%", targets: 0, orderable: true },
+                    { width: "10%", targets: 1, orderable: true },
+                    { width: "20%", targets: 2, orderable: true },
+                    { width: "15%", targets: 3, orderable: true },
+                    { width: "10%", targets: 4, orderable: true },
+                    { width: "10%", targets: 5, orderable: true },
+                    { width: "10%", targets: 6, orderable: true },
+                    { width: "15%", targets: 7, orderable: true },
+                    { width: "15%", targets: 8, orderable: true },
+                    { width: "10%", targets: 9, orderable: false }
                 ],
                 columns: [
                     { data: 'id_tramite', name: 'id_tramite' },
                     { data: 'cuenta', name: 'cuenta' },
-                    {
-                        data: 'nombre_categoria',
-                        name: 'nombre_categoria',
-                        render: function(data, type, row) {
-                            // Trunca el texto y añade el tooltip
-                            return `<span title="${data}" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; max-width: 150px;">${data}</span>`;
-                        }
-                    },
-                    {
-                        data: 'tipo_tramite',
-                        name: 'tipo_tramite',
-                        render: function(data, type, row) {
-                            // Trunca el texto y añade el tooltip
-                            return `<span title="${data}" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; max-width: 150px;">${data}</span>`;
-                        }
-                    },
+                    { data: 'nombre_categoria', name: 'nombre_categoria' },
+                    { data: 'tipo_tramite', name: 'tipo_tramite' },
                     { data: 'estado', name: 'estado' },
                     { data: 'fecha_alta', name: 'fecha_alta' },
                     { data: 'cuit_contribuyente', name: 'cuit_contribuyente' },
@@ -210,41 +220,46 @@
                         }
                     }
                 ],
-                order: [[0, 'desc']], // Orden predeterminado por la columna ID en forma ascendente
+                order: [[0, 'desc']],
                 pageLength: 10,
                 language: {
                     search: "Buscar:",
-                    paginate: {
-                        previous: "<",
-                        next: ">"
-                    },
+                    paginate: { previous: "<", next: ">" },
                     processing: "Cargando..."
                 }
             });
 
-            // Evento para el botón "Ver detalle"
-            $('#tramitesTable tbody').on('click', '.view-details', function() {
-                // Usa la instancia global `table`
-                var data = table.row($(this).parents('tr')).data();
-
-                // Construye el contenido del detalle
-                var details = `
-                    <strong>ID Trámite:</strong> ${data.id_tramite}<br>
-                    <strong>Cuenta:</strong> ${data.cuenta}<br>
-                    <strong>Categoría:</strong> ${data.nombre_categoria}<br>
-                    <strong>Tipo:</strong> ${data.tipo_tramite}<br>
-                    <strong>Estado:</strong> ${data.estado}<br>
-                    <strong>Fecha Alta:</strong> ${data.fecha_alta}<br>
-                    <strong>CUIT:</strong> ${data.cuit_contribuyente}<br>
-                    <strong>Nombre:</strong> ${data.contribuyente}<br>
-                    <strong>Operador:</strong> ${data.usuario_interno}
-                `;
-
-                // Muestra los detalles en el modal
-                $('#tramiteDetails').html(details);
-                $('#detailModal').modal('show');
-            });
+            // Si hay un filtro activo, mostrarlo en la barra de búsqueda
+            if (estadoFiltro) {
+                setTimeout(() => {
+                    table.search(estadoFiltro).draw();
+                }, 500);
+            }
         });
+
+        // Evento para el botón "Ver detalle"
+        $('#tramitesTable tbody').on('click', '.view-details', function() {
+            // Usa la instancia global `table`
+            var data = table.row($(this).parents('tr')).data();
+
+            // Construye el contenido del detalle
+            var details = `
+                <strong>ID Trámite:</strong> ${data.id_tramite}<br>
+                <strong>Cuenta:</strong> ${data.cuenta}<br>
+                <strong>Categoría:</strong> ${data.nombre_categoria}<br>
+                <strong>Tipo:</strong> ${data.tipo_tramite}<br>
+                <strong>Estado:</strong> ${data.estado}<br>
+                <strong>Fecha Alta:</strong> ${data.fecha_alta}<br>
+                <strong>CUIT:</strong> ${data.cuit_contribuyente}<br>
+                <strong>Nombre:</strong> ${data.contribuyente}<br>
+                <strong>Operador:</strong> ${data.usuario_interno}
+            `;
+
+            // Muestra los detalles en el modal
+            $('#tramiteDetails').html(details);
+            $('#detailModal').modal('show');
+        });
+
         // Añadir eventos para posicionar los botones de acción
         $('#tramitesTable tbody').on('mouseenter', 'tr', function(e) {
             var $actions = $(this).find('.actions');
