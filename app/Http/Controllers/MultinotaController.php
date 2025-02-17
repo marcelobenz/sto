@@ -57,7 +57,10 @@ class MultinotaController extends Controller
         }
 
         if(($request->has('nombre') && !empty($request->nombre))
-        || $request->has('categoria') && !empty($request->categoria)) {
+        || $request->has('categoria') && !empty($request->categoria)
+        || $request->has('publicas') && !empty($request->publicas)
+        || $request->has('mensajeInicial') && !empty($request->mensajeInicial)
+        || $request->has('expediente') && !empty($request->expediente)) {
             $dataFiltrada = $data;
 
             if($request->has('nombre') && !empty($request->nombre)) {
@@ -74,6 +77,42 @@ class MultinotaController extends Controller
                 $dataFiltrada = $dataFiltrada->filter(function ($d) use ($idCategoria) {
                     return str_contains(Str::lower($d->id_categoria), $idCategoria);
                 });
+            }
+
+            if($request->publicas != 'Todas') {
+                if($request->publicas == 'Públicas') {
+                    $dataFiltrada = $dataFiltrada->filter(function ($d) {
+                        return $d->publico == 1;
+                    });
+                } else {
+                    $dataFiltrada = $dataFiltrada->filter(function ($d) {
+                        return $d->publico == 0;
+                    });
+                }
+            }
+
+            if($request->mensajeInicial != 'Todas') {
+                if($request->mensajeInicial == 'Muestran mensaje inicial') {
+                    $dataFiltrada = $dataFiltrada->filter(function ($d) {
+                        return $d->muestra_mensaje == 1;
+                    });
+                } else {
+                    $dataFiltrada = $dataFiltrada->filter(function ($d) {
+                        return $d->muestra_mensaje == 0;
+                    });
+                }
+            }
+
+            if($request->expediente != 'Todas') {
+                if($request->expediente == 'Llevan expediente') {
+                    $dataFiltrada = $dataFiltrada->filter(function ($d) {
+                        return $d->lleva_expediente == 1;
+                    });
+                } else {
+                    $dataFiltrada = $dataFiltrada->filter(function ($d) {
+                        return $d->lleva_expediente == 0;
+                    });
+                }
             }
         }
 

@@ -48,7 +48,7 @@
                     </div>
                     <div style="display: flex; flex-direction: column; flex-grow: 1;">
                         <label style="font-weight: bold;">Públicas</label>
-                        <select name="publicas" id="select-publicas">
+                        <select id="publicas">
                             <option value="Todas">Todas</option>
                             <option value="Públicas">Públicas</option>
                             <option value="No públicas">No públicas</option>
@@ -56,7 +56,7 @@
                     </div>
                     <div style="display: flex; flex-direction: column; flex-grow: 1;">
                         <label style="font-weight: bold;">Mensaje Inicial</label>
-                        <select name="mensaje-inicial" id="select-mensaje-inicial">
+                        <select id="mensaje-inicial">
                             <option value="Todas">Todas</option>
                             <option value="Muestran mensaje inicial">Muestran mensaje inicial</option>
                             <option value="No muestran mensaje inicial">No muestran mensaje inicial</option>
@@ -64,7 +64,7 @@
                     </div>
                     <div style="display: flex; flex-direction: column; flex-grow: 1;">
                         <label style="font-weight: bold;">Expediente</label>
-                        <select name="expediente" id="select-expediente">
+                        <select id="expediente">
                             <option value="Todas">Todas</option>
                             <option value="Llevan expediente">Llevan expediente</option>
                             <option value="No llevan expediente">No llevan expediente</option>
@@ -116,6 +116,9 @@
                     "data": function(d) {
                         d.nombre = $('#nombre').val();
                         d.categoria = $('#categoria').val();
+                        d.publicas = $('#publicas').val();
+                        d.mensajeInicial = $('#mensaje-inicial').val();
+                        d.expediente = $('#expediente').val();
                     }
                 },
                 "columns": [
@@ -160,7 +163,7 @@
 
             var table = $('#multinotas-table').DataTable();
 
-            $('#nombre, #categoria').on('keyup change', function() {
+            $('#nombre, #categoria, #publicas, #mensaje-inicial, #expediente').on('keyup change', function() {
                 table.draw();
             });
         });
