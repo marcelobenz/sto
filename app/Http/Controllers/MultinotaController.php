@@ -6,6 +6,7 @@ use stdClass;
 use App\Models\TipoTramiteMultinota;
 use App\Models\Categoria;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -161,5 +162,41 @@ class MultinotaController extends Controller
         $categorias = Cache::get('CATEGORIAS');
         
         return view('multinotas.index', compact('categorias'));
+    }
+
+    public function view($id) {
+        $data = Cache::get('DATA_MULTINOTAS');
+        $categorias = Cache::get('CATEGORIAS');
+        $multinotaSelected = null;
+
+        foreach ($data as $d) {
+            if($d->id_tipo_tramite_multinota == $id) {
+                $multinotaSelected = $d;
+                Session::put('MULTINOTA_SELECTED', $multinotaSelected);
+            }
+        }
+
+        foreach ($categorias as $c) {
+            if($c->id_categoria == $multinotaSelected->id_categoria) {
+                $multinotaSelected->nombre_subcategoria = $c->nombre;
+                Session::put('MULTINOTA_SELECTED', $multinotaSelected);
+
+                if($c->id_padre != null) {
+                    $categoriaPadre = Categoria::where('id_categoria', $c->id_padre)
+                    ->get();
+
+                    if($categoriaPadre[0] != null) {
+                        $multinotaSelected->nombre_categoria_padre = $categoriaPadre[0]->nombre;
+                        Session::put('MULTINOTA_SELECTED', $multinotaSelected);
+                    }
+                }
+            }
+        }
+
+        return view('multinotas.view', compact('multinotaSelected'));
+    }
+
+    public function edit($id) {
+        return view('multinotas.edit');
     }
 }

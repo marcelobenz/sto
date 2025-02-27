@@ -146,9 +146,9 @@
                         "data": null,
                         "render": function(data, type, row) {
                             return `
-                                <button class="btn btn-sm btn-secondary" onclick="verMultinota(${row.id_seccion})">Ver</button>
-                                <button class="btn btn-sm btn-primary" onclick="editarMultinota(${row.id_seccion})">Editar</button>
-                                <button class="btn btn-sm btn-danger" onclick="confirmarEliminar(${row.id_seccion})">Eliminar</button>
+                                <button class="btn btn-sm btn-secondary" onclick="verMultinota(${row.id_tipo_tramite_multinota})">Ver</button>
+                                <button class="btn btn-sm btn-primary" onclick="editarMultinota(${row.id_tipo_tramite_multinota})">Editar</button>
+                                <button class="btn btn-sm btn-danger" onclick="confirmarEliminar(${row.id_tipo_tramite_multinota})">Eliminar</button>
                             `;
                         }
                     }
@@ -167,5 +167,13 @@
                 table.draw();
             });
         });
+
+        function verMultinota(id) {
+            window.location.href = `/multinotas/${id}/view`;
+        }
+
+        function editarMultinota(id) {
+            window.location.href = `/multinotas/${id}/edit`;
+        }
     </script>
 @endsection
