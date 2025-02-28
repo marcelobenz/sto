@@ -7,6 +7,9 @@ use App\Models\TipoTramiteMultinota;
 use App\Models\Categoria;
 use App\Models\MensajeInicial;
 use App\Models\TipoTramiteMensajeInicial;
+use App\Models\MultinotaSeccion;
+use App\Models\SeccionMultinota;
+use App\Models\Campo;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Cache;
@@ -209,7 +212,31 @@ class MultinotaController extends Controller
             Session::put('MULTINOTA_SELECTED', $multinotaSelected);
         }
 
-        return view('multinotas.view', compact('multinotaSelected'));
+        //Se recuperan las secciones de la multinota
+        $secciones = SeccionMultinota::join('multinota_seccion as ms', 'seccion.id_seccion', '=', 'ms.id_seccion')
+        ->where('ms.id_tipo_tramite_multinota', $id)
+        ->orderBy('ms.orden')
+        ->select('seccion.*')
+        ->get();
+
+        // Array de secciones que se enviaran a la vista
+        $seccionesMultinota = [];
+
+        foreach ($secciones as $s) {
+            $campos = Campo::where('id_seccion', $s->id_seccion)
+            ->orderBy('orden')
+            ->get();
+
+            $seccion = new \stdClass();
+            $seccion->id_seccion = $s->id_seccion;
+            $seccion->temporal = $s->temporal;
+            $seccion->titulo = $s->titulo;
+            $seccion->campos = $campos;
+
+            $seccionesMultinota[] = $seccion;
+        }
+
+        return view('multinotas.view', compact('multinotaSelected', 'seccionesMultinota'));
     }
 
     public function edit($id) {

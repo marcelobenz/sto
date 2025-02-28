@@ -100,6 +100,22 @@
                             </div>
                         </div>
                     </div>
+                    <div class="card-body">
+                        <div style="display: flex; width: 100%; border-top: 2px solid gray;">
+                            <div style="display: flex; flex-direction: column; width: 100%; margin-top: 10px; gap: 10px;">
+                                @foreach ($seccionesMultinota as $s)
+                                    @if (count($s->campos) !== 0)
+                                        <div style="background-color: #ededed; border: 1px solid black; border-radius: 10px; padding: 10px;">
+                                            <h3>{{ $s->titulo }}</h3>
+                                            <div style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 0.75rem; margin: 1rem;">
+                                                @include('partials.seccion-campos', ['campos' => $s->campos])
+                                            </div>
+                                        </div>
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
