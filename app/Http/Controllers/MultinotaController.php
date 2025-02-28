@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use stdClass;
 use App\Models\TipoTramiteMultinota;
 use App\Models\Categoria;
+use App\Models\MensajeInicial;
+use App\Models\TipoTramiteMensajeInicial;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Cache;
@@ -176,6 +178,7 @@ class MultinotaController extends Controller
             }
         }
 
+        //Se recuperan nombres de categoría y subcategoría de la multinota
         foreach ($categorias as $c) {
             if($c->id_categoria == $multinotaSelected->id_categoria) {
                 $multinotaSelected->nombre_subcategoria = $c->nombre;
@@ -191,6 +194,19 @@ class MultinotaController extends Controller
                     }
                 }
             }
+        }
+
+        //Se recupera el mensaje inicial de la multinota
+        if(Session::get('MULTINOTA_SELECTED')->muestra_mensaje == 1) {
+            $result = MensajeInicial::join('tipo_tramite_mensaje_inicial as ttmi', 'mensaje_inicial.id_mensaje_inicial', '=', 'ttmi.id_mensaje_inicial')
+            ->where('ttmi.id_tipo_tramite_multinota', $id)
+            ->orderBy('mensaje_inicial.id_mensaje_inicial', 'desc')
+            ->limit(1)
+            ->select('mensaje_inicial.*')
+            ->first();
+
+            $multinotaSelected->mensaje_inicial = $result->mensaje_inicial;
+            Session::put('MULTINOTA_SELECTED', $multinotaSelected);
         }
 
         return view('multinotas.view', compact('multinotaSelected'));

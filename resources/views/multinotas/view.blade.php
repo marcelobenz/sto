@@ -23,7 +23,6 @@
                             </svg>
                         </a>
                     </div>
-
                     <div class="card-body">
                         <h3>Detalle</h3>
                         <div style="display: flex; width: 100%; border-top: 2px solid gray;">
@@ -90,6 +89,14 @@
                                         @endif
                                     </label>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h3>Mensaje</h3>
+                        <div style="display: flex; width: 100%; border-top: 2px solid gray;">
+                            <div style="width: 100%; margin-top: 10px;">
+                                {!! $multinotaSelected->mensaje_inicial !!}
                             </div>
                         </div>
                     </div>
