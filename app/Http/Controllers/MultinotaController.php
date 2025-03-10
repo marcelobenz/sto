@@ -257,6 +257,16 @@ class MultinotaController extends Controller
             $seccionesMultinota[] = $seccion;
         }
 
+        Session::put('SECCIONES', $seccionesMultinota);
+
         return array($multinotaSelected, $seccionesMultinota);
+    }
+
+    public function refresh() {
+        $secciones = Session::get('SECCIONES');
+
+        return response()->json([
+            'updatedSecciones' => $secciones,
+        ]);
     }
 }

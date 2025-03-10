@@ -73,6 +73,29 @@
                             <textarea id="myeditorinstance">{{ $mensajeInicial ?? '' }}</textarea>
                         </form>
                     </div>
+                    <div class="card-body" style="display: flex; flex-direction: column;">
+                        <label>Secciones precargadas</label>
+                        <select style="width: 30%;">
+                            <option value="">Seleccione...</option>
+                        </select>
+                        <div style="display: flex; width: 100%; padding-top: 20px;">
+                            <div class="secciones-container" style="display: flex; flex-direction: column; width: 100%; gap: 10px;">
+                                @foreach ($seccionesMultinota as $s)
+                                    @if (count($s->campos) !== 0)
+                                        <div class="seccion" draggable="true" data-id="{{ $s->id_seccion }}" 
+                                             ondragstart="handleDragSeccionesStart(event)" 
+                                             ondragover="handleDragSeccionesOver(event)" 
+                                             ondrop="handleDropSecciones(event)">
+                                            <h3>{{ $s->titulo }}</h3>
+                                            <div style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 0.75rem; margin: 1rem;">
+                                                @include('partials.seccion-campos', ['campos' => $s->campos])
+                                            </div>
+                                        </div>
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -82,6 +105,100 @@
 @section('scripting')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    
+    let draggedRow = null;
+
+    function handleDragSeccionesStart(event) {
+        draggedRow = event.target.closest('.seccion');
+        event.dataTransfer.effectAllowed = 'move';
+    }
+
+    function handleDragSeccionesOver(event) {
+        event.preventDefault();
+
+        const container = document.querySelector('.secciones-container');
+        const targetRow = event.target.closest('.seccion');
+
+        if (!targetRow || targetRow === draggedRow) return;
+
+        const rows = Array.from(container.children);
+
+        // Get bounding rectangles to check cursor position
+        const targetRect = targetRow.getBoundingClientRect();
+        const offset = event.clientY - targetRect.top;
+
+        if (offset < targetRect.height / 2) {
+            targetRow.before(draggedRow); // Move up (including to the first position)
+        } else {
+            targetRow.after(draggedRow); // Move down
+        }
+    }
+
+    function handleDropSecciones(event) {
+        event.preventDefault();
+
+        const container = document.querySelector('.secciones-container');
+        const rows = Array.from(container.children);
+
+        // Optional: Sync order to array or server if needed
+        arraySecciones = rows.map(row => row.dataset.id);
+        console.log('Updated array:', arraySecciones);
+
+        draggedRow = null; // Reset
+    }
+
+    // Ensure empty spaces allow drops (for dragging below or above all elements)
+    function handleDragEnter(event) {
+        event.preventDefault();
+        const container = document.querySelector('.secciones-container');
+        const isEmptySpace = !event.target.closest('.seccion');
+
+        if (isEmptySpace && draggedRow) {
+            const rows = Array.from(container.children);
+
+            // Check if dragging above the first element
+            if (event.clientY < rows[0].getBoundingClientRect().top) {
+                container.prepend(draggedRow); // Move to the first position
+            } else {
+                container.appendChild(draggedRow); // Move to the last position
+            }
+        }
+    }
+
+    // Attach event listeners
+    document.querySelectorAll('.seccion').forEach(seccion => {
+        seccion.addEventListener('dragstart', handleDragSeccionesStart);
+        seccion.addEventListener('dragover', handleDragSeccionesOver);
+        seccion.addEventListener('drop', handleDropSecciones);
+    });
+
+    document.querySelector('.secciones-container').addEventListener('dragover', handleDragEnter);
 </script>
+<style>
+    .secciones-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+        border: 2px dashed #ccc;
+        padding: 10px;
+    }
+
+    .seccion {
+        background-color: #ededed;
+        border: 1px solid black;
+        border-radius: 10px;
+        padding: 10px;
+        cursor: grab;
+        transition: all 0.2s ease;
+    }
+
+    .seccion:active {
+        cursor: grabbing;
+        opacity: 0.7;
+    }
+
+    .seccion.dragging {
+        opacity: 0.5;
+    }
+</style>
 @endsection

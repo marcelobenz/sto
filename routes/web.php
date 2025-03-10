@@ -63,6 +63,7 @@ Route::put('/secciones-multinota/{id}/desactivar', [SeccionesMultinotaController
 Route::get('/multinotas', [MultinotaController::class, 'index'])->name('multinotas.index');
 Route::get('/multinotas/{id}/view', [MultinotaController::class, 'view'])->name('multinotas.view');
 Route::get('/multinotas/{id}/edit', [MultinotaController::class, 'edit'])->name('multinotas.edit');
+Route::get('/multinotas/refresh', [MultinotaController::class, 'refresh'])->name('multinotas.refresh');
 
 Route::get('usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
 Route::get('usuarios/create', [UsuarioController::class, 'create'])->name('usuarios.create');
