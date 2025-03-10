@@ -30,6 +30,24 @@ class AdministracionWorkflowController extends Controller
     
     
 
+    public function crear($id)
+    {
+        $tipoTramite = TipoTramiteMultinota::findOrFail($id);
+
+        // Estados por defecto
+        $estados = [
+            ['actual' => 'En Creación', 'nuevo' => 'En Creación'],
+            ['actual' => 'Iniciado', 'nuevo' => 'Iniciado'],
+            ['actual' => 'En Análisis', 'nuevo' => 'En Análisis'],
+            ['actual' => 'En Aprobación', 'nuevo' => 'En Aprobación'],
+            ['actual' => 'A Finalizar', 'nuevo' => 'A Finalizar'],
+        ];
+
+        return view('estados.crear', compact('tipoTramite', 'estados'));
+
+    }
+
+
     public function edit($id)
     {
         $tramite = TipoTramiteMultinota::findOrFail($id);

@@ -39,35 +39,34 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        $(document).ready(function() {
-            $('#tramitesTable').DataTable({
-                "processing": true,
-                "serverSide": true,
-                "ajax": "{{ route('estados.index') }}",
-                "columns": [
-                    { "data": "categoria" },  
-                    { "data": "nombre_tipo_tramite" },
-                    {
-                        "data": null,
-                        "render": function(data, type, row) {
-                            return `
-                                <button class="btn btn-sm btn-primary fa fa-edit" onclick="editarCategoria(${row.id_categoria})" title="Editar Workflow"></button>
-                                <button class="btn btn-sm btn-danger fa fa-trash" onclick="confirmarEliminar(${row.id_categoria})" title="Eliminar"></button>
-                            `;
-                        }
-                    }
-                ],
-                "language": {
-                    "paginate": {
-                        "previous": "<",
-                        "next": ">"
+    $(document).ready(function() {
+        $('#tramitesTable').DataTable({
+            "processing": true,
+            "serverSide": true,
+            "ajax": "{{ route('estados.index') }}",
+            "columns": [
+                { "data": "categoria" },  
+                { "data": "nombre_tipo_tramite" },
+                {
+                    "data": null,
+                    "render": function(data, type, row) {
+                        return `
+                            <button class="btn btn-sm btn-primary fa fa-edit" 
+                            onclick="window.location.href='/workflow/${row.id_tipo_tramite_multinota}'">
+                            </button>
+                            <button class="btn btn-sm btn-danger fa fa-trash" onclick="confirmarEliminar(${row.id_tipo_tramite_multinota})" title="Eliminar"></button>
+                        `;
                     }
                 }
-            });
+            ],
+            "language": {
+                "paginate": {
+                    "previous": "<",
+                    "next": ">"
+                }
+            }
         });
+    });
+</script>
 
-        function editarTramite(id) {
-            window.location.href = `/tramites/${id}/edit`;
-        }
-    </script>
 @endsection
