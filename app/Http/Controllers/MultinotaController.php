@@ -170,6 +170,26 @@ class MultinotaController extends Controller
     }
 
     public function view($id) {
+        $array = MultinotaController::buildMultinotaSelected($id);
+
+        $multinotaSelected = $array[0];
+        $seccionesMultinota = $array[1];
+
+        return view('multinotas.view', compact('multinotaSelected', 'seccionesMultinota'));
+    }
+
+    public function edit($id) {
+        $categorias = Cache::get('CATEGORIAS');
+
+        $array = MultinotaController::buildMultinotaSelected($id);
+
+        $multinotaSelected = $array[0];
+        $seccionesMultinota = $array[1];
+
+        return view('multinotas.edit', compact('multinotaSelected', 'seccionesMultinota', 'categorias'));
+    }
+
+    private static function buildMultinotaSelected($id) {
         $data = Cache::get('DATA_MULTINOTAS');
         $categorias = Cache::get('CATEGORIAS');
         $multinotaSelected = null;
@@ -236,10 +256,6 @@ class MultinotaController extends Controller
             $seccionesMultinota[] = $seccion;
         }
 
-        return view('multinotas.view', compact('multinotaSelected', 'seccionesMultinota'));
-    }
-
-    public function edit($id) {
-        return view('multinotas.edit');
+        return array($multinotaSelected, $seccionesMultinota);
     }
 }
