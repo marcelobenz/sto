@@ -67,6 +67,12 @@
                             </div>
                         </div>
                     </div>
+                    <div class="card-body">
+                        <form method="post">
+                        @csrf
+                            <textarea id="myeditorinstance">{{ $mensajeInicial ?? '' }}</textarea>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

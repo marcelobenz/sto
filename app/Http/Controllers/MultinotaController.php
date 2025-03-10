@@ -185,8 +185,9 @@ class MultinotaController extends Controller
 
         $multinotaSelected = $array[0];
         $seccionesMultinota = $array[1];
+        $mensajeInicial = $multinotaSelected->mensaje_inicial;
 
-        return view('multinotas.edit', compact('multinotaSelected', 'seccionesMultinota', 'categorias'));
+        return view('multinotas.edit', compact('multinotaSelected', 'seccionesMultinota', 'mensajeInicial', 'categorias'));
     }
 
     private static function buildMultinotaSelected($id) {
