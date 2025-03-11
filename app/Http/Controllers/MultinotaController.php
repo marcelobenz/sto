@@ -173,9 +173,9 @@ class MultinotaController extends Controller
         $array = MultinotaController::buildMultinotaSelected($id);
 
         $multinotaSelected = $array[0];
-        $seccionesMultinota = $array[1];
+        $seccionesAsociadas = $array[1];
 
-        return view('multinotas.view', compact('multinotaSelected', 'seccionesMultinota'));
+        return view('multinotas.view', compact('multinotaSelected', 'seccionesAsociadas'));
     }
 
     public function edit($id) {
@@ -184,10 +184,11 @@ class MultinotaController extends Controller
         $array = MultinotaController::buildMultinotaSelected($id);
 
         $multinotaSelected = $array[0];
-        $seccionesMultinota = $array[1];
+        $seccionesAsociadas = $array[1];
+        $todasLasSecciones = $array[2];
         $mensajeInicial = $multinotaSelected->mensaje_inicial;
 
-        return view('multinotas.edit', compact('multinotaSelected', 'seccionesMultinota', 'mensajeInicial', 'categorias'));
+        return view('multinotas.edit', compact('multinotaSelected', 'seccionesAsociadas', 'todasLasSecciones', 'mensajeInicial', 'categorias'));
     }
 
     private static function buildMultinotaSelected($id) {
@@ -241,7 +242,7 @@ class MultinotaController extends Controller
         ->get();
 
         // Array de secciones que se enviaran a la vista
-        $seccionesMultinota = [];
+        $seccionesAsociadas = [];
 
         foreach ($secciones as $s) {
             $campos = Campo::where('id_seccion', $s->id_seccion)
@@ -254,19 +255,75 @@ class MultinotaController extends Controller
             $seccion->titulo = $s->titulo;
             $seccion->campos = $campos;
 
-            $seccionesMultinota[] = $seccion;
+            $seccionesAsociadas[] = $seccion;
         }
 
-        Session::put('SECCIONES', $seccionesMultinota);
+        Session::put('SECCIONES_ASOCIADAS', $seccionesAsociadas);
 
-        return array($multinotaSelected, $seccionesMultinota);
+        //Se recuperan todas las secciones multinota
+        $secciones = SeccionMultinota::select('seccion.*')
+            ->where('seccion.activo', true)
+            ->where('seccion.temporal', false)
+            ->get();
+
+        // Array de todas las secciones que se enviaran a la vista
+        $todasLasSecciones = [];
+
+        foreach ($secciones as $s) {
+            $campos = Campo::where('id_seccion', $s->id_seccion)
+            ->orderBy('orden')
+            ->get();
+
+            $seccion = new \stdClass();
+            $seccion->id_seccion = $s->id_seccion;
+            $seccion->temporal = $s->temporal;
+            $seccion->titulo = $s->titulo;
+            $seccion->campos = $campos;
+
+            $todasLasSecciones[] = $seccion;
+        }
+
+        Session::put('TODAS_LAS_SECCIONES', $todasLasSecciones);
+
+        return array($multinotaSelected, $seccionesAsociadas, $todasLasSecciones);
     }
 
     public function refresh() {
-        $secciones = Session::get('SECCIONES');
+        $seccionesAsociadas = Session::get('SECCIONES_ASOCIADAS');
 
         return response()->json([
-            'updatedSecciones' => $secciones,
+            'updatedSecciones' => $seccionesAsociadas,
         ]);
+    }
+
+    public function agregarSeccion(Request $request) {
+        $id = $request->post('id');
+        $seccionesAsociadas = Session::get('SECCIONES_ASOCIADAS');
+        $todasLasSecciones = Session::get('TODAS_LAS_SECCIONES');
+
+        $campos = Campo::where('id_seccion', $id)
+            ->orderBy('orden')
+            ->get();
+
+        $s = SeccionMultinota::where('id_seccion', $id)
+            ->get();
+
+        if ($s) {
+            $seccion = new \stdClass();
+            $seccion->id_seccion = $s[0]->id_seccion;
+            $seccion->temporal = $s[0]->temporal;
+            $seccion->titulo = $s[0]->titulo;
+            $seccion->campos = $campos;
+
+            $seccionesAsociadas[] = $seccion; 
+
+            Session::put('SECCIONES_ASOCIADAS', $seccionesAsociadas);
+        }
+
+        // Render the partial view with updated data
+        $html = view('partials.secciones-container', compact('seccionesAsociadas', 'todasLasSecciones'))->render();
+
+        // Return JSON response with rendered HTML
+        return response()->json(['html' => $html]);
     }
 }

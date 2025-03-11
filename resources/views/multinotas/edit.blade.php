@@ -38,7 +38,11 @@
                                     <select id="subcategorias">
                                         <option value="">Seleccione...</option>
                                         @foreach($categorias as $cat)
-                                            <option value="{{ $cat->id_categoria }}">{{ $cat->nombre }}</option>
+                                            @if($cat->id_categoria === $multinotaSelected->id_categoria)
+                                                <option selected value="{{ $cat->id_categoria }}">{{ $cat->nombre }}</option>
+                                            @else
+                                                <option value="{{ $cat->id_categoria }}">{{ $cat->nombre }}</option>
+                                            @endif
                                         @endforeach
                                     </select>
                                 </div>
@@ -73,28 +77,9 @@
                             <textarea id="myeditorinstance">{{ $mensajeInicial ?? '' }}</textarea>
                         </form>
                     </div>
-                    <div class="card-body" style="display: flex; flex-direction: column;">
+                    <div id="secciones-container" class="card-body" style="display: flex; flex-direction: column;">
                         <label>Secciones precargadas</label>
-                        <select style="width: 30%;">
-                            <option value="">Seleccione...</option>
-                        </select>
-                        <div style="display: flex; width: 100%; padding-top: 20px;">
-                            <div class="secciones-container" style="display: flex; flex-direction: column; width: 100%; gap: 10px;">
-                                @foreach ($seccionesMultinota as $s)
-                                    @if (count($s->campos) !== 0)
-                                        <div class="seccion" draggable="true" data-id="{{ $s->id_seccion }}" 
-                                             ondragstart="handleDragSeccionesStart(event)" 
-                                             ondragover="handleDragSeccionesOver(event)" 
-                                             ondrop="handleDropSecciones(event)">
-                                            <h3>{{ $s->titulo }}</h3>
-                                            <div style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 0.75rem; margin: 1rem;">
-                                                @include('partials.seccion-campos', ['campos' => $s->campos])
-                                            </div>
-                                        </div>
-                                    @endif
-                                @endforeach
-                            </div>
-                        </div>
+                        @include('partials.secciones-container', ['seccionesAsociadas' => $seccionesAsociadas, 'todasLasSecciones' => $todasLasSecciones])
                     </div>
                 </div>
             </div>
@@ -105,6 +90,27 @@
 @section('scripting')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+    $(document).ready(function() {
+        $('#secciones-container').on('click', '#boton-agregar-seccion', function(event) {
+            event.preventDefault();
+            const idSeccionSeleccionada = document.getElementById('secciones-precargadas').value;
+
+            fetch("{{ route('multinotas.agregarSeccion') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ id: idSeccionSeleccionada })
+            })
+            .then(response => response.json())
+            .then(data => {
+                $('#secciones-container').html(data.html);
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+
     let draggedRow = null;
 
     function handleDragSeccionesStart(event) {
