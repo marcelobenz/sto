@@ -103,7 +103,7 @@
                     <div class="card-body">
                         <div style="display: flex; width: 100%; border-top: 2px solid gray;">
                             <div style="display: flex; flex-direction: column; width: 100%; margin-top: 10px; gap: 10px;">
-                                @foreach ($seccionesMultinota as $s)
+                                @foreach ($seccionesAsociadas as $s)
                                     @if (count($s->campos) !== 0)
                                         <div style="background-color: #ededed; border: 1px solid black; border-radius: 10px; padding: 10px;">
                                             <h3>{{ $s->titulo }}</h3>
