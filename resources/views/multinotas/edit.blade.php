@@ -23,7 +23,7 @@
                             </svg>
                         </button>
                     </div>
-                    <div class="card-body">
+                    <div id="seccion-datos-principales" class="card-body">
                         <div style="display: flex; flex-direction: column; gap: 30px;">
                             <div style="display: flex; width: 100%; justify-content: space-between; gap: 50px;">
                                 <div style="display: flex; flex-direction: column; flex-grow: 1;">
@@ -71,22 +71,25 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card-body">
+                    <div id="seccion-mensaje-inicial" class="card-body">
                         <form method="post">
                         @csrf
                             <textarea id="myeditorinstance">{{ $mensajeInicial ?? '' }}</textarea>
                         </form>
                     </div>
-                    <div id="secciones-container" class="card-body" style="display: flex; flex-direction: column;">
+                    <div id="secciones-container" class="card-body flex flex-col">
                         <label>Secciones precargadas</label>
                         @include('partials.secciones-container', ['seccionesAsociadas' => $seccionesAsociadas, 'todasLasSecciones' => $todasLasSecciones])
                     </div>
-                    <div style="display: flex; justify-content: flex-end;">
+                    <div id="seccion-boton-previsualizar" class="flex justify-flex-end">
                         <button id="boton-previsualizar-cambios" class="btn btn-secondary">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" viewBox="0 0 448 512">
                                 <path d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.8 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z"/>
                             </svg>
                         </button>
+                    </div>
+                    <div id="detalle-multinota" class="hidden">
+                        @include('partials.detalle-multinota', ['seccionesAsociadas' => $seccionesAsociadas, 'multinotaSelected' => $multinotaSelected])
                     </div>
                 </div>
             </div>
@@ -138,6 +141,43 @@
             })
             .catch(error => console.error('Error removing section:', error));
         });
+
+        $('#boton-previsualizar-cambios').on('click', function() {
+            fetch("{{ route('multinotas.previsualizarCambiosMultinota') }}", {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                $('#detalle-multinota').html(data.html);
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+
+    document.getElementById('boton-previsualizar-cambios').addEventListener('click', function() {
+        const div1 = document.getElementById('seccion-datos-principales');
+        const div2 = document.getElementById('seccion-mensaje-inicial');
+        const div3 = document.getElementById('secciones-container');
+        const div4 = document.getElementById('seccion-boton-previsualizar');
+        const divDetalle = document.getElementById('detalle-multinota');
+
+        if (div1.classList.contains('hidden')) {
+            div1.classList.remove('hidden');
+            div2.classList.remove('hidden');
+            div3.classList.remove('hidden');
+            div4.classList.remove('hidden');
+            divDetalle.classList.add('hidden');
+        } else {
+            div1.classList.add('hidden');
+            div2.classList.add('hidden');
+            div3.classList.add('hidden');
+            div4.classList.add('hidden');
+            divDetalle.classList.remove('hidden');
+        }
     });
 
     var salirButton = document.getElementById("salir-editar-multinota");
@@ -285,6 +325,22 @@
 
     #boton-previsualizar-cambios {
         margin: 0 1.25rem 1.25rem 0;
+    }
+
+    .flex {
+        display: flex;
+    }
+
+    .flex-col {
+        flex-direction: column;
+    }
+
+    .justify-flex-end {
+        justify-content: flex-end;
+    }
+
+    .hidden {
+        display: none;
     }
 </style>
 @endsection

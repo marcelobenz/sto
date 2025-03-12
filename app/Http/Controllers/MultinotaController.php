@@ -367,4 +367,15 @@ class MultinotaController extends Controller
         // Return JSON response with rendered HTML
         return response()->json(['html' => $html]);
     }
+
+    public function previsualizarCambiosMultinota() {
+        $multinotaSelected = Session::get('MULTINOTA_SELECTED');
+        $seccionesAsociadas = Session::get('SECCIONES_ASOCIADAS');
+
+        // Render the partial view with updated data
+        $html = view('partials.detalle-multinota', compact('seccionesAsociadas', 'multinotaSelected'))->render();
+
+        // Return JSON response with rendered HTML
+        return response()->json(['html' => $html]);
+    }
 }
