@@ -326,4 +326,45 @@ class MultinotaController extends Controller
         // Return JSON response with rendered HTML
         return response()->json(['html' => $html]);
     }
+
+    public function quitarSeccion(Request $request) {
+        $id = $request->post('id');
+        $seccionesAsociadas = Session::get('SECCIONES_ASOCIADAS');
+        $todasLasSecciones = Session::get('TODAS_LAS_SECCIONES');
+
+        // Quitar seccion
+        $nuevasSeccionesAsociadas = array_filter($seccionesAsociadas, function ($s) use ($id) {
+            return $s->id_seccion !== $id; // Se quita elemento con id_seccion seleccionado
+        });
+
+        Session::put('SECCIONES_ASOCIADAS', $nuevasSeccionesAsociadas);
+
+        $seccionesAsociadas = $nuevasSeccionesAsociadas;
+
+        // Agregar seccion a 'todasLasSecciones' (disponibles)
+        $campos = Campo::where('id_seccion', $id)
+            ->orderBy('orden')
+            ->get();
+
+        $s = SeccionMultinota::where('id_seccion', $id)
+            ->get();
+
+        if ($s) {
+            $seccion = new \stdClass();
+            $seccion->id_seccion = $s[0]->id_seccion;
+            $seccion->temporal = $s[0]->temporal;
+            $seccion->titulo = $s[0]->titulo;
+            $seccion->campos = $campos;
+
+            $todasLasSecciones[] = $seccion; 
+
+            Session::put('TODAS_LAS_SECCIONES', $todasLasSecciones);
+        }
+
+        // Render the partial view with updated data
+        $html = view('partials.secciones-container', compact('seccionesAsociadas', 'todasLasSecciones'))->render();
+
+        // Return JSON response with rendered HTML
+        return response()->json(['html' => $html]);
+    }
 }

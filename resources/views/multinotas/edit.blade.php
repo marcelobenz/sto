@@ -91,9 +91,10 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
+        // Add section handler
         $('#secciones-container').on('click', '#boton-agregar-seccion', function(event) {
             event.preventDefault();
-            const idSeccionSeleccionada = document.getElementById('secciones-precargadas').value;
+            const idSeccionSeleccionada = $('#secciones-precargadas').val();
 
             fetch("{{ route('multinotas.agregarSeccion') }}", {
                 method: 'POST',
@@ -107,9 +108,30 @@
             .then(data => {
                 $('#secciones-container').html(data.html);
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => console.error('Error adding section:', error));
         });
-    });
+
+        // Remove section handler
+        $('#secciones-container').on('click', '.boton-quitar-seccion', function(event) {
+            event.preventDefault();
+            const idSeccion = $(this).closest('.seccion').data('id');
+
+            fetch("{{ route('multinotas.quitarSeccion') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ id: idSeccion })
+            })
+            .then(response => response.json())
+            .then(data => {
+                $('#secciones-container').html(data.html);
+            })
+            .catch(error => console.error('Error removing section:', error));
+        });
+});
+
 
     let draggedRow = null;
 
@@ -196,6 +218,8 @@
         padding: 10px;
         cursor: grab;
         transition: all 0.2s ease;
+        position: relative;
+        display: inline-block;
     }
 
     .seccion:active {
@@ -205,6 +229,37 @@
 
     .seccion.dragging {
         opacity: 0.5;
+    }
+
+    .seccion:hover {
+        background-color: #b9b7b7;
+    }
+
+    /* Hidden button by default */
+    .boton-quitar-seccion {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background-color: #ff4d4d;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 5px 10px;
+        cursor: pointer;
+
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    /* Show button on hover */
+    .seccion:hover .boton-quitar-seccion {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .boton-quitar-seccion:hover {
+        background-color: #e63131;
     }
 </style>
 @endsection
