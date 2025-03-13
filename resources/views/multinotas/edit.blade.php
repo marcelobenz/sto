@@ -91,6 +91,15 @@
                     <div id="detalle-multinota" class="hidden">
                         @include('partials.detalle-multinota', ['seccionesAsociadas' => $seccionesAsociadas, 'multinotaSelected' => $multinotaSelected])
                     </div>
+                    <div id="seccion-boton-volver-editar" class="hidden">
+                        <div class="flex justify-flex-start">
+                            <button id="boton-volver-editar" class="btn btn-secondary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" viewBox="0 0 448 512">
+                                    <path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -158,26 +167,29 @@
         });
     });
 
-    document.getElementById('boton-previsualizar-cambios').addEventListener('click', function() {
-        const div1 = document.getElementById('seccion-datos-principales');
-        const div2 = document.getElementById('seccion-mensaje-inicial');
-        const div3 = document.getElementById('secciones-container');
-        const div4 = document.getElementById('seccion-boton-previsualizar');
-        const divDetalle = document.getElementById('detalle-multinota');
+    const div1 = document.getElementById('seccion-datos-principales');
+    const div2 = document.getElementById('seccion-mensaje-inicial');
+    const div3 = document.getElementById('secciones-container');
+    const div4 = document.getElementById('seccion-boton-previsualizar');
+    const divBotonVolver = document.getElementById('seccion-boton-volver-editar');
+    const divDetalle = document.getElementById('detalle-multinota');
 
-        if (div1.classList.contains('hidden')) {
-            div1.classList.remove('hidden');
-            div2.classList.remove('hidden');
-            div3.classList.remove('hidden');
-            div4.classList.remove('hidden');
-            divDetalle.classList.add('hidden');
-        } else {
-            div1.classList.add('hidden');
-            div2.classList.add('hidden');
-            div3.classList.add('hidden');
-            div4.classList.add('hidden');
-            divDetalle.classList.remove('hidden');
-        }
+    document.getElementById('boton-previsualizar-cambios').addEventListener('click', function() {
+        div1.classList.add('hidden');
+        div2.classList.add('hidden');
+        div3.classList.add('hidden');
+        div4.classList.add('hidden');
+        divBotonVolver.classList.remove('hidden');
+        divDetalle.classList.remove('hidden');
+    });
+
+    document.getElementById('boton-volver-editar').addEventListener('click', function() {
+        div1.classList.remove('hidden');
+        div2.classList.remove('hidden');
+        div3.classList.remove('hidden');
+        div4.classList.remove('hidden');
+        divBotonVolver.classList.add('hidden');
+        divDetalle.classList.add('hidden');
     });
 
     var salirButton = document.getElementById("salir-editar-multinota");
@@ -327,6 +339,10 @@
         margin: 0 1.25rem 1.25rem 0;
     }
 
+    #boton-volver-editar {
+        margin: 0 0 1.25rem 1.25rem;
+    }
+
     .flex {
         display: flex;
     }
@@ -337,6 +353,10 @@
 
     .justify-flex-end {
         justify-content: flex-end;
+    }
+
+    .justify-flex-start {
+        justify-content: flex-start;
     }
 
     .hidden {
