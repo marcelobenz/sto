@@ -95,7 +95,7 @@ class AutorizacionController extends Controller
 
 		    return $requestView->getUsuario();
         } catch (\Throwable $th) {
-            throw new ExcepcionControladaError("No es posible recuperar el usuario", $th);
+            throw new Exception("No es posible recuperar el usuario", $th);
         }
     }
 
