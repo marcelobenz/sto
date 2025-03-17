@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Permiso;
+use App\Models\UsuarioPermiso;
 use App\Models\PermisoEnum;
 
 class PermisoController extends Controller
