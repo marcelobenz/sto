@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Tramites Online</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-
+    <x-head.tinymce-config />
     @yield('heading')
 </head>
 
@@ -43,11 +43,13 @@
                     </a>
                     <div class="dropdown-menu" aria-labelledby="administracionDropdown">
                         <a class="dropdown-item" href="categorias">Categorias</a>
-                                <a class="dropdown-item" href="usuarios">Administrativos</a>
-                                <a class="dropdown-item" href="limite">Limite de asignaciones</a>
-                                <a class="dropdown-item" href="usuario">Usuarios</a>
-                                <a class="dropdown-item" href="cuestionarios">Cuestionarios</a>
-                                <a class="dropdown-item" href="estados">Estados</a>
+                        <a class="dropdown-item" href="usuarios">Administrativos</a>
+                        <a class="dropdown-item" href="limite">Limite de asignaciones</a>
+                        <a class="dropdown-item" href="usuario">Usuarios</a>
+                        <a class="dropdown-item" href="cuestionarios">Cuestionarios</a>
+                        <a class="dropdown-item" href="estados">Estados</a>
+                        <a class="dropdown-item" href="secciones-multinota">Secciones Multinota</a>
+                    	<a class="dropdown-item" href="multinotas">Multinotas</a>
                     </div>
                 </li>
                 <li class="nav-item dropdown">

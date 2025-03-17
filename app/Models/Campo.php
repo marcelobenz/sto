@@ -5,14 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class TipoTramiteMultinota extends Model {
+class Campo extends Model
+{
     use HasFactory;
 
     // Define the table name if it's not the plural of the model name
-    protected $table = 'tipo_tramite_multinota';
+    protected $table = 'campo';
 
     // Define the primary key
-    protected $primaryKey = 'id_tipo_tramite_multinota';
+    protected $primaryKey = 'id_campo';
 
     // Disable auto-incrementing as we are using mediumIncrements
     public $incrementing = false;
@@ -22,15 +23,17 @@ class TipoTramiteMultinota extends Model {
 
     // Define fillable attributes for mass assignment
     protected $fillable = [
-        'nombre', 'codigo', 'id_categoria', 'publico', 'nivel', 'muestra_mensaje', 'lleva_expediente', 'baja_logica', 'fecha_alta', 'fecha_ultima_actualizacion', 'codigo_crm', 'lleva_documentacion'
+        'nombre', 'texto', 'valor', 'tipo', 'dimension', 'orden', 'fecha_alta', 'fecha_baja', 'id_seccion', 'obligatorio', 'mascara', 'limite_minimo', 'limite_maximo',
     ];
 
     // Disable timestamps if you are managing them manually
     public $timestamps = false;
 
+    public function setTipo(String $tipo) {
+		$this->tipo = $tipo;
+	}
 
-    public function categoria()
-    {
-        return $this->belongsTo(Categoria::class, 'id_categoria');
-    }
+    public function getTipo() {
+		return $this->tipo;
+	}
 }

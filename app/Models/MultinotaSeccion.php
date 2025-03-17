@@ -5,14 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class TipoTramiteMultinota extends Model {
+class MultinotaSeccion extends Model
+{
     use HasFactory;
 
     // Define the table name if it's not the plural of the model name
-    protected $table = 'tipo_tramite_multinota';
+    protected $table = 'multinota_seccion';
 
     // Define the primary key
-    protected $primaryKey = 'id_tipo_tramite_multinota';
+    protected $primaryKey = 'id_multinota_seccion';
 
     // Disable auto-incrementing as we are using mediumIncrements
     public $incrementing = false;
@@ -22,15 +23,9 @@ class TipoTramiteMultinota extends Model {
 
     // Define fillable attributes for mass assignment
     protected $fillable = [
-        'nombre', 'codigo', 'id_categoria', 'publico', 'nivel', 'muestra_mensaje', 'lleva_expediente', 'baja_logica', 'fecha_alta', 'fecha_ultima_actualizacion', 'codigo_crm', 'lleva_documentacion'
+        'fecha_sistema', 'id_tipo_tramite_multinota', 'id_seccion', 'orden',
     ];
 
     // Disable timestamps if you are managing them manually
     public $timestamps = false;
-
-
-    public function categoria()
-    {
-        return $this->belongsTo(Categoria::class, 'id_categoria');
-    }
 }
