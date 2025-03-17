@@ -35,7 +35,7 @@ class TramiteController extends Controller
             ->join('categoria as c', 'tt.id_categoria', '=', 'c.id_categoria')
             ->join('estado_tramite as e', 'te.id_estado_tramite', '=', 'e.id_estado_tramite')
             ->select(
-                'm.id_tramite',
+                'm.id_tramite as id_tramite',
                 'm.cuenta',
                 'c.nombre as nombre_categoria',
                 'tt.nombre as tipo_tramite',
@@ -92,4 +92,39 @@ class TramiteController extends Controller
             "data" => $data
         ]);
     }
+
+    public function show($idTramite)
+    {
+        $detalleTramite = DB::table('multinota_seccion_valor as ms')
+            ->join('seccion as s', 'ms.id_seccion', '=', 's.id_seccion')
+            ->join('campo as c', 'ms.id_campo', '=', 'c.id_campo')
+            ->select('ms.id_multinota_seccion_valor', 's.titulo', 'c.nombre', 'ms.valor')
+            ->where('ms.id_tramite', $idTramite)
+            ->orderBy('ms.id_multinota_seccion_valor', 'asc')
+            ->get();
+
+        $tramiteInfo = DB::table('multinota as m')
+            ->where('m.id_tramite', $idTramite)
+            ->join('tipo_tramite_multinota as ttm', 'm.id_tipo_tramite_multinota', '=', 'ttm.id_tipo_tramite_multinota')
+            ->select('ttm.nombre', 'm.fecha_alta')
+            ->first();
+
+        $historialTramite = DB::table('historial_tramite as h')
+            ->join('evento as e', 'h.id_evento', '=', 'e.id_evento')
+            ->join('usuario_interno as u', 'h.id_usuario_interno_asignado', '=', 'u.id_usuario_interno')
+            ->selectRaw('COALESCE(e.descripcion, e.desc_contrib) AS descripcion, e.fecha_alta, e.clave, u.legajo, CONCAT(u.nombre, u.apellido) as usuario')
+            ->where('h.id_tramite', $idTramite)
+            ->orderBy('e.fecha_alta', 'desc') // Ordenar por fecha de forma descendente
+            ->get();
+
+        $tramiteArchivo = DB::table('archivo as a')
+            ->join('tramite_archivo as ta', 'a.id_archivo', '=','ta.id_archivo')
+            ->select('a.id_archivo', 'a.fecha_alta', 'a.nombre', 'a.descripcion', 'a.path_archivo')
+            ->where('ta.id_tramite', $idTramite)
+            ->orderBy('a.descripcion')
+            ->get();
+
+        return view('tramites.detalle', compact('detalleTramite', 'idTramite', 'tramiteInfo', 'historialTramite', 'tramiteArchivo'));
+    }
+    
 }

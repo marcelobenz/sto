@@ -202,7 +202,7 @@
                         render: function(data, type, row) {
                             return `
                                 <div class="actions text-center">
-                                    <button class="btn btn-primary btn-sm btn-action view-details" title="Ver detalle"><i class="fas fa-eye"></i></button>
+                                    <a href="/tramites/${row.id_tramite}/detalle" class="btn btn-primary btn-sm btn-action" title="Ver detalle"><i class="fas fa-eye"></i></a>
                                     <button class="btn btn-success btn-sm btn-action" title="Tomar trámite"><i class="fas fa-hand-paper"></i></button>
                                     <button class="btn btn-warning btn-sm btn-action" title="Reasignar"><i class="fas fa-exchange-alt"></i></button>
                                     <button class="btn btn-danger btn-sm btn-action" title="Dar de Baja"><i class="fas fa-trash"></i></button>

@@ -11,6 +11,9 @@ use App\Http\Controllers\RolController;
 use App\Http\Controllers\LimiteController;
 use App\Http\Controllers\ContribuyenteMultinotaController;
 use App\Http\Controllers\CuestionarioController;
+use App\Http\Controllers\ComentarioController;
+use App\Http\Controllers\ArchivoController;
+use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\ConfiguracionMailController;
 use App\Http\Controllers\IngresoExternoController;
 use App\Http\Controllers\AdministracionWorkflowController;
@@ -60,7 +63,11 @@ Route::get('/', function () {
     return view('navbar');
 });*/
 
-Route::get('/ingreso', [AutorizacionController::class, 'index'])->name('ingreso.index');
+Route::get('/reporte/constancia/{idTramite}', [ReporteController::class, 'generarPDF'])->name('reporte.constancia');
+Route::post('/archivo/subir', [ArchivoController::class, 'subirArchivo'])->name('archivo.subir');
+Route::get('/archivo/descargar/{id}', [ArchivoController::class, 'descargar'])->name('archivo.descargar');
+Route::post('/comentario/guardar', [ComentarioController::class, 'guardarComentario'])->name('comentario.guardar');
+Route::get('/tramites/{id}/detalle', [TramiteController::class, 'show'])->name('tramites.detalle');
 Route::get('/tramites', [TramiteController::class, 'index'])->name('tramites.index');
 Route::get('/tramites/data', [TramiteController::class, 'getTramitesData'])->name('tramites.data');
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
