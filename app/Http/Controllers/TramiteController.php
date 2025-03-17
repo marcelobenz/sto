@@ -216,6 +216,7 @@ class TramiteController extends Controller
 
     public function darDeBaja(Request $request)
     {
+        dd($request);
         try {
             $idTramite = $request->input('idTramite');
     
