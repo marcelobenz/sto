@@ -11,6 +11,9 @@ use App\Http\Controllers\RolController;
 use App\Http\Controllers\LimiteController;
 use App\Http\Controllers\ContribuyenteMultinotaController;
 use App\Http\Controllers\CuestionarioController;
+use App\Http\Controllers\ConfiguracionMailController;
+use App\Http\Controllers\IngresoExternoController;
+use App\Http\Controllers\AdministracionWorkflowController;
 use App\Http\Controllers\BandejaPersonalController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -84,6 +87,8 @@ Route::get('limite', [LimiteController::class, 'index'])->name('limites.index');
 Route::post('/guardar-limite', [LimiteController::class, 'guardarLimite'])->name('guardar.limite');
 Route::get('usuario', [ContribuyenteMultinotaController::class, 'index'])->name('contribuyente.index');
 Route::post('/usuario', [ContribuyenteMultinotaController::class, 'buscar'])->name('contribuyente.buscar');
+Route::put('/usuario/{id}/actualizar-correo', [ContribuyenteMultinotaController::class, 'actualizarCorreo'])->name('contribuyente.actualizarCorreo');
+Route::post('/usuario/{id}/restablecer-clave', [ContribuyenteMultinotaController::class, 'restablecerClave'])->name('contribuyente.restablecerClave');
 Route::get('cuestionarios', [CuestionarioController::class, 'index'])->name('cuestionarios.index');
 Route::get('/cuestionarios/crear', [CuestionarioController::class, 'create'])->name('cuestionarios.create');
 Route::post('/cuestionarios', [CuestionarioController::class, 'store'])->name('cuestionarios.store');
@@ -91,11 +96,28 @@ Route::get('/cuestionarios/{id}/editar', [CuestionarioController::class, 'edit']
 Route::put('/cuestionarios/{id}', [CuestionarioController::class, 'update'])->name('cuestionarios.update');
 Route::put('/cuestionarios/{id}/activar', [CuestionarioController::class, 'activar'])->name('cuestionarios.activar');
 Route::put('/cuestionarios/{id}/desactivar', [CuestionarioController::class, 'desactivar'])->name('cuestionarios.desactivar');
+Route::get('/sistema', [ConfiguracionMailController::class, 'edit'])->name('configuracion.edit');
+Route::post('/sistema', [ConfiguracionMailController::class, 'update'])->name('configuracion.update');
+Route::get('/ingreso-externo', [IngresoExternoController::class, 'showLoginForm'])->name('ingreso-externo');
+Route::post('/ingreso-externo', [IngresoExternoController::class, 'login'])->name('ingreso-externo.login');
+Route::get('/bandeja-usuario-externo', [IngresoExternoController::class, 'showBandeja'])->name('bandeja-usuario-externo');
+Route::get('/cambiar-clave', [ContribuyenteMultinotaController::class, 'showChangePasswordForm'])->name('cambiar-clave');
+Route::post('/cambiar-clave', [ContribuyenteMultinotaController::class, 'changePassword'])->name('cambiar-clave.submit');
+Route::get('/estados', [AdministracionWorkflowController::class, 'index'])->name('estados.index');
+Route::get('/workflow/{id}', [AdministracionWorkflowController::class, 'crear'])->name('workflow.crear');
+
 
 Route::get('/set-usuario-interno', [UsuarioController::class, 'setUsuarioInterno']);
 Route::get('/clear-session', [UsuarioController::class, 'clearSession']); // Para limpiar la sesión
 
+
+Route::get('/clear-session', function() {
+    session()->forget('contribuyente_multinota');
+    return redirect()->route('ingreso-externo');
+});
+
 Route::view('/navbar','/navbar')->name('navbar');
+
 
 //Route::get('/dashboard', 'DashboardController@index')->name('dashboard.index');
 Route::get('/bandeja-personal', [BandejaPersonalController::class, 'index'])->name('bandeja-personal.index');

@@ -37,27 +37,6 @@
                 <li class="nav-item">
                     <a class="nav-link" href="#">Formularios</a>
                 </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="administracionDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Administracion
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="administracionDropdown">
-                        <a class="dropdown-item" href="categorias">Categorias</a>
-                                <a class="dropdown-item" href="usuarios">Administrativos</a>
-                                <a class="dropdown-item" href="limite">Limite de asignaciones</a>
-                                <a class="dropdown-item" href="usuario">Usuarios</a>
-                                <a class="dropdown-item" href="cuestionarios">Cuestionarios</a>
-                                <a class="dropdown-item" href="estados">Estados</a>
-                    </div>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="SistemaDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Sistema
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="SistemaDropdown">
-                        <a class="dropdown-item" href="sistema">Configuración Mail</a>
-                    </div>
-                </li>
             </ul>
         </div>
 
@@ -68,20 +47,21 @@
                         <img src="https://via.placeholder.com/30" alt="Avatar" class="avatar-img">
                     </a>
                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
-                        @if(Session::has('usuario_interno'))
-                            @php
-                                $usuarioInterno = Session::get('usuario_interno');
-                            @endphp
-                            <span class="dropdown-item-text">
-                                <strong>{{ $usuarioInterno->nombre }} {{ $usuarioInterno->apellido }}</strong><br>
-                                Nro Legajo: {{ $usuarioInterno->legajo }}
-                            </span>
-                        @else
-                            <span class="dropdown-item-text">No estás autenticado</span>
-                        @endif
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Perfil</a>
-                        <a class="dropdown-item" href="/clear-session">Salir</a>
+                    @if(Session::has('contribuyente_multinota'))
+                    @php
+                        $contribuyente = Session::get('contribuyente_multinota');
+                    @endphp
+                    <span class="dropdown-item-text">
+                    <strong>{{ $contribuyente->nombre }} {{ $contribuyente->apellido }}</strong><br>
+                    CUIT: {{ $contribuyente->cuit }}<br>
+                    </span>
+                    @else
+                    <span class="dropdown-item-text">No estás autenticado</span>
+                    @endif
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#">Perfil</a>
+                    <a class="dropdown-item" href="cambiar-clave">Cambiar Clave</a>
+                    <a class="dropdown-item" href="/clear-session">Salir</a>
                     </div>
                 </li>
             </ul>
