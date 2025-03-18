@@ -125,6 +125,14 @@
         div4.classList.remove('hidden');
         divBotonVolver.classList.add('hidden');
         divDetalle.classList.add('hidden');
+
+        setTimeout(() => {
+            window.scrollTo({
+                top: 0,
+                left: 0,
+                behavior: 'smooth'
+            });
+        }, 100);
     });
 
     $(document).ready(function() {
@@ -212,13 +220,20 @@
             if (!isValid) {
                 return;
             } else {
-                // 
                 div1.classList.add('hidden');
                 div2.classList.add('hidden');
                 div3.classList.add('hidden');
                 div4.classList.add('hidden');
                 divBotonVolver.classList.remove('hidden');
                 divDetalle.classList.remove('hidden');
+
+                setTimeout(() => {
+                    window.scrollTo({
+                        top: 0,
+                        left: 0,
+                        behavior: 'smooth'
+                    });
+                }, 100);
             }
 
             // If the form is valid, proceed with fetch
