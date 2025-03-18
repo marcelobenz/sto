@@ -15,79 +15,79 @@
                 @endif
 
                 <div class="card">
-                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-                        Edición Multinota
-                        <button type="button" id="salir-editar-multinota" class="btn btn-secondary">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-90deg-left" viewBox="0 0 16 16">
-                                <path fill-rule="evenodd" d="M1.146 4.854a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H12.5A2.5 2.5 0 0 1 15 6.5v8a.5.5 0 0 1-1 0v-8A1.5 1.5 0 0 0 12.5 5H2.707l3.147 3.146a.5.5 0 1 1-.708.708z"/>
-                            </svg>
-                        </button>
-                    </div>
-                    <div id="seccion-datos-principales" class="card-body">
-                        <div style="display: flex; flex-direction: column; gap: 30px;">
-                            <div style="display: flex; width: 100%; justify-content: space-between; gap: 50px;">
-                                <div style="display: flex; flex-direction: column; flex-grow: 1;">
-                                    <label style="font-weight: bold;">Categoría</label>
-                                    <select id="categorias">
-                                        <option value="">Seleccione...</option>
-                                        <option selected value="{{ $multinotaSelected->nombre_categoria_padre }}">{{ $multinotaSelected->nombre_categoria_padre }}</option>
-                                    </select>
+                    <form id="form-previsualizar-cambios" method="POST" action="{{ route('multinotas.previsualizarCambiosMultinota') }}" novalidate>
+                        @csrf
+                        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                            Edición Multinota
+                            <button type="button" id="salir-editar-multinota" class="btn btn-secondary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-90deg-left" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd" d="M1.146 4.854a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H12.5A2.5 2.5 0 0 1 15 6.5v8a.5.5 0 0 1-1 0v-8A1.5 1.5 0 0 0 12.5 5H2.707l3.147 3.146a.5.5 0 1 1-.708.708z"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div id="seccion-datos-principales" class="card-body">
+                            <div style="display: flex; flex-direction: column; gap: 30px;">
+                                <div style="display: flex; width: 100%; justify-content: space-between; gap: 50px;">
+                                    <div style="display: flex; flex-direction: column; flex-grow: 1;">
+                                        <label style="font-weight: bold;">Categoría</label>
+                                        <select name="categoria" id="categoria" required>
+                                            <option value="">Seleccione...</option>
+                                            <option selected value="{{ $multinotaSelected->nombre_categoria_padre }}">{{ $multinotaSelected->nombre_categoria_padre }}</option>
+                                        </select>
+                                    </div>
+                                    <div style="display: flex; flex-direction: column; flex-grow: 1;">
+                                        <label style="font-weight: bold;">Subcategoría</label>
+                                        <select name="subcategoria" id="subcategoria" required>
+                                            <option value="">Seleccione...</option>
+                                            @foreach($categorias as $cat)
+                                                @if($cat->id_categoria === $multinotaSelected->id_categoria)
+                                                    <option selected value="{{ $cat->id_categoria }}">{{ $cat->nombre }}</option>
+                                                @else
+                                                    <option value="{{ $cat->id_categoria }}">{{ $cat->nombre }}</option>
+                                                @endif
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div style="display: flex; flex-direction: column; flex-grow: 1;">
+                                        <label style="font-weight: bold;">Código del trámite</label>
+                                        <input name="codigo" id="codigo" type="text" disabled value="{{ $multinotaSelected->codigo }}" />
+                                    </div>
+                                    <div style="display: flex; flex-direction: column; flex-grow: 1;">
+                                        <label style="font-weight: bold;">Nombre del Trámite</label>
+                                        <input name="nombre" id="nombre-tramite" type="text" value="{{ $multinotaSelected->nombre }}" required />
+                                    </div>
                                 </div>
-                                <div style="display: flex; flex-direction: column; flex-grow: 1;">
-                                    <label style="font-weight: bold;">Subcategorías</label>
-                                    <select id="subcategorias">
-                                        <option value="">Seleccione...</option>
-                                        @foreach($categorias as $cat)
-                                            @if($cat->id_categoria === $multinotaSelected->id_categoria)
-                                                <option selected value="{{ $cat->id_categoria }}">{{ $cat->nombre }}</option>
-                                            @else
-                                                <option value="{{ $cat->id_categoria }}">{{ $cat->nombre }}</option>
-                                            @endif
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div style="display: flex; flex-direction: column; flex-grow: 1;">
-                                    <label style="font-weight: bold;">Código del trámite</label>
-                                    <input id="codigo" type="text" disabled value="{{ $multinotaSelected->codigo }}" />
-                                </div>
-                                <div style="display: flex; flex-direction: column; flex-grow: 1;">
-                                    <label style="font-weight: bold;">Nombre del Trámite</label>
-                                    <input id="nombre-tramite" type="text" value="{{ $multinotaSelected->nombre }}" />
-                                </div>
-                            </div>
-                            <div style="display: flex; width: 100%; gap: 50px;">
-                                <div style="display: flex; gap: 15px;">
-                                    <label style="font-weight: bold;">Público</label>
-                                    <input id="publico" type="checkbox" {{ $multinotaSelected->publico == 1 ? 'checked' : '' }}>
-                                </div>
-                                <div style="display: flex; gap: 15px;">
-                                    <label style="font-weight: bold;">Lleva documentación</label>
-                                    <input id="lleva-documentacion" type="checkbox" {{ $multinotaSelected->lleva_documentacion == 1 ? 'checked' : '' }}>
-                                </div>
-                                <div style="display: flex; gap: 15px;">
-                                    <label style="font-weight: bold;">Mensaje inicial</label>
-                                    <input id="muestra-mensaje" type="checkbox" {{ $multinotaSelected->muestra_mensaje == 1 ? 'checked' : '' }}>
+                                <div style="display: flex; width: 100%; gap: 50px;">
+                                    <div style="display: flex; gap: 15px;">
+                                        <label style="font-weight: bold;">Público</label>
+                                        <input name="publico" id="publico" type="checkbox" {{ $multinotaSelected->publico == 1 ? 'checked' : '' }}>
+                                    </div>
+                                    <div style="display: flex; gap: 15px;">
+                                        <label style="font-weight: bold;">Lleva documentación</label>
+                                        <input name="llevaDocumentacion" id="lleva-documentacion" type="checkbox" {{ $multinotaSelected->lleva_documentacion == 1 ? 'checked' : '' }}>
+                                    </div>
+                                    <div style="display: flex; gap: 15px;">
+                                        <label style="font-weight: bold;">Mensaje inicial</label>
+                                        <input name="muestraMensaje" id="muestra-mensaje" type="checkbox" {{ $multinotaSelected->muestra_mensaje == 1 ? 'checked' : '' }}>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div id="seccion-mensaje-inicial" class="card-body">
-                        <form method="post">
-                        @csrf
-                            <textarea id="myeditorinstance">{{ $mensajeInicial ?? '' }}</textarea>
-                        </form>
-                    </div>
-                    <div id="secciones-container" class="card-body flex flex-col">
-                        <label>Secciones precargadas</label>
-                        @include('partials.secciones-container', ['seccionesAsociadas' => $seccionesAsociadas, 'todasLasSecciones' => $todasLasSecciones])
-                    </div>
-                    <div id="seccion-boton-previsualizar" class="flex justify-flex-end">
-                        <button id="boton-previsualizar-cambios" class="btn btn-secondary">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" viewBox="0 0 448 512">
-                                <path d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.8 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z"/>
-                            </svg>
-                        </button>
-                    </div>
+                        <div id="seccion-mensaje-inicial" class="card-body">
+                            <textarea name="mensajeInicial" id="myeditorinstance">{{ $mensajeInicial ?? '' }}</textarea>
+                        </div>
+                        <div id="secciones-container" class="card-body flex flex-col">
+                            <label>Secciones precargadas</label>
+                            @include('partials.secciones-container', ['seccionesAsociadas' => $seccionesAsociadas, 'todasLasSecciones' => $todasLasSecciones])
+                        </div>
+                        <div id="seccion-boton-previsualizar" class="flex justify-flex-end">
+                            <button type="submit" id="boton-previsualizar-cambios" class="btn btn-secondary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" viewBox="0 0 448 512">
+                                    <path d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.8 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </form>
                     <div id="detalle-multinota" class="hidden">
                         @include('partials.detalle-multinota', ['seccionesAsociadas' => $seccionesAsociadas, 'multinotaSelected' => $multinotaSelected])
                     </div>
@@ -109,7 +109,24 @@
 
 @section('scripting')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    const div1 = document.getElementById('seccion-datos-principales');
+    const div2 = document.getElementById('seccion-mensaje-inicial');
+    const div3 = document.getElementById('secciones-container');
+    const div4 = document.getElementById('seccion-boton-previsualizar');
+    const divBotonVolver = document.getElementById('seccion-boton-volver-editar');
+    const divDetalle = document.getElementById('detalle-multinota');
+
+    document.getElementById('boton-volver-editar').addEventListener('click', function() {
+        div1.classList.remove('hidden');
+        div2.classList.remove('hidden');
+        div3.classList.remove('hidden');
+        div4.classList.remove('hidden');
+        divBotonVolver.classList.add('hidden');
+        divDetalle.classList.add('hidden');
+    });
+
     $(document).ready(function() {
         // Add section handler
         $('#secciones-container').on('click', '#boton-agregar-seccion', function(event) {
@@ -151,13 +168,67 @@
             .catch(error => console.error('Error removing section:', error));
         });
 
-        $('#boton-previsualizar-cambios').on('click', function() {
-            fetch("{{ route('multinotas.previsualizarCambiosMultinota') }}", {
-                method: 'GET',
+        $('#form-previsualizar-cambios').on('submit', function(event) {
+            event.preventDefault();
+
+            // Check if required fields are filled
+            let isValid = true;
+
+            $(this).find('[required]').each(function() {
+                let nombreCampo = $(this).attr('name');
+                let mensajeError = '';
+                switch(nombreCampo) {
+                    case 'categoria':
+                        mensajeError = 'Debe ingresar la categoría de la multinota'
+                        break;
+                    case 'subcategoria':
+                        mensajeError = 'Debe ingresar la subcategoría de la multinota'
+                        break;
+                    case 'nombre':
+                        mensajeError = 'Debe ingresar el nombre de trámite de la multinota'
+                        break;
+                    default:
+                        break;
+                }
+
+                if ($(this).val().trim() === '') {
+                    isValid = false;
+
+                    // Show SweetAlert and stop execution
+                    Swal.fire({
+                        position: "top-end",
+                        icon: "warning",
+                        title: `${mensajeError}`,
+                        showConfirmButton: false,
+                        timer: 5000,
+                        timerProgressBar: true
+                    });
+
+                    return false; // Stops the loop early
+                }
+            });
+
+            // Stop the function if validation failed
+            if (!isValid) {
+                return;
+            } else {
+                // 
+                div1.classList.add('hidden');
+                div2.classList.add('hidden');
+                div3.classList.add('hidden');
+                div4.classList.add('hidden');
+                divBotonVolver.classList.remove('hidden');
+                divDetalle.classList.remove('hidden');
+            }
+
+            // If the form is valid, proceed with fetch
+            fetch(this.action, {
+                method: this.method,
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                }
+                },
+                body: JSON.stringify(Object.fromEntries(new FormData(this))),
             })
             .then(response => response.json())
             .then(data => {
@@ -165,31 +236,6 @@
             })
             .catch(error => console.error('Error:', error));
         });
-    });
-
-    const div1 = document.getElementById('seccion-datos-principales');
-    const div2 = document.getElementById('seccion-mensaje-inicial');
-    const div3 = document.getElementById('secciones-container');
-    const div4 = document.getElementById('seccion-boton-previsualizar');
-    const divBotonVolver = document.getElementById('seccion-boton-volver-editar');
-    const divDetalle = document.getElementById('detalle-multinota');
-
-    document.getElementById('boton-previsualizar-cambios').addEventListener('click', function() {
-        div1.classList.add('hidden');
-        div2.classList.add('hidden');
-        div3.classList.add('hidden');
-        div4.classList.add('hidden');
-        divBotonVolver.classList.remove('hidden');
-        divDetalle.classList.remove('hidden');
-    });
-
-    document.getElementById('boton-volver-editar').addEventListener('click', function() {
-        div1.classList.remove('hidden');
-        div2.classList.remove('hidden');
-        div3.classList.remove('hidden');
-        div4.classList.remove('hidden');
-        divBotonVolver.classList.add('hidden');
-        divDetalle.classList.add('hidden');
     });
 
     var salirButton = document.getElementById("salir-editar-multinota");
@@ -243,6 +289,12 @@
         // Optional: Sync order to array or server if needed
         arraySecciones = rows.map(row => row.dataset.id);
         console.log('Updated array:', arraySecciones);
+
+        // Se llama funcion del controlador para setear nuevo orden
+        $.ajax({
+            type: 'GET',
+            url: `/multinotas/setearNuevoOrdenSeccion/${arraySecciones}`
+        });
 
         draggedRow = null; // Reset
     }

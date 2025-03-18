@@ -238,7 +238,7 @@ class MultinotaController extends Controller
         $secciones = SeccionMultinota::join('multinota_seccion as ms', 'seccion.id_seccion', '=', 'ms.id_seccion')
         ->where('ms.id_tipo_tramite_multinota', $id)
         ->orderBy('ms.orden')
-        ->select('seccion.*')
+        ->select('seccion.*', 'ms.orden')
         ->get();
 
         // Array de secciones que se enviaran a la vista
@@ -254,6 +254,7 @@ class MultinotaController extends Controller
             $seccion->temporal = $s->temporal;
             $seccion->titulo = $s->titulo;
             $seccion->campos = $campos;
+            $seccion->orden = $s->orden;
 
             $seccionesAsociadas[] = $seccion;
         }
@@ -308,12 +309,15 @@ class MultinotaController extends Controller
         $s = SeccionMultinota::where('id_seccion', $id)
             ->get();
 
+        $maxOrden = max(array_column($seccionesAsociadas, 'orden'));
+
         if ($s) {
             $seccion = new \stdClass();
             $seccion->id_seccion = $s[0]->id_seccion;
             $seccion->temporal = $s[0]->temporal;
             $seccion->titulo = $s[0]->titulo;
             $seccion->campos = $campos;
+            $seccion->orden = $maxOrden + 1;
 
             $seccionesAsociadas[] = $seccion; 
 
@@ -336,6 +340,14 @@ class MultinotaController extends Controller
         $nuevasSeccionesAsociadas = array_filter($seccionesAsociadas, function ($s) use ($id) {
             return $s->id_seccion !== $id; // Se quita elemento con id_seccion seleccionado
         });
+
+        // Se reindexa array
+        $nuevasSeccionesAsociadas = array_values($nuevasSeccionesAsociadas);
+
+        // Se recorre array para setear orden tras reindexacion
+        foreach ($nuevasSeccionesAsociadas as $index => $s) {
+            $s->orden = $index; // Se setea orden desde el 0
+        }
 
         Session::put('SECCIONES_ASOCIADAS', $nuevasSeccionesAsociadas);
 
@@ -368,14 +380,85 @@ class MultinotaController extends Controller
         return response()->json(['html' => $html]);
     }
 
-    public function previsualizarCambiosMultinota() {
-        $multinotaSelected = Session::get('MULTINOTA_SELECTED');
+    public function setearNuevoOrdenSeccion($array) {
         $seccionesAsociadas = Session::get('SECCIONES_ASOCIADAS');
 
-        // Render the partial view with updated data
+        // Se guardan los IDs de multinota, parseados y en orden en un array
+        $arrayIdsMultinotaOrdenados = explode(',', $array);
+
+        foreach ($seccionesAsociadas as $index => $s) {
+            if(count(Session::get('SECCIONES_ASOCIADAS')[$index]->campos) == 0) {
+                array_splice($arrayIdsMultinotaOrdenados, $index, 0, $s->id_seccion);
+            }
+        }
+
+        // Se reubican las secciones
+        $seccionesOrdenadas = [];
+        foreach ($arrayIdsMultinotaOrdenados as $id) {
+            $seccionesOrdenadas[] = current(array_filter($seccionesAsociadas, fn($s) => $s->id_seccion == (int) $id));
+        }
+
+        // Se acomoda el atributo 'orden'
+        foreach ($seccionesOrdenadas as $index => $s) {
+            $s->orden = $index;
+        }
+
+        // Se setean las secciones en sesion
+        Session::put('SECCIONES_ASOCIADAS', $seccionesOrdenadas);
+    }
+
+    public function previsualizarCambiosMultinota(Request $request) {
+        $multinotaSelected = Session::get('MULTINOTA_SELECTED');
+        $seccionesAsociadas = Session::get('SECCIONES_ASOCIADAS');
+        $categorias = Cache::get('CATEGORIAS');
+
+        // Se actualiza multinotaSelected
+
+        // Nombre
+        $multinotaSelected->nombre = $request->post('nombre');
+
+        // Categoria
+        $multinotaSelected->nombre_categoria_padre = $request->post('categoria');
+
+        // Subcategoria
+        foreach ($categorias as $c) {
+            if($c->id_categoria == $request->post('subcategoria')) {
+                $multinotaSelected->nombre_subcategoria = $c->nombre;
+                Session::put('MULTINOTA_SELECTED', $multinotaSelected);
+            }
+        }
+
+        // Público
+        if($request->post('publico') == 'on') {
+            $multinotaSelected->publico = 1;
+        } else {
+            $multinotaSelected->publico = 0;
+        }
+
+        // Lleva documentación
+        if($request->post('llevaDocumentacion') == 'on') {
+            $multinotaSelected->lleva_documentacion = 1;
+        } else {
+            $multinotaSelected->lleva_documentacion = 0;
+        }
+
+        // Muestra mensaje inicial
+        if($request->post('muestraMensaje') == 'on') {
+            $multinotaSelected->muestra_mensaje = 1;
+        } else {
+            $multinotaSelected->muestra_mensaje = 0;
+        }
+
+        // Mensaje inicial
+        $multinotaSelected->mensaje_inicial = $request->post('mensajeInicial');
+
+        // Secciones
+
+
+        // Se renderiza el partial con el detalle, con los datos actualizados
         $html = view('partials.detalle-multinota', compact('seccionesAsociadas', 'multinotaSelected'))->render();
 
-        // Return JSON response with rendered HTML
+        // Se retorna el JSON con el nuevo HTML
         return response()->json(['html' => $html]);
     }
 }
