@@ -92,12 +92,20 @@
                         @include('partials.detalle-multinota', ['seccionesAsociadas' => $seccionesAsociadas, 'multinotaSelected' => $multinotaSelected])
                     </div>
                     <div id="seccion-boton-volver-editar" class="hidden">
-                        <div class="flex justify-flex-start">
+                        <div class="flex justify-between">
                             <button id="boton-volver-editar" class="btn btn-secondary">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" viewBox="0 0 448 512">
                                     <path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.2 288 416 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-306.7 0L214.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/>
                                 </svg>
                             </button>
+                            <form method="GET" action="{{ route('multinotas.guardarMultinota', $multinotaSelected->id_tipo_tramite_multinota) }}">
+                                @csrf
+                                <button id="boton-guardar-multinota" class="btn btn-secondary">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" viewBox="0 0 448 512">
+                                        <path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/>
+                                    </svg>
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -410,6 +418,10 @@
         margin: 0 0 1.25rem 1.25rem;
     }
 
+    #boton-guardar-multinota {
+        margin: 0 1.25rem 1.25rem 0;
+    }
+
     .flex {
         display: flex;
     }
@@ -422,8 +434,8 @@
         justify-content: flex-end;
     }
 
-    .justify-flex-start {
-        justify-content: flex-start;
+    .justify-between {
+        justify-content: space-between;
     }
 
     .hidden {

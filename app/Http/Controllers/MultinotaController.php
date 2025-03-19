@@ -424,6 +424,7 @@ class MultinotaController extends Controller
         foreach ($categorias as $c) {
             if($c->id_categoria == $request->post('subcategoria')) {
                 $multinotaSelected->nombre_subcategoria = $c->nombre;
+                $multinotaSelected->id_categoria = $c->id_categoria;
                 Session::put('MULTINOTA_SELECTED', $multinotaSelected);
             }
         }
@@ -460,5 +461,60 @@ class MultinotaController extends Controller
 
         // Se retorna el JSON con el nuevo HTML
         return response()->json(['html' => $html]);
+    }
+
+    public function guardarMultinota($id) {
+        $multinotaSelected = Session::get('MULTINOTA_SELECTED');
+        $seccionesAsociadas = Session::get('SECCIONES_ASOCIADAS');
+        $categorias = Cache::get('CATEGORIAS');
+
+        // A la multinota obsoleta se le asigna "baja_logica" = 1
+        TipoTramiteMultinota::where('id_tipo_tramite_multinota', (int) $id)->update(['baja_logica' => 1]);
+
+        // Mensaje inicial se guarda en mensaje_inicial
+        MensajeInicial::create(['mensaje_inicial' => $multinotaSelected->mensaje_inicial]);
+
+        // Los demas datos de la multinota se guardan en tipo_tramite_multinota 
+        TipoTramiteMultinota::create([
+            'nombre' => $multinotaSelected->nombre,
+            'codigo' => $multinotaSelected->codigo,
+            'id_categoria' => $multinotaSelected->id_categoria,
+            'publico' => $multinotaSelected->publico,
+            'nivel' => $multinotaSelected->nivel,
+            'muestra_mensaje' => $multinotaSelected->muestra_mensaje,
+            'lleva_expediente' => $multinotaSelected->lleva_expediente,
+            'baja_logica' => 0,
+            'lleva_documentacion' => $multinotaSelected->lleva_documentacion,
+        ]);
+
+        // La recupero para saber el ID de la nueva multinota
+        $res = TipoTramiteMultinota::select('id_tipo_tramite_multinota')
+        ->where('baja_logica', 0)
+        ->where('nombre', $multinotaSelected->nombre)
+        ->get();
+
+        $nuevoId = $res[0]->id_tipo_tramite_multinota;
+
+        // Recupero ID de mensaje inicial previamente insertado
+        $maxIdMensajeInicial = MensajeInicial::max('id_mensaje_inicial');
+
+        // Relacion mensaje inicial / multinota se guarda en tipo_tramite_mensaje_inicial
+        TipoTramiteMensajeInicial::create([
+            'id_tipo_tramite_multinota' => $nuevoId,
+            'id_mensaje_inicial' => $maxIdMensajeInicial,
+        ]);
+
+        // La relacion entre la multinota y sus secciones se guarda en multinota_seccion, asi como el orden
+        
+        // Se recorre el array de secciones para ir insertando una por una en base
+        foreach ($seccionesAsociadas as $s) {
+            MultinotaSeccion::create([
+                'id_tipo_tramite_multinota' => $nuevoId,
+                'id_seccion' => $s->id_seccion,
+                'orden' => $s->orden,
+            ]);
+        }
+
+        return view('multinotas.index', compact('categorias'));
     }
 }

@@ -68,6 +68,7 @@ Route::post('/multinotas/agregarSeccion', [MultinotaController::class, 'agregarS
 Route::post('/multinotas/quitarSeccion', [MultinotaController::class, 'quitarSeccion'])->name('multinotas.quitarSeccion');
 Route::get('/multinotas/setearNuevoOrdenSeccion/{array}', [MultinotaController::class, 'setearNuevoOrdenSeccion'])->name('multinotas.setearNuevoOrdenSeccion');
 Route::post('/multinotas/previsualizarCambiosMultinota', [MultinotaController::class, 'previsualizarCambiosMultinota'])->name('multinotas.previsualizarCambiosMultinota');
+Route::get('/multinotas/guardarMultinota/{id}', [MultinotaController::class, 'guardarMultinota'])->name('multinotas.guardarMultinota');
 
 Route::get('usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
 Route::get('usuarios/create', [UsuarioController::class, 'create'])->name('usuarios.create');
