@@ -7,6 +7,7 @@ use App\Models\TipoTramiteMultinota;
 use App\Models\Categoria;
 use App\Models\MensajeInicial;
 use App\Models\TipoTramiteMensajeInicial;
+use App\Models\MultinotaTipoCuenta;
 use App\Models\MultinotaSeccion;
 use App\Models\SeccionMultinota;
 use App\Models\Campo;
@@ -514,6 +515,12 @@ class MultinotaController extends Controller
                 'orden' => $s->orden,
             ]);
         }
+
+        // Se inserta un registro en la tabla multinota_tipo_cuenta con valor '-'
+        MultinotaTipoCuenta::create([
+            'id_tipo_tramite_multinota' => $nuevoId,
+            'cod_tipo_cuenta' => '-',
+        ]);
 
         return view('multinotas.index', compact('categorias'));
     }
