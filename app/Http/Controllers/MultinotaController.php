@@ -32,14 +32,17 @@ class MultinotaController extends Controller
         } else {
             // Chequea si la data necesita ser recuperada de base de nuevo segun la fecha de ultima actualizacion
             $lastUpdate = Cache::get('LAST_UPDATE_MULTINOTAS');
-            $latestMultinotaUpdate = TipoTramiteMultinota::max('fecha_ultima_actualizacion');
-            // Se convierte la fecha de ultima actualización de base a una instancia de la librería Carbon
-            $latestMultinotaUpdateUTC = Carbon::createFromFormat('Y-m-d H:i:s', $latestMultinotaUpdate, 'UTC');
+            $lastMultinotaUpdate = TipoTramiteMultinota::max('fecha_ultima_actualizacion');
+            
+            // Se convierte la fecha de ultima actualización de base y la fecha de la cache a una instancia de la librería Carbon
+            $lastMultinotaUpdateUTC = Carbon::createFromFormat('Y-m-d H:i:s', $lastMultinotaUpdate, 'UTC');
+            $lastUpdateUTC = Carbon::createFromFormat('Y-m-d H:i:s', $lastUpdate, 'UTC');
 
             // Se convierte la instancia a GMT-3
-            $latestMultinotaUpdateHoraLocal = $latestMultinotaUpdateUTC->setTimezone('America/Sao_Paulo');
+            $lastMultinotaUpdateHoraLocal = $lastMultinotaUpdateUTC->setTimezone('America/Sao_Paulo');
+            $lastUpdateHoraLocal = $lastUpdateUTC->setTimezone('America/Sao_Paulo');
 
-            if ($latestMultinotaUpdateHoraLocal > $lastUpdate) {
+            if ($lastMultinotaUpdateHoraLocal > $lastUpdateHoraLocal) {
                 $shouldRefreshData = true; // La base fue actualizada, necesitamos refrescar la cache
             }
         }
