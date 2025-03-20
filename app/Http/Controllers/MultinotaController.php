@@ -527,4 +527,16 @@ class MultinotaController extends Controller
 
         return view('multinotas.index', compact('categorias'));
     }
+
+    public function desactivarMultinota($id) {
+        $multinota = TipoTramiteMultinota::find((int) $id);
+        if ($multinota) {
+            $multinota->baja_logica = 1; 
+            $multinota->fecha_ultima_actualizacion = Carbon::now();
+            $multinota->save();
+            return response()->json(['message' => 'Multinota desactivada correctamente.'], 200);
+        } else {
+            return response()->json(['message' => 'Multinota no encontrada.'], 404);
+        }
+    }
 }

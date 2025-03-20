@@ -25,6 +25,10 @@ class TipoTramiteMultinota extends Model {
         'nombre', 'codigo', 'id_categoria', 'publico', 'nivel', 'muestra_mensaje', 'lleva_expediente', 'baja_logica', 'fecha_alta', 'fecha_ultima_actualizacion', 'codigo_crm', 'lleva_documentacion'
     ];
 
+    protected $casts = [
+        'fecha_ultima_actualizacion' => 'datetime',
+    ];
+
     // Disable timestamps if you are managing them manually
     public $timestamps = false;
 }

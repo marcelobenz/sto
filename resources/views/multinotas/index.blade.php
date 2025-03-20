@@ -175,5 +175,45 @@
         function editarMultinota(id) {
             window.location.href = `/multinotas/${id}/edit`;
         }
+
+        function confirmarEliminar(id) {
+            Swal.fire({
+                title: '¿Está seguro que desea eliminar la multinota?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/multinotas/' + id + '/desactivar',
+                        type: 'PUT', 
+                        data: {
+                            _token: '{{ csrf_token() }}',
+                        },
+                        success: function(response) {
+                            console.log('Sección desactivada correctamente.');
+                            Swal.fire(
+                                'Eliminado!',
+                                'La multinota ha sido eliminada.',
+                                'success'
+                            )
+                            // Recargar la tabla para reflejar el cambio
+                            $('#multinotas-table').DataTable().ajax.reload(null, false); // false mantiene la página actual
+                        },
+                        error: function(err) {
+                            console.error('Error al desactivar la multinota.');
+                            Swal.fire(
+                                'Error!',
+                                'Hubo un problema al eliminar la multinota.',
+                                'error'
+                            )
+                        }
+                    });
+                } else {
+                    console.log('Se canceló desactivación de multinota con ID: ' + id);
+                }
+            });
+        }
     </script>
 @endsection
