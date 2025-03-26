@@ -190,9 +190,31 @@ class MultinotaController extends Controller
         $multinotaSelected = $array[0];
         $seccionesAsociadas = $array[1];
         $todasLasSecciones = $array[2];
-        $mensajeInicial = $multinotaSelected->mensaje_inicial;
+        $categoriasPadre = $array[3];
 
-        return view('multinotas.edit', compact('multinotaSelected', 'seccionesAsociadas', 'todasLasSecciones', 'mensajeInicial', 'categorias'));
+        return view('multinotas.edit', compact('multinotaSelected', 'seccionesAsociadas', 'todasLasSecciones', 'categorias', 'categoriasPadre'));
+    }
+
+    public function crearNuevaMultinota() {
+        $categorias = Cache::get('CATEGORIAS');
+
+        $multinotaSelected = new MultinotaController();
+        $multinotaSelected->id_tipo_tramite_multinota = 0; //ID dummy
+        $multinotaSelected->nombre_categoria_padre = null;
+        $multinotaSelected->id_categoria = null;
+        $multinotaSelected->codigo = null;
+        $multinotaSelected->nombre = null;
+        $multinotaSelected->publico = 1;
+        $multinotaSelected->lleva_documentacion = 0;
+        $multinotaSelected->muestra_mensaje = 1;
+        $multinotaSelected->lleva_expediente = 0;
+        $multinotaSelected->nombre_subcategoria = null;
+        $multinotaSelected->mensaje_inicial = '';
+
+        $seccionesAsociadas = [];
+        $todasLasSecciones = MultinotaController::getTodasLasSecciones();
+
+        return view('multinotas.edit', compact('multinotaSelected', 'seccionesAsociadas', 'todasLasSecciones', 'categorias'));
     }
 
     private static function buildMultinotaSelected($id) {
@@ -224,6 +246,17 @@ class MultinotaController extends Controller
                 }
             }
         }
+
+        //Se recuperan las categorias padre
+        $categoriasPadre = Categoria::from('categoria as c1')
+        ->join('categoria as c2', 'c1.id_padre', '=', 'c2.id_categoria')
+        ->whereNotNull('c1.id_padre')
+        ->where('c1.flag_activo', 1)
+        ->select('c1.id_padre', 'c2.nombre')
+        ->distinct()
+        ->get();
+
+        Session::put('CATEGORIAS_PADRE', $categoriasPadre);
 
         //Se recupera el mensaje inicial de la multinota
         if(Session::get('MULTINOTA_SELECTED')->muestra_mensaje == 1) {
@@ -265,6 +298,14 @@ class MultinotaController extends Controller
 
         Session::put('SECCIONES_ASOCIADAS', $seccionesAsociadas);
 
+        $todasLasSecciones = MultinotaController::getTodasLasSecciones();
+
+        Session::put('TODAS_LAS_SECCIONES', $todasLasSecciones);
+
+        return array($multinotaSelected, $seccionesAsociadas, $todasLasSecciones, $categoriasPadre);
+    }
+
+    public static function getTodasLasSecciones() {
         //Se recuperan todas las secciones multinota
         $secciones = SeccionMultinota::select('seccion.*')
             ->where('seccion.activo', true)
@@ -288,9 +329,7 @@ class MultinotaController extends Controller
             $todasLasSecciones[] = $seccion;
         }
 
-        Session::put('TODAS_LAS_SECCIONES', $todasLasSecciones);
-
-        return array($multinotaSelected, $seccionesAsociadas, $todasLasSecciones);
+        return $todasLasSecciones;
     }
 
     public function refresh() {
@@ -456,9 +495,6 @@ class MultinotaController extends Controller
 
         // Mensaje inicial
         $multinotaSelected->mensaje_inicial = $request->post('mensajeInicial');
-
-        // Secciones
-
 
         // Se renderiza el partial con el detalle, con los datos actualizados
         $html = view('partials.detalle-multinota', compact('seccionesAsociadas', 'multinotaSelected'))->render();

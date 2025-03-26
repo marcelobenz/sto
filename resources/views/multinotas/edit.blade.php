@@ -31,14 +31,32 @@
                                     <div style="display: flex; flex-direction: column; flex-grow: 1;">
                                         <label style="font-weight: bold;">Categoría</label>
                                         <select name="categoria" id="categoria" required>
-                                            <option value="">Seleccione...</option>
-                                            <option selected value="{{ $multinotaSelected->nombre_categoria_padre }}">{{ $multinotaSelected->nombre_categoria_padre }}</option>
+                                            @if($multinotaSelected->nombre_categoria_padre == null)
+                                                <option selected value="">Seleccione...</option>
+                                                @foreach($categoriasPadre as $cp)
+                                                    <option value="{{ $cp->nombre }}">{{ $cp->nombre }}</option>
+                                                @endforeach
+                                            @else
+                                                <option value="">Seleccione...</option>
+                                                @foreach($categoriasPadre as $cp)
+                                                    @if($multinotaSelected->nombre_categoria_padre == $cp->nombre)
+                                                        <option selected value="{{ $cp->nombre }}">{{ $cp->nombre }}</option>
+                                                    @else
+                                                        <option value="{{ $cp->nombre }}">{{ $cp->nombre }}</option>
+                                                    @endif
+                                                @endforeach
+                                            @endif
                                         </select>
                                     </div>
                                     <div style="display: flex; flex-direction: column; flex-grow: 1;">
                                         <label style="font-weight: bold;">Subcategoría</label>
                                         <select name="subcategoria" id="subcategoria" required>
-                                            <option value="">Seleccione...</option>
+                                            @if($multinotaSelected->id_categoria == null)
+                                                <option selected value="">Seleccione...</option>
+                                            @else
+                                                <option value="">Seleccione...</option> 
+                                            @endif
+                                            
                                             @foreach($categorias as $cat)
                                                 @if($cat->id_categoria === $multinotaSelected->id_categoria)
                                                     <option selected value="{{ $cat->id_categoria }}">{{ $cat->nombre }}</option>
@@ -50,11 +68,19 @@
                                     </div>
                                     <div style="display: flex; flex-direction: column; flex-grow: 1;">
                                         <label style="font-weight: bold;">Código del trámite</label>
-                                        <input name="codigo" id="codigo" type="text" disabled value="{{ $multinotaSelected->codigo }}" />
+                                        @if($multinotaSelected->codigo == null)
+                                            <input name="codigo" id="codigo" type="text" required />
+                                        @else
+                                            <input name="codigo" id="codigo" type="text" disabled value="{{ $multinotaSelected->codigo }}" />
+                                        @endif
                                     </div>
                                     <div style="display: flex; flex-direction: column; flex-grow: 1;">
                                         <label style="font-weight: bold;">Nombre del Trámite</label>
-                                        <input name="nombre" id="nombre-tramite" type="text" value="{{ $multinotaSelected->nombre }}" required />
+                                        @if($multinotaSelected->nombre == null)
+                                            <input name="nombre" id="nombre-tramite" type="text" required />
+                                        @else
+                                            <input name="nombre" id="nombre-tramite" type="text" value="{{ $multinotaSelected->nombre }}" required />
+                                        @endif
                                     </div>
                                 </div>
                                 <div style="display: flex; width: 100%; gap: 50px;">
@@ -74,7 +100,7 @@
                             </div>
                         </div>
                         <div id="seccion-mensaje-inicial" class="card-body">
-                            <textarea name="mensajeInicial" id="myeditorinstance">{{ $mensajeInicial ?? '' }}</textarea>
+                            <textarea name="mensajeInicial" id="myeditorinstance">{{ $multinotaSelected->mensaje_inicial ?? '' }}</textarea>
                         </div>
                         <div id="secciones-container" class="card-body flex flex-col">
                             <label>Secciones precargadas</label>
@@ -202,6 +228,9 @@
                         break;
                     case 'nombre':
                         mensajeError = 'Debe ingresar el nombre de trámite de la multinota'
+                        break;
+                    case 'codigo':
+                        mensajeError = 'Debe ingresar el código de la multinota'
                         break;
                     default:
                         break;
