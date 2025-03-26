@@ -70,6 +70,7 @@ Route::get('/multinotas/setearNuevoOrdenSeccion/{array}', [MultinotaController::
 Route::post('/multinotas/previsualizarCambiosMultinota', [MultinotaController::class, 'previsualizarCambiosMultinota'])->name('multinotas.previsualizarCambiosMultinota');
 Route::get('/multinotas/guardarMultinota/{id}', [MultinotaController::class, 'guardarMultinota'])->name('multinotas.guardarMultinota');
 Route::put('/multinotas/{id}/desactivar', [MultinotaController::class, 'desactivarMultinota'])->name('multinotas.desactivarMultinota');
+Route::get('/multinotas/crearNuevaMultinota', [MultinotaController::class, 'crearNuevaMultinota'])->name('multinotas.crearNuevaMultinota');
 
 Route::get('usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
 Route::get('usuarios/create', [UsuarioController::class, 'create'])->name('usuarios.create');

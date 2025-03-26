@@ -73,12 +73,12 @@
                 </div>
             </div>
             <div style="background-color: #ededed; padding: 40px 10px;">
-                 {{-- <form method="GET" action="{{ route('multinotas.crearNuevaMultinota') }}">
-                @csrf --}}
-                <div style="display: flex; justify-content: flex-end;">
-                    <button type="submit" id="boton-crear-multinota" class="btn btn-primary">Crear</button>
-                </div>
-                {{-- </form> --}}
+                <form method="GET" action="{{ route('multinotas.crearNuevaMultinota') }}">
+                    @csrf
+                    <div style="display: flex; justify-content: flex-end;">
+                        <button type="submit" id="boton-crear-multinota" class="btn btn-primary">Crear</button>
+                    </div>
+                </form>
                 <table id="multinotas-table" class="table table-bordered table-striped table-hover">
                     <h3>LISTADO</h1>
                     <thead>
