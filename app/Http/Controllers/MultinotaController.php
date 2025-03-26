@@ -197,8 +197,6 @@ class MultinotaController extends Controller
     }
 
     public function crearNuevaMultinota() {
-        $subcategorias = Session::get('SUBCATEGORIAS');
-
         $multinotaSelected = new MultinotaController();
         $multinotaSelected->id_tipo_tramite_multinota = 0; //ID dummy
         $multinotaSelected->nombre_categoria_padre = null;
@@ -213,9 +211,11 @@ class MultinotaController extends Controller
         $multinotaSelected->mensaje_inicial = '';
 
         $seccionesAsociadas = [];
-        $todasLasSecciones = MultinotaController::getTodasLasSecciones();
+        $todasLasSecciones = MultinotaController::getTodasLasSecciones();       
+        $subcategorias = [];
+        $categoriasPadre = MultinotaController::getCategoriasPadre();
 
-        return view('multinotas.edit', compact('multinotaSelected', 'seccionesAsociadas', 'todasLasSecciones', 'subcategorias'));
+        return view('multinotas.edit', compact('multinotaSelected', 'seccionesAsociadas', 'todasLasSecciones', 'subcategorias', 'categoriasPadre'));
     }
 
     private static function buildMultinotaSelected($id) {
@@ -250,13 +250,7 @@ class MultinotaController extends Controller
         }
 
         //Se recuperan las categorias padre
-        $categoriasPadre = Categoria::from('categoria as c1')
-        ->join('categoria as c2', 'c1.id_padre', '=', 'c2.id_categoria')
-        ->whereNotNull('c1.id_padre')
-        ->where('c1.flag_activo', 1)
-        ->select('c1.id_padre', 'c2.nombre')
-        ->distinct()
-        ->get();
+        $categoriasPadre = MultinotaController::getCategoriasPadre();
 
         Session::put('CATEGORIAS_PADRE', $categoriasPadre);
 
@@ -305,6 +299,18 @@ class MultinotaController extends Controller
         Session::put('TODAS_LAS_SECCIONES', $todasLasSecciones);
 
         return array($multinotaSelected, $seccionesAsociadas, $todasLasSecciones, $categoriasPadre);
+    }
+
+    public static function getCategoriasPadre() {
+        $categoriasPadre = Categoria::from('categoria as c1')
+        ->join('categoria as c2', 'c1.id_padre', '=', 'c2.id_categoria')
+        ->whereNotNull('c1.id_padre')
+        ->where('c1.flag_activo', 1)
+        ->select('c1.id_padre', 'c2.nombre')
+        ->distinct()
+        ->get();
+
+        return $categoriasPadre;
     }
 
     public static function getTodasLasSecciones() {
