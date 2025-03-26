@@ -205,7 +205,7 @@
                                     <a href="/tramites/${row.id_tramite}/detalle" class="btn btn-primary btn-sm btn-action" title="Ver detalle"><i class="fas fa-eye"></i></a>
                                     <button class="btn btn-success btn-sm btn-action" title="Tomar trámite"><i class="fas fa-hand-paper"></i></button>
                                     <button class="btn btn-warning btn-sm btn-action" title="Reasignar"><i class="fas fa-exchange-alt"></i></button>
-                                    <button class="btn btn-danger btn-sm btn-action" title="Dar de Baja"><i class="fas fa-trash"></i></button>
+                                    <button class="btn btn-danger btn-sm btn-action" title="Dar de Baja" onclick="darDeBajaTramite( ${row.id_tramite} )"><i class="fas fa-trash"></i></button>
                                 </div>`;
                         }
                     }
@@ -259,6 +259,30 @@
                 left: ''
             });
         });        
+
+        function darDeBajaTramite(idTramite) {
+        if (confirm("¿Estás seguro de que deseas dar de baja este trámite?")) {
+            fetch("{{ route('tramites.darDeBaja') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                body: JSON.stringify({ idTramite: idTramite })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("El trámite ha sido dado de baja correctamente.");
+                    //  location.reload(); // Recargar la página para ver cambios
+                    $('#tramitesTable').DataTable().ajax.reload(null, false);
+                } else {
+                    alert("Error: " + data.message);
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+    }
 
     </script>
 @endsection

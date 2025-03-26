@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+
 use DB;
 
 class TramiteController extends Controller
@@ -42,6 +44,8 @@ class TramiteController extends Controller
                 'e.nombre as estado',
                 'm.fecha_alta',
                 't.cuit_contribuyente',
+                't.flag_cancelado', 
+                't.flag_rechazado',
                 DB::raw("CONCAT(ce.nombre, ' ', ce.apellido) as contribuyente"),
                 DB::raw("CONCAT(u.nombre, ' ', u.apellido) as usuario_interno")
             )
@@ -71,13 +75,21 @@ class TramiteController extends Controller
 
         // Reemplazar "A finalizar" con "Finalizado" en la columna estado
         $data = collect($data)->map(function ($item) {
-            $item = (array) $item; // Convertir a array
-            if ($item['estado'] === "A Finalizar") {
+            $item = (array) $item;
+        
+            if ($item['flag_cancelado'] == 1) {
+                $item['estado'] = "Dado de Baja";
+            } elseif ($item['flag_rechazado'] == 1) {
+                $item['estado'] = "Rechazado";
+            }elseif ($item['estado'] === "A Finalizar") {
                 $item['estado'] = "Finalizado";
             }
-            return (object) $item; // Convertir de nuevo a objeto si es necesario
+            unset($item['flag_cancelado']);
+            unset($item['flag_rechazado']);
+
+            return (object) $item;
         });
-        
+
         // Total de registros sin filtro
         $totalData = DB::table('multinota as m')
             ->join('tramite_estado_tramite as te', 'm.id_tramite', '=', 'te.id_tramite')
@@ -130,18 +142,24 @@ class TramiteController extends Controller
     public function darDeBaja(Request $request)
     {
         try {
+            Log::debug('Inicio de la función darDeBaja');
+            Log::debug('Contenido del Request:', $request->all());
+    
             $idTramite = $request->input('idTramite');
+            Log::debug('ID del trámite recibido: ' . $idTramite);
     
             DB::beginTransaction(); // 1️⃣ Iniciar transacción
+            Log::debug('Transacción iniciada');
     
             // 2️⃣ Actualizar el trámite
-            DB::table('tramite')
+            $affected = DB::table('tramite')
                 ->where('id_tramite', $idTramite)
                 ->update([
                     'flag_cancelado' => 1,
                     'flag_ingreso' => 1,
                     'fecha_modificacion' => now()
                 ]);
+            Log::debug("Trámite actualizado. Registros afectados: " . $affected);
     
             // 3️⃣ Insertar el evento
             $idEvento = DB::table('evento')->insertGetId([
@@ -151,21 +169,36 @@ class TramiteController extends Controller
                 'id_tipo_evento' => 14,
                 'clave' => 'CANCELAR'
             ]);
+            Log::debug("Evento insertado con ID: " . $idEvento);
     
             // 4️⃣ Registrar en historial_tramite
-            DB::table('historial_tramite')->insert([
+            $idHistorial = DB::table('historial_tramite')->insertGetId([
                 'fecha' => now(),
                 'id_tramite' => $idTramite,
-                'id_evento' => $idEvento
-            ]);
-    
+                'id_evento' => $idEvento,
+                'id_usuario_interno_asignado' => 107
+            ], 'id_historial_tramite'); // <- especificar el nombre de la PK autoincremental
+            
+            Log::debug("Historial de trámite registrado con ID: " . $idHistorial);
+           
+            
+            // Inmediatamente consultar
+            $ultimoHistorial = DB::table('historial_tramite')
+                ->where('id_tramite', $idTramite)
+                ->orderBy('id_historial_tramite', 'desc')
+                ->first();
+            
+            Log::debug("Último historial tras insert:", (array) $ultimoHistorial);
+
             DB::commit(); // 5️⃣ Confirmar cambios
+            Log::debug("Transacción confirmada");
     
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
             DB::rollBack(); // 6️⃣ Revertir cambios en caso de error
+            Log::error('Error en darDeBaja: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
     }
-    
+
 }
