@@ -27,46 +27,31 @@
                         </div>
                         <div id="seccion-datos-principales" class="card-body">
                             <div style="display: flex; flex-direction: column; gap: 30px;">
-                                <div style="display: flex; width: 100%; justify-content: space-between; gap: 50px;">
-                                    <div style="display: flex; flex-direction: column; flex-grow: 1;">
+                                <div style="display: flex; width: 100%; gap: 10px;">
+                                    <div style="display: flex; flex-direction: column; width: 100%;">
                                         <label style="font-weight: bold;">Categoría</label>
-                                        <select name="categoria" id="categoria" required>
+                                        <select id="select-categoria-padre" name="categoria" id="categoria" required>
                                             @if($multinotaSelected->nombre_categoria_padre == null)
-                                                <option selected value="">Seleccione...</option>
+                                                <option selected value="0">Seleccione...</option>
                                                 @foreach($categoriasPadre as $cp)
-                                                    <option value="{{ $cp->nombre }}">{{ $cp->nombre }}</option>
+                                                    <option value="{{ $cp->id_padre }}">{{ $cp->nombre }}</option>
                                                 @endforeach
                                             @else
-                                                <option value="">Seleccione...</option>
+                                                <option value="0">Seleccione...</option>
                                                 @foreach($categoriasPadre as $cp)
                                                     @if($multinotaSelected->nombre_categoria_padre == $cp->nombre)
-                                                        <option selected value="{{ $cp->nombre }}">{{ $cp->nombre }}</option>
+                                                        <option selected value="{{ $cp->id_padre }}">{{ $cp->nombre }}</option>
                                                     @else
-                                                        <option value="{{ $cp->nombre }}">{{ $cp->nombre }}</option>
+                                                        <option value="{{ $cp->id_padre }}">{{ $cp->nombre }}</option>
                                                     @endif
                                                 @endforeach
                                             @endif
                                         </select>
                                     </div>
-                                    <div style="display: flex; flex-direction: column; flex-grow: 1;">
-                                        <label style="font-weight: bold;">Subcategoría</label>
-                                        <select name="subcategoria" id="subcategoria" required>
-                                            @if($multinotaSelected->id_categoria == null)
-                                                <option selected value="">Seleccione...</option>
-                                            @else
-                                                <option value="">Seleccione...</option> 
-                                            @endif
-                                            
-                                            @foreach($categorias as $cat)
-                                                @if($cat->id_categoria === $multinotaSelected->id_categoria)
-                                                    <option selected value="{{ $cat->id_categoria }}">{{ $cat->nombre }}</option>
-                                                @else
-                                                    <option value="{{ $cat->id_categoria }}">{{ $cat->nombre }}</option>
-                                                @endif
-                                            @endforeach
-                                        </select>
+                                    <div id="subcategorias-container" style="display: flex; flex-direction: column; width: 100%;">
+                                        @include('partials.select-subcategorias', ['multinotaSelected' => $multinotaSelected, 'subcategorias' => $subcategorias])
                                     </div>
-                                    <div style="display: flex; flex-direction: column; flex-grow: 1;">
+                                    <div style="display: flex; flex-direction: column; width: 100%;">
                                         <label style="font-weight: bold;">Código del trámite</label>
                                         @if($multinotaSelected->codigo == null)
                                             <input name="codigo" id="codigo" type="text" required />
@@ -74,7 +59,7 @@
                                             <input name="codigo" id="codigo" type="text" disabled value="{{ $multinotaSelected->codigo }}" />
                                         @endif
                                     </div>
-                                    <div style="display: flex; flex-direction: column; flex-grow: 1;">
+                                    <div style="display: flex; flex-direction: column; width: 100%;">
                                         <label style="font-weight: bold;">Nombre del Trámite</label>
                                         @if($multinotaSelected->nombre == null)
                                             <input name="nombre" id="nombre-tramite" type="text" required />
@@ -287,6 +272,17 @@
                 $('#detalle-multinota').html(data.html);
             })
             .catch(error => console.error('Error:', error));
+        });
+
+        $('#select-categoria-padre').on('change', function() {
+            var selectedValue = $(this).val(); 
+
+            fetch(`/multinotas/recargarSubcategorias/${selectedValue}`)
+                .then(response => response.json())
+                .then(data => {
+                    $('#subcategorias-container').html(data.html);
+                })
+                .catch(error => console.error('Error:', error));
         });
     });
 

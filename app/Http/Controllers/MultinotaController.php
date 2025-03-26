@@ -183,8 +183,6 @@ class MultinotaController extends Controller
     }
 
     public function edit($id) {
-        $categorias = Cache::get('CATEGORIAS');
-
         $array = MultinotaController::buildMultinotaSelected($id);
 
         $multinotaSelected = $array[0];
@@ -192,11 +190,14 @@ class MultinotaController extends Controller
         $todasLasSecciones = $array[2];
         $categoriasPadre = $array[3];
 
-        return view('multinotas.edit', compact('multinotaSelected', 'seccionesAsociadas', 'todasLasSecciones', 'categorias', 'categoriasPadre'));
+        $subcategorias = MultinotaController::getSubcategoriasPorIdPadre($multinotaSelected->id_categoria_padre);
+        Session::put('SUBCATEGORIAS', $subcategorias);
+
+        return view('multinotas.edit', compact('multinotaSelected', 'seccionesAsociadas', 'todasLasSecciones', 'subcategorias', 'categoriasPadre'));
     }
 
     public function crearNuevaMultinota() {
-        $categorias = Cache::get('CATEGORIAS');
+        $subcategorias = Session::get('SUBCATEGORIAS');
 
         $multinotaSelected = new MultinotaController();
         $multinotaSelected->id_tipo_tramite_multinota = 0; //ID dummy
@@ -214,7 +215,7 @@ class MultinotaController extends Controller
         $seccionesAsociadas = [];
         $todasLasSecciones = MultinotaController::getTodasLasSecciones();
 
-        return view('multinotas.edit', compact('multinotaSelected', 'seccionesAsociadas', 'todasLasSecciones', 'categorias'));
+        return view('multinotas.edit', compact('multinotaSelected', 'seccionesAsociadas', 'todasLasSecciones', 'subcategorias'));
     }
 
     private static function buildMultinotaSelected($id) {
@@ -241,6 +242,7 @@ class MultinotaController extends Controller
 
                     if($categoriaPadre[0] != null) {
                         $multinotaSelected->nombre_categoria_padre = $categoriaPadre[0]->nombre;
+                        $multinotaSelected->id_categoria_padre = $categoriaPadre[0]->id_categoria;
                         Session::put('MULTINOTA_SELECTED', $multinotaSelected);
                     }
                 }
@@ -450,6 +452,33 @@ class MultinotaController extends Controller
         Session::put('SECCIONES_ASOCIADAS', $seccionesOrdenadas);
     }
 
+    public static function getSubcategoriasPorIdPadre($idCategoria) {
+        $subcategorias = Categoria::where('flag_activo', 1)
+        ->where('id_padre', (int) $idCategoria)
+        ->orderBy('nombre')
+        ->get();
+
+        return $subcategorias;
+    }
+
+    public function recargarSubcategorias($idCategoria) {
+        $multinotaSelected = Session::get('MULTINOTA_SELECTED');
+        if((int) $idCategoria == 0) {
+            $subcategorias = [];
+        } else {
+            $subcategorias = MultinotaController::getSubcategoriasPorIdPadre($idCategoria);
+        }
+
+        //Se guardan las nuevas subcategorias asociadas a la categoria padre seleccionada
+        Session::put('SUBCATEGORIAS', $subcategorias);
+
+        // Se renderiza el partial de las subcategorias con los datos actualizados
+        $html = view('partials.select-subcategorias', compact('multinotaSelected', 'subcategorias'))->render();
+
+        // Se retorna el JSON con el nuevo HTML
+        return response()->json(['html' => $html]);
+    }
+
     public function previsualizarCambiosMultinota(Request $request) {
         $multinotaSelected = Session::get('MULTINOTA_SELECTED');
         $seccionesAsociadas = Session::get('SECCIONES_ASOCIADAS');
@@ -460,11 +489,13 @@ class MultinotaController extends Controller
         // Nombre
         $multinotaSelected->nombre = $request->post('nombre');
 
-        // Categoria
-        $multinotaSelected->nombre_categoria_padre = $request->post('categoria');
-
-        // Subcategoria
+        // Categoria y Subcategoria
         foreach ($categorias as $c) {
+            if($c->id_categoria == $request->post('categoria')) {
+                $multinotaSelected->nombre_categoria_padre = $c->nombre;
+                Session::put('MULTINOTA_SELECTED', $multinotaSelected);
+            }
+
             if($c->id_categoria == $request->post('subcategoria')) {
                 $multinotaSelected->nombre_subcategoria = $c->nombre;
                 $multinotaSelected->id_categoria = $c->id_categoria;

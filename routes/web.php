@@ -64,6 +64,7 @@ Route::get('/multinotas', [MultinotaController::class, 'index'])->name('multinot
 Route::get('/multinotas/{id}/view', [MultinotaController::class, 'view'])->name('multinotas.view');
 Route::get('/multinotas/{id}/edit', [MultinotaController::class, 'edit'])->name('multinotas.edit');
 Route::get('/multinotas/refresh', [MultinotaController::class, 'refresh'])->name('multinotas.refresh');
+Route::get('/multinotas/recargarSubcategorias/{id}', [MultinotaController::class, 'recargarSubcategorias'])->name('multinotas.recargarSubcategorias');
 Route::post('/multinotas/agregarSeccion', [MultinotaController::class, 'agregarSeccion'])->name('multinotas.agregarSeccion');
 Route::post('/multinotas/quitarSeccion', [MultinotaController::class, 'quitarSeccion'])->name('multinotas.quitarSeccion');
 Route::get('/multinotas/setearNuevoOrdenSeccion/{array}', [MultinotaController::class, 'setearNuevoOrdenSeccion'])->name('multinotas.setearNuevoOrdenSeccion');
