@@ -34,6 +34,8 @@ Route::get('/', function () {
     return view('navbar');
 });*/
 
+Route::post('/tramites/tomarTramite', [TramiteController::class, 'tomarTramite'])->name('tramites.tomarTramite');
+Route::post('/tramites/cambiar-prioridad', [TramiteController::class, 'cambiarPrioridad'])->name('tramites.cambiarPrioridad');
 Route::post('/tramites/darDeBaja', [TramiteController::class, 'darDeBaja'])->name('tramites.darDeBaja');
 Route::get('/reporte/constancia/{idTramite}', [ReporteController::class, 'generarPDF'])->name('reporte.constancia');
 Route::post('/archivo/subir', [ArchivoController::class, 'subirArchivo'])->name('archivo.subir');

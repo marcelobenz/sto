@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 
 use DB;
 
@@ -136,7 +137,9 @@ class TramiteController extends Controller
             ->orderBy('a.descripcion')
             ->get();
 
-        return view('tramites.detalle', compact('detalleTramite', 'idTramite', 'tramiteInfo', 'historialTramite', 'tramiteArchivo'));
+        $prioridades = DB::table('prioridad')->orderBy('nombre')->get();
+
+        return view('tramites.detalle', compact('detalleTramite', 'idTramite', 'tramiteInfo', 'historialTramite', 'tramiteArchivo', 'prioridades'));
     }
 
     public function darDeBaja(Request $request)
@@ -201,4 +204,98 @@ class TramiteController extends Controller
         }
     }
 
+    public function cambiarPrioridad(Request $request)
+    {
+        $request->validate([
+            'id_tramite' => 'required|exists:tramite,id_tramite',
+            'id_prioridad' => 'required|exists:prioridad,id_prioridad',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // Actualizar prioridad
+            DB::table('tramite')
+                ->where('id_tramite', $request->id_tramite)
+                ->update([
+                    'id_prioridad' => $request->id_prioridad,
+                    'fecha_modificacion' => now()
+                ]);
+
+            // Registrar evento
+            $prioridad = DB::table('prioridad')->where('id_prioridad', $request->id_prioridad)->first();
+            $descripcionEvento = 'Se cambió la prioridad del trámite a: ' . ($prioridad->nombre ?? 'Desconocida');
+
+            $idEvento = DB::table('evento')->insertGetId([
+                'descripcion' => $descripcionEvento,
+                'fecha_alta' => now(),
+                'fecha_modificacion' => now(),
+                'id_tipo_evento' => 4, // Asigná un tipo de evento específico
+                'clave' => 'CAMBIO_PRIORIDAD'
+            ]);
+
+            // Insertar en historial
+            DB::table('historial_tramite')->insert([
+                'fecha' => now(),
+                'id_tramite' => $request->id_tramite,
+                'id_evento' => $idEvento,
+                'id_usuario_interno_asignado' => auth()->user()->id_usuario_interno ?? 107
+            ]);
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Prioridad actualizada correctamente.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error al cambiar prioridad: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error al cambiar prioridad.');
+        }
+    }
+
+    public function tomarTramite(Request $request)
+    {
+        try{
+            $idTramite = $request->input('idTramite');
+            $usuario = Session::get('usuario_interno');
+
+            DB::beginTransaction();
+            // 2️⃣ Actualizar el trámite
+            $affected = DB::table('tramite_estado_tramite')
+                ->where('id_tramite', $idTramite)
+                ->where('activo', 1)
+                ->update([
+                    'id_usuario_interno' => $usuario->id_usuario_interno,
+                    'fecha_sistema' => now()
+                ]);
+
+            // 3️⃣ Insertar el evento
+            $idEvento = DB::table('evento')->insertGetId([
+                'descripcion' => 'Se reasignó el trámite',
+                'fecha_alta' => now(),
+                'fecha_modificacion' => now(),
+                'id_tipo_evento' => 3,
+                'clave' => 'ASIGNACIÓN'
+            ]);
+            Log::debug("Evento insertado con ID: " . $idEvento);
+    
+            // 4️⃣ Registrar en historial_tramite
+            $idHistorial = DB::table('historial_tramite')->insertGetId([
+                'fecha' => now(),
+                'id_tramite' => $idTramite,
+                'id_evento' => $idEvento,
+                'id_usuario_interno_asignado' => $usuario->id_usuario_interno
+            ], 'id_historial_tramite'); // <- especificar el nombre de la PK autoincremental
+            
+            Log::debug("Historial de trámite registrado con ID: " . $idHistorial);
+            DB::commit(); // 5️⃣ Confirmar cambios
+            Log::debug("Transacción confirmada");
+    
+            return response()->json(['success' => true]);
+        }catch (\Exception $e) {
+            DB::rollBack(); // 6️⃣ Revertir cambios en caso de error
+            Log::error('Error al tomar trámite: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        }
+
+    }
 }

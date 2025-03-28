@@ -37,10 +37,11 @@
                 <button class="btn btn-warning mx-1" data-bs-toggle="tooltip" title="Reasignar el Trámite">
                     <i class="fas fa-random"></i>
                 </button>
-                <button class="btn btn-warning mx-1" data-bs-toggle="tooltip" title="Cambiar prioridad del trámite">
+                <button class="btn btn-warning mx-1" data-bs-toggle="modal" data-bs-target="#modalCambiarPrioridad" title="Cambiar prioridad del trámite">
                     <i class="fas fa-exclamation"></i>
                 </button>
-                <button class="btn btn-primary mx-1" data-bs-toggle="tooltip" title="Tomar el Trámite">
+                <button class="btn btn-primary mx-1" data-bs-toggle="tooltip" title="Tomar el Trámite"
+                    onclick="tomarTramite({{ $idTramite }})">
                     <i class="fas fa-sign-out-alt"></i>
                 </button>
                 <button class="btn btn-danger mx-1" data-bs-toggle="tooltip" title="Dar de baja el Trámite"
@@ -214,6 +215,34 @@
     </div>
 </div>
 
+<!-- Modal Cambiar Prioridad -->
+<div class="modal fade" id="modalCambiarPrioridad" tabindex="-1" aria-labelledby="modalCambiarPrioridadLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="POST" action="{{ route('tramites.cambiarPrioridad') }}">
+            @csrf
+            <input type="hidden" name="id_tramite" value="{{ $idTramite }}">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalCambiarPrioridadLabel">Cambiar Prioridad del Trámite</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="id_prioridad">Seleccione nueva prioridad:</label>
+                    <select name="id_prioridad" id="id_prioridad" class="form-select" required>
+                        @foreach($prioridades as $prioridad)
+                            <option value="{{ $prioridad->id_prioridad }}">{{ $prioridad->nombre }} (Peso: {{ $prioridad->peso }})</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Actualizar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 @endsection
 
 @section('scripting')
@@ -250,6 +279,28 @@
         }
     }
 
+    function tomarTramite(idTramite) {
+        if (confirm("¿Estás seguro de que deseas tomar este trámite?")) {
+            fetch("{{ route('tramites.tomarTramite') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                body: JSON.stringify({ idTramite: idTramite })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("El trámite ha sido tomado correctamente.");
+                    location.reload(); // Recargar la página para ver cambios
+                } else {
+                    alert("Error: " + data.message);
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+    }
 </script>
 
 @endsection
