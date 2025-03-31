@@ -269,17 +269,15 @@ class MultinotaController extends Controller
         Session::put('CATEGORIAS_PADRE', $categoriasPadre);
 
         //Se recupera el mensaje inicial de la multinota
-        if(Session::get('MULTINOTA_SELECTED')->muestra_mensaje == 1) {
-            $result = MensajeInicial::join('tipo_tramite_mensaje_inicial as ttmi', 'mensaje_inicial.id_mensaje_inicial', '=', 'ttmi.id_mensaje_inicial')
-            ->where('ttmi.id_tipo_tramite_multinota', $id)
-            ->orderBy('mensaje_inicial.id_mensaje_inicial', 'desc')
-            ->limit(1)
-            ->select('mensaje_inicial.*')
-            ->first();
+        $result = MensajeInicial::join('tipo_tramite_mensaje_inicial as ttmi', 'mensaje_inicial.id_mensaje_inicial', '=', 'ttmi.id_mensaje_inicial')
+        ->where('ttmi.id_tipo_tramite_multinota', $id)
+        ->orderBy('mensaje_inicial.id_mensaje_inicial', 'desc')
+        ->limit(1)
+        ->select('mensaje_inicial.*')
+        ->first();
 
-            $multinotaSelected->mensaje_inicial = $result->mensaje_inicial;
-            Session::put('MULTINOTA_SELECTED', $multinotaSelected);
-        }
+        $multinotaSelected->mensaje_inicial = $result->mensaje_inicial;
+        Session::put('MULTINOTA_SELECTED', $multinotaSelected);
 
         //Se recuperan las secciones de la multinota
         $secciones = SeccionMultinota::join('multinota_seccion as ms', 'seccion.id_seccion', '=', 'ms.id_seccion')
