@@ -25,7 +25,7 @@
                 <label>{{ $multinotaSelected->nombre }}
             </div>
             <div style="display: flex; flex-direction: column;">
-                <label>Público</label>
+                <label>Pública</label>
                 <label>
                     @if ($multinotaSelected->publico == '1')
                         Sí

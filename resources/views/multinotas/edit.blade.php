@@ -70,7 +70,7 @@
                                 </div>
                                 <div style="display: flex; width: 100%; gap: 50px;">
                                     <div style="display: flex; gap: 15px;">
-                                        <label style="font-weight: bold;">Público</label>
+                                        <label style="font-weight: bold;">Pública</label>
                                         <input name="publico" id="publico" type="checkbox" {{ $multinotaSelected->publico == 1 ? 'checked' : '' }}>
                                     </div>
                                     <div style="display: flex; gap: 15px;">
@@ -228,7 +228,7 @@
 
                 for (const c of codigos) {
                     if($("#codigo").val() == c && isEditar == false) {
-                        mensajeError = 'El código ingresado corresponde a una multinota activa. Por favor ingrese otro.'
+                        mensajeError = 'Debe ingresar un código distinto debido a que el ingresado ya está registrado en el sistema.'
                         
                         isValid = false;
 

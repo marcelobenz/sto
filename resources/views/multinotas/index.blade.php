@@ -129,7 +129,7 @@
                         "data": null,
                         "render": function(data, type, row) {
                             return `
-                                <input type="checkbox" id="publico" name="publico" ${row.publico === 1 ? 'checked' : ''}>
+                                <input onclick="return false;" type="checkbox" id="publico" name="publico" ${row.publico === 1 ? 'checked' : ''}>
                             `;
                         }
                     },
@@ -137,7 +137,7 @@
                         "data": null,
                         "render": function(data, type, row) {
                             return `
-                                <input type="checkbox" id="muestra_mensaje" name="muestra_mensaje" ${row.muestra_mensaje === 1 ? 'checked' : ''}>
+                                <input onclick="return false;" type="checkbox" id="muestra_mensaje" name="muestra_mensaje" ${row.muestra_mensaje === 1 ? 'checked' : ''}>
                             `;
                         }
                     },
