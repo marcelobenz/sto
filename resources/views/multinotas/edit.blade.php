@@ -131,6 +131,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     var codigos = @json($codigos);
+    var isEditar = @json($isEditar);
 
     const div1 = document.getElementById('seccion-datos-principales');
     const div2 = document.getElementById('seccion-mensaje-inicial');
@@ -226,7 +227,7 @@
                 }
 
                 for (const c of codigos) {
-                    if($("#codigo").val() == c) {
+                    if($("#codigo").val() == c && isEditar == false) {
                         mensajeError = 'El código ingresado corresponde a una multinota activa. Por favor ingrese otro.'
                         
                         isValid = false;
