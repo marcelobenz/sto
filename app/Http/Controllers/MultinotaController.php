@@ -192,10 +192,11 @@ class MultinotaController extends Controller
 
         $subcategorias = MultinotaController::getSubcategoriasPorIdPadre($multinotaSelected->id_categoria_padre);
         Session::put('SUBCATEGORIAS', $subcategorias);
+        $codigos = MultinotaController::getCodigosMultinotasActivas();
         Session::put('IS_EDITAR', true);
         $isEditar = Session::get('IS_EDITAR');
 
-        return view('multinotas.edit', compact('multinotaSelected', 'seccionesAsociadas', 'todasLasSecciones', 'subcategorias', 'categoriasPadre', 'isEditar'));
+        return view('multinotas.edit', compact('multinotaSelected', 'seccionesAsociadas', 'todasLasSecciones', 'subcategorias', 'categoriasPadre', 'codigos', 'isEditar'));
     }
 
     public function crearNuevaMultinota() {
