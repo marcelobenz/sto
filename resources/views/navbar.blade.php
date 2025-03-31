@@ -44,8 +44,8 @@
                     <div class="dropdown-menu" aria-labelledby="administracionDropdown">
                         <a class="dropdown-item" href="categorias">Categorias</a>
                         <a class="dropdown-item" href="usuarios">Usuarios</a>
-                        <a class="dropdown-item" href="secciones-multinota">Secciones Multinota</a>
-                        <a class="dropdown-item" href="multinotas">Multinotas</a>
+                        <a class="dropdown-item" href="{{ route('secciones-multinota.index') }}">Secciones Multinota</a>
+                        <a class="dropdown-item" href="{{ route('multinotas.index') }}">Multinotas</a>
                     </div>
                 </li>
             </ul>
