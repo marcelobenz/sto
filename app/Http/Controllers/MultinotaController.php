@@ -192,8 +192,10 @@ class MultinotaController extends Controller
 
         $subcategorias = MultinotaController::getSubcategoriasPorIdPadre($multinotaSelected->id_categoria_padre);
         Session::put('SUBCATEGORIAS', $subcategorias);
+        Session::put('IS_EDITAR', true);
+        $isEditar = Session::get('IS_EDITAR');
 
-        return view('multinotas.edit', compact('multinotaSelected', 'seccionesAsociadas', 'todasLasSecciones', 'subcategorias', 'categoriasPadre'));
+        return view('multinotas.edit', compact('multinotaSelected', 'seccionesAsociadas', 'todasLasSecciones', 'subcategorias', 'categoriasPadre', 'isEditar'));
     }
 
     public function crearNuevaMultinota() {
@@ -204,6 +206,7 @@ class MultinotaController extends Controller
         $multinotaSelected->codigo = null;
         $multinotaSelected->nombre = null;
         $multinotaSelected->publico = 1;
+        $multinotaSelected->nivel = 1;
         $multinotaSelected->lleva_documentacion = 0;
         $multinotaSelected->muestra_mensaje = 1;
         $multinotaSelected->lleva_expediente = 0;
@@ -211,11 +214,21 @@ class MultinotaController extends Controller
         $multinotaSelected->mensaje_inicial = '';
 
         $seccionesAsociadas = [];
-        $todasLasSecciones = MultinotaController::getTodasLasSecciones();       
+        $todasLasSecciones = MultinotaController::getTodasLasSecciones();
+        Session::put('TODAS_LAS_SECCIONES', $todasLasSecciones);
         $subcategorias = [];
         $categoriasPadre = MultinotaController::getCategoriasPadre();
+        Session::put('CATEGORIAS_PADRE', $categoriasPadre);
+        $codigos = MultinotaController::getCodigosMultinotasActivas();
 
-        return view('multinotas.edit', compact('multinotaSelected', 'seccionesAsociadas', 'todasLasSecciones', 'subcategorias', 'categoriasPadre'));
+        //Se setean los datos de sesion en 'nulos'
+        Session::put('MULTINOTA_SELECTED', $multinotaSelected);
+        Session::put('SECCIONES_ASOCIADAS', []);
+        Session::put('SUBCATEGORIAS', []);
+        Session::put('IS_EDITAR', false);
+        $isEditar = Session::get('IS_EDITAR');
+
+        return view('multinotas.edit', compact('multinotaSelected', 'seccionesAsociadas', 'todasLasSecciones', 'subcategorias', 'categoriasPadre', 'codigos', 'isEditar'));
     }
 
     private static function buildMultinotaSelected($id) {
@@ -301,6 +314,12 @@ class MultinotaController extends Controller
         return array($multinotaSelected, $seccionesAsociadas, $todasLasSecciones, $categoriasPadre);
     }
 
+    public static function getCodigosMultinotasActivas() {
+        $codigos = TipoTramiteMultinota::where('baja_logica', 0)->pluck('codigo');
+
+        return $codigos;
+    }
+
     public static function getCategoriasPadre() {
         $categoriasPadre = Categoria::from('categoria as c1')
         ->join('categoria as c2', 'c1.id_padre', '=', 'c2.id_categoria')
@@ -360,7 +379,11 @@ class MultinotaController extends Controller
         $s = SeccionMultinota::where('id_seccion', $id)
             ->get();
 
-        $maxOrden = max(array_column($seccionesAsociadas, 'orden'));
+        if(count($seccionesAsociadas) == 0) {
+            $maxOrden = -1;
+        } else {
+            $maxOrden = max(array_column($seccionesAsociadas, 'orden'));
+        }
 
         if ($s) {
             $seccion = new \stdClass();
@@ -469,6 +492,9 @@ class MultinotaController extends Controller
 
     public function recargarSubcategorias($idCategoria) {
         $multinotaSelected = Session::get('MULTINOTA_SELECTED');
+        $isEditar = Session::get('IS_EDITAR');
+
+
         if((int) $idCategoria == 0) {
             $subcategorias = [];
         } else {
@@ -479,7 +505,7 @@ class MultinotaController extends Controller
         Session::put('SUBCATEGORIAS', $subcategorias);
 
         // Se renderiza el partial de las subcategorias con los datos actualizados
-        $html = view('partials.select-subcategorias', compact('multinotaSelected', 'subcategorias'))->render();
+        $html = view('partials.select-subcategorias', compact('multinotaSelected', 'subcategorias', 'isEditar'))->render();
 
         // Se retorna el JSON con el nuevo HTML
         return response()->json(['html' => $html]);
@@ -489,8 +515,14 @@ class MultinotaController extends Controller
         $multinotaSelected = Session::get('MULTINOTA_SELECTED');
         $seccionesAsociadas = Session::get('SECCIONES_ASOCIADAS');
         $categorias = Cache::get('CATEGORIAS');
+        $isEditar = Session::get('IS_EDITAR');
 
         // Se actualiza multinotaSelected
+
+        // Codigo
+        if(!$isEditar) {
+            $multinotaSelected->codigo = $request->post('codigo');
+        }
 
         // Nombre
         $multinotaSelected->nombre = $request->post('nombre');

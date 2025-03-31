@@ -49,7 +49,7 @@
                                         </select>
                                     </div>
                                     <div id="subcategorias-container" style="display: flex; flex-direction: column; width: 100%;">
-                                        @include('partials.select-subcategorias', ['multinotaSelected' => $multinotaSelected, 'subcategorias' => $subcategorias])
+                                        @include('partials.select-subcategorias', ['multinotaSelected' => $multinotaSelected, 'subcategorias' => $subcategorias, 'isEditar' => $isEditar])
                                     </div>
                                     <div style="display: flex; flex-direction: column; width: 100%;">
                                         <label style="font-weight: bold;">Código del trámite</label>
@@ -130,6 +130,8 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    var codigos = @json($codigos);
+
     const div1 = document.getElementById('seccion-datos-principales');
     const div2 = document.getElementById('seccion-mensaje-inicial');
     const div3 = document.getElementById('secciones-container');
@@ -198,6 +200,8 @@
         $('#form-previsualizar-cambios').on('submit', function(event) {
             event.preventDefault();
 
+            console.log('Codigos: ', codigos)
+
             // Check if required fields are filled
             let isValid = true;
 
@@ -215,10 +219,30 @@
                         mensajeError = 'Debe ingresar el nombre de trámite de la multinota'
                         break;
                     case 'codigo':
-                        mensajeError = 'Debe ingresar el código de la multinota'
+                        mensajeError = 'Debe ingresar un código para la multinota'
                         break;
                     default:
                         break;
+                }
+
+                for (const c of codigos) {
+                    if($("#codigo").val() == c) {
+                        mensajeError = 'El código ingresado corresponde a una multinota activa. Por favor ingrese otro.'
+                        
+                        isValid = false;
+
+                        // Show SweetAlert and stop execution
+                        Swal.fire({
+                            position: "top-end",
+                            icon: "warning",
+                            title: `${mensajeError}`,
+                            showConfirmButton: false,
+                            timer: 5000,
+                            timerProgressBar: true
+                        });
+
+                        return false; // Stops the loop early
+                    }
                 }
 
                 if ($(this).val().trim() === '') {
