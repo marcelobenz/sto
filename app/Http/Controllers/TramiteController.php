@@ -15,7 +15,10 @@ class TramiteController extends Controller
      */
     public function index()
     {
-        return view('tramites.index');
+        return view('tramites.index', [
+            'tituloPagina' => 'Todos los Trámites',
+            'soloIniciados' => false
+        ]);
     }
 
     /**
@@ -27,7 +30,10 @@ class TramiteController extends Controller
         $columnName = $request->get('columns')[$columnIndex]['data']; // Nombre de la columna
         $columnSortOrder = $request->get('order')[0]['dir']; // Orden (asc o desc)
         $searchValue = $request->get('search')['value']; // Valor de búsqueda
-    
+        $soloIniciados = $request->get('soloIniciados') === 'true';
+
+        Log::debug('soloIniciados recibido:', ['soloIniciados' => $soloIniciados]);
+
         // Construir la consulta base
         $query = DB::table('multinota as m')
             ->join('tramite as t', 'm.id_tramite', '=', 't.id_tramite')
@@ -51,7 +57,12 @@ class TramiteController extends Controller
                 DB::raw("CONCAT(u.nombre, ' ', u.apellido) as usuario_interno")
             )
             ->where('te.activo', 1);
-    
+        if ($soloIniciados) {
+            $query->where('t.flag_cancelado', '!=', 1)
+            ->where('t.flag_rechazado', '!=', 1)
+            ->where('e.nombre', 'Iniciado');
+        }
+                
         // Filtro de búsqueda
         if (!empty($searchValue)) {
             $query->where(function ($q) use ($searchValue) {
@@ -329,4 +340,14 @@ class TramiteController extends Controller
         }
 
     }
+
+    public function enCurso()
+    {
+        return view('tramites.index', [
+            'tituloPagina' => 'Trámites en Curso',
+            'soloIniciados' => true
+        ]);
+    }
+    
+    
 }

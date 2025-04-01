@@ -30,7 +30,7 @@
                     </a>
                     <div class="dropdown-menu" aria-labelledby="bandejasDropdown">
                         <a class="dropdown-item" href="#">Bandeja Personal</a>
-                        <a class="dropdown-item" href="#">Trámites en Curso</a>
+                        <a class="dropdown-item" href="{{ route('tramites.enCurso') }}">Trámites en Curso</a>
                         <a class="dropdown-item" href="{{ route('tramites.index') }}">Todos los Trámites</a>
                     </div>
                 </li>
@@ -58,6 +58,13 @@
                     </div>
                 </li>
             </ul>
+
+            <li class="nav-item ml-4">
+                <span class="navbar-text text-white font-weight-bold" id="titulo-pagina">
+                    {{ $tituloPagina ?? '' }}
+                </span>
+            </li>
+
         </div>
 
         <div class="collapse navbar-collapse" id="navbarSupportedContent">

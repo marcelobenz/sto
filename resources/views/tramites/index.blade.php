@@ -150,13 +150,20 @@
     <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script>
     <script>
+
+        // Variable para filtro de bandeja tranites en curso
+        var soloIniciados = {{ isset($soloIniciados) && $soloIniciados ? 'true' : 'false' }};
+
         $(document).ready(function() {
             var table = $('#tramitesTable').DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: {
                     url: "{{ route('tramites.data') }}",
-                    type: 'GET'
+                    type: 'GET',
+                    data: function (d) {
+                        d.soloIniciados = soloIniciados;
+                    }
                 },
                 autoWidth: false, // Desactiva el ajuste automático
                 columnDefs: [
