@@ -78,6 +78,10 @@ Route::post('/comentario/guardar', [ComentarioController::class, 'guardarComenta
 Route::get('/tramites/{id}/detalle', [TramiteController::class, 'show'])->name('tramites.detalle');
 Route::get('/tramites', [TramiteController::class, 'index'])->name('tramites.index');
 Route::get('/tramites/data', [TramiteController::class, 'getTramitesData'])->name('tramites.data');
+Route::get('/tramites/en-curso', [TramiteController::class, 'enCurso'])->name('tramites.enCurso');
+Route::post('/tramites/tomarTramite', [TramiteController::class, 'tomarTramite'])->name('tramites.tomarTramite');
+Route::post('/tramites/cambiar-prioridad', [TramiteController::class, 'cambiarPrioridad'])->name('tramites.cambiarPrioridad');
+Route::post('/tramites/darDeBaja', [TramiteController::class, 'darDeBaja'])->name('tramites.darDeBaja');
 
 //Categorías
 Route::get('/categorias', [CategoriaController::class, 'index'])->name('categorias.index');

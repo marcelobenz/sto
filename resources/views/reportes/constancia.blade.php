@@ -3,110 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Constancia de Trámite</title>
+    <title>Constancia</title>
     <style>
-        body { font-family: Arial, sans-serif; font-size: 12px; }
-        .container { width: 100%; max-width: 700px; margin: 0 auto; }
-        .title { text-align: center; font-size: 18px; font-weight: bold; }
-        .subtitle { text-align: center; font-size: 14px; margin-bottom: 20px; }
-        .section { margin-bottom: 10px; font-size: 12px; }
-        .table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .table td, .table th { border: 1px solid #000; padding: 8px; }
-        .table th { background-color: #f2f2f2; text-align: left; }
+        body { font-family: Arial, sans-serif; font-size: 14px; }
+        .container { width: 100%; padding: 20px; }
+        .header { text-align: center; font-weight: bold; font-size: 20px; }
+        .sub-header { text-align: center; font-size: 16px; margin-bottom: 10px; }
+        .section-title { font-weight: bold; font-size: 16px; margin-top: 20px; border-bottom: 1px solid black; padding-bottom: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid black; padding: 8px; text-align: left; }
         .qr-container { text-align: center; margin-top: 20px; }
-        .qr-container img { width: 150px; }
+        .footer { margin-top: 30px; text-align: center; font-size: 12px; }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <p class="title">{{ $titulo }}</p>
-        <p class="subtitle">{{ $subtitulo }}</p>
+        <!-- Encabezado -->
+        <div class="header">CONSTANCIA</div>
+        <div class="sub-header"> {{ optional($tramiteInfo)->nombre ?? 'Sin nombre' }}</div>
 
-        <table class="table">
+        <table>
             <tr>
-                <th>Nº de Trámite</th>
-                <td>{{ $id_tramite }}</td>
+                <td><strong>Nº de Trámite</strong></td>
+                <td>{{ $idTramite ?? '---' }}</td>
             </tr>
             <tr>
-                <th>Fecha de Emisión</th>
-                <td>{{ $fecha_emision }}</td>
-            </tr>
-            <tr>
-                <th>CUIT</th>
-                <td>{{ $cuit }}</td>
-            </tr>
-            <tr>
-                <th>Razón Social</th>
-                <td>{{ $razon_social }}</td>
+                <td><strong>Fecha de Emisión</strong></td>
+                <td>{{ date('d-m-Y') }}</td>
             </tr>
         </table>
 
-        <p class="section"><strong>DATOS DEL VEHÍCULO</strong></p>
-        <table class="table">
+        <!-- Datos del Titular -->
+        <div class="section-title">DATOS DEL TITULAR</div>
+        <table>
             <tr>
-                <th>Dominio</th>
-                <td>{{ $dominio }}</td>
+                <td><strong>Apellido y Nombre</strong></td>
+                <td>{{ $detalleTramite->firstWhere('nombre', 'APELLIDO Y NOMBRE')->valor ?? '---' }}</td>
             </tr>
             <tr>
-                <th>Marca</th>
-                <td>{{ $marca }}</td>
+                <td><strong>CUIL/CUIT</strong></td>
+                <td>{{ $detalleTramite->firstWhere('nombre', 'CUIL/CUIT')->valor ?? '---' }}</td>
             </tr>
             <tr>
-                <th>Modelo</th>
-                <td>{{ $modelo }}</td>
+                <td><strong>Nacionalidad</strong></td>
+                <td>{{ $detalleTramite->firstWhere('nombre', 'NACIONALIDAD')->valor ?? '---' }}</td>
             </tr>
             <tr>
-                <th>Año</th>
-                <td>{{ $anio }}</td>
+                <td><strong>Teléfono</strong></td>
+                <td>{{ $detalleTramite->firstWhere('nombre', 'TELEFONO')->valor ?? '---' }}</td>
             </tr>
             <tr>
-                <th>Color</th>
-                <td>{{ $color }}</td>
-            </tr>
-        </table>
-
-        <p class="section"><strong>DATOS DEL TITULAR</strong></p>
-        <table class="table">
-            <tr>
-                <th>Apellido y Nombre</th>
-                <td>{{ $razon_social }}</td>
-            </tr>
-            <tr>
-                <th>DNI</th>
-                <td>{{ $dni }}</td>
-            </tr>
-            <tr>
-                <th>CUIL/CUIT</th>
-                <td>{{ $cuit }}</td>
-            </tr>
-            <tr>
-                <th>Nacionalidad</th>
-                <td>{{ $nacionalidad }}</td>
-            </tr>
-            <tr>
-                <th>Teléfono</th>
-                <td>{{ $telefono }}</td>
+                <td><strong>DNI</strong></td>
+                <td>{{ $detalleTramite->firstWhere('nombre', 'D.N.I')->valor ?? '---' }}</td>
             </tr>
         </table>
 
-        <p class="section"><strong>MOTIVO</strong></p>
-        <table class="table">
+        <!-- Datos del Automotor -->
+        <div class="section-title">DATOS DEL AUTOMOTOR</div>
+        <table>
             <tr>
-                <th>Motivo</th>
-                <td>{{ $motivo }}</td>
+                <td><strong>Dominio</strong></td>
+                <td>{{ $detalleTramite->firstWhere('nombre', 'DOMINIO')->valor ?? '---' }}</td>
             </tr>
             <tr>
-                <th>Mensaje</th>
-                <td>{{ $mensaje }}</td>
+                <td><strong>Marca</strong></td>
+                <td>{{ $detalleTramite->firstWhere('nombre', 'MARCA')->valor ?? '---' }}</td>
+            </tr>
+            <tr>
+                <td><strong>Modelo</strong></td>
+                <td>{{ $detalleTramite->firstWhere('nombre', 'MODELO')->valor ?? '---' }}</td>
+            </tr>
+            <tr>
+                <td><strong>Año</strong></td>
+                <td>{{ $detalleTramite->firstWhere('nombre', 'AÑO')->valor ?? '---' }}</td>
+            </tr>
+            <tr>
+                <td><strong>Color</strong></td>
+                <td>{{ $detalleTramite->firstWhere('nombre', 'COLOR')->valor ?? '---' }}</td>
             </tr>
         </table>
 
-        <p style="text-align: center; margin-top: 20px;">Por lo expuesto, se extiende la presente a pedido del interesado y al sólo efecto de servir como constancia de inicio de trámite.</p>
+        <!-- Motivo -->
+        <div class="section-title">MOTIVO</div>
+        <table>
+            <tr>
+                <td><strong>Motivo</strong></td>
+                <td>{{ $tramiteInfo->motivo ?? '---' }}</td>
+            </tr>
+        </table>
 
-        <div class="qr-container">
-            <p>Escanea el código QR para ver el trámite:</p>
-            <img src="data:image/png;base64,{{ $qr }}" alt="Código QR">
-        </div>    
+        <!-- Mensaje -->
+        <div class="section-title">MENSAJE</div>
+        <table>
+            <tr>
+                <td>{{ $mensaje ?? 'Sin mensaje' }}</td>
+            </tr>
+        </table>
+
+        <!-- Código QR -->
+        @if(isset($qr))
+            <div class="qr-container">
+                <img src="data:image/png;base64,{{ $qr }}" alt="Código QR">
+            </div>
+        @endif
+
+        <!-- Pie de Página -->
+        <div class="footer">
+            Por lo expuesto, se extiende la presente a pedido del interesado y al sólo efecto de servir como constancia de inicio de trámite.
+        </div>
     </div>
+
 </body>
 </html>
