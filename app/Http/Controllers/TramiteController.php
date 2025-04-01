@@ -15,6 +15,7 @@ class TramiteController extends Controller
      */
     public function index()
     {
+
         return view('tramites.index', [
             'tituloPagina' => 'Todos los Trámites',
             'soloIniciados' => false
@@ -119,6 +120,8 @@ class TramiteController extends Controller
 
     public function show($idTramite)
     {
+        $usuarios = DB::table('usuario_interno')->orderBy('apellido')->get(); // 👉 esta línea
+
         $detalleTramite = DB::table('multinota_seccion_valor as ms')
             ->join('seccion as s', 'ms.id_seccion', '=', 's.id_seccion')
             ->join('campo as c', 'ms.id_campo', '=', 'c.id_campo')
@@ -181,7 +184,7 @@ class TramiteController extends Controller
 
         $prioridades = DB::table('prioridad')->orderBy('id_prioridad')->get();
 
-        return view('tramites.detalle', compact('detalleTramite', 'idTramite', 'tramiteInfo', 'historialTramite', 'tramiteArchivo', 'prioridades'));
+        return view('tramites.detalle', compact('detalleTramite', 'idTramite', 'tramiteInfo', 'historialTramite', 'tramiteArchivo', 'prioridades', 'usuarios'));
     }
 
     public function darDeBaja(Request $request)
@@ -312,11 +315,11 @@ class TramiteController extends Controller
 
             // 3️⃣ Insertar el evento
             $idEvento = DB::table('evento')->insertGetId([
-                'descripcion' => 'Se reasignó el trámite',
+                'descripcion' => 'Se tomó el trámite',
                 'fecha_alta' => now(),
                 'fecha_modificacion' => now(),
-                'id_tipo_evento' => 3,
-                'clave' => 'ASIGNACIÓN'
+                'id_tipo_evento' => 22,
+                'clave' => 'TRAMITE_TOMADO'
             ]);
             Log::debug("Evento insertado con ID: " . $idEvento);
     
@@ -344,10 +347,50 @@ class TramiteController extends Controller
     public function enCurso()
     {
         return view('tramites.index', [
-            'tituloPagina' => 'Trámites en Curso',
-            'soloIniciados' => true
+            'soloIniciados' => true,
+            'tituloPagina' => 'Trámites en Curso'
         ]);
     }
     
+    public function reasignar(Request $request)
+    {
+        try {
+            $idTramite = $request->input('idTramite');
+            $idUsuario = $request->input('id_usuario_interno');
     
+            DB::beginTransaction();
+    
+            DB::table('tramite_estado_tramite')
+                ->where('id_tramite', $idTramite)
+                ->where('activo', 1)
+                ->update([
+                    'id_usuario_interno' => $idUsuario,
+                    'fecha_sistema' => now()
+                ]);
+    
+            $idEvento = DB::table('evento')->insertGetId([
+                'descripcion' => 'Se reasignó el trámite a otro usuario',
+                'fecha_alta' => now(),
+                'fecha_modificacion' => now(),
+                'id_tipo_evento' => 3,
+                'clave' => 'REASIGNACIÓN'
+            ]);
+    
+            DB::table('historial_tramite')->insert([
+                'fecha' => now(),
+                'id_tramite' => $idTramite,
+                'id_evento' => $idEvento,
+                'id_usuario_interno_asignado' => $idUsuario
+            ]);
+    
+            DB::commit();
+    
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error en reasignarTramite: ' . $e->getMessage());
+            return response()->json(['success' => false]);
+        }
+    }
+        
 }

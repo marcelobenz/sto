@@ -34,6 +34,7 @@ Route::get('/', function () {
     return view('navbar');
 });*/
 
+Route::post('/tramites/reasignar', [TramiteController::class, 'reasignar'])->name('tramites.reasignar');
 Route::get('/tramites/en-curso', [TramiteController::class, 'enCurso'])->name('tramites.enCurso');
 Route::post('/tramites/tomarTramite', [TramiteController::class, 'tomarTramite'])->name('tramites.tomarTramite');
 Route::post('/tramites/cambiar-prioridad', [TramiteController::class, 'cambiarPrioridad'])->name('tramites.cambiarPrioridad');

@@ -58,7 +58,7 @@
                 </div>
             </div>
             <div class="ms-3 d-flex gap-1">
-                <button class="btn btn-warning" title="Reasignar"><i class="fas fa-random"></i></button>
+                <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalReasignarTramite" data-id="{{ $idTramite }}" title="Reasignar"><i class="fas fa-random"></i></button>
                 <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalCambiarPrioridad" title="Cambiar prioridad"><i class="fas fa-exclamation"></i></button>
                 <button class="btn btn-primary" onclick="tomarTramite({{ $idTramite }})" title="Tomar"><i class="fas fa-sign-out-alt"></i></button>
                 <button class="btn btn-danger" onclick="darDeBajaTramite({{ $idTramite }})" title="Dar de baja"><i class="fas fa-ban"></i></button>
@@ -72,7 +72,7 @@
                 <table class="table table-striped table-hover">
                     <thead class="table-dark">
                         <tr>
-                            <th class="text-center fs-4" colspan="4">Información</th>
+                            <th class="text-center fs-5" colspan="4">Información</th>
                         </tr>
                     </thead>
                 </table>
@@ -112,7 +112,7 @@
                 <div class="table-responsive" style="max-height: 300px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 8px;">
                     <table class="table table-striped table-hover">
                         <thead class="table-dark">
-                            <tr><th class="text-center fs-4">Comentarios</th></tr>
+                            <tr><th class="text-center fs-5">Comentarios</th></tr>
                         </thead>
                         <tbody>
                             <tr>
@@ -142,7 +142,7 @@
                 <div class="table-responsive" style="max-height: 200px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 8px;">
                     <table class="table table-striped table-hover">
                         <thead class="table-dark">
-                            <tr><th class="text-center fs-4" colspan="4">Adjuntos</th></tr>
+                            <tr><th class="text-center fs-5" colspan="4">Adjuntos</th></tr>
                         </thead>
                         <tbody>
                             @foreach($tramiteArchivo as $tramiteArchivo)
@@ -181,7 +181,7 @@
                     <div class="table-responsive" style="max-height: 300px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 8px;">
                         <table class="table table-striped table-hover">
                             <thead class="table-dark">
-                                <tr><th colspan="4" class="text-center fs-4">Historial</th></tr>
+                                <tr><th colspan="4" class="text-center fs-5">Historial</th></tr>
                             </thead>
                             <tbody>
                                 @forelse($historialTramite as $evento)
@@ -232,6 +232,37 @@
         </form>
     </div>
 </div>
+
+<!-- Modal Reasignar Trámite -->
+<div class="modal fade" id="modalReasignarTramite" tabindex="-1" aria-labelledby="modalReasignarTramiteLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Reasignar Trámite</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formReasignarTramite">
+          @csrf
+          <input type="hidden" name="idTramite" id="idTramiteReasignar">
+          <div class="form-group">
+            <label for="usuarioSelect">Seleccione un usuario:</label>
+            <select class="form-control" id="usuarioSelect" name="id_usuario_interno">
+              @foreach ($usuarios as $usuario)
+                  <option value="{{ $usuario->id_usuario_interno }}">{{ $usuario->nombre }} {{ $usuario->apellido }}</option>
+              @endforeach
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" onclick="reasignarTramite()">Reasignar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 @endsection
 
 @section('scripting')
@@ -279,5 +310,25 @@
                 });
         }
     }
+
+    $('#modalReasignarTramite').on('show.bs.modal', function (event) {
+        const button = $(event.relatedTarget);
+        const idTramite = button.data('id');
+        $('#idTramiteReasignar').val(idTramite);
+    });
+
+    function reasignarTramite() {
+        const data = $('#formReasignarTramite').serialize();
+
+        $.post("{{ route('tramites.reasignar') }}", data, function(response) {
+            if (response.success) {
+                $('#modalReasignarTramite').modal('hide');
+                location.reload();
+            } else {
+                alert("Error al reasignar trámite.");
+            }
+        });
+    }
+
 </script>
 @endsection
