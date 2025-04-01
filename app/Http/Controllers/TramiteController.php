@@ -119,9 +119,21 @@ class TramiteController extends Controller
         $tramiteInfo = DB::table('multinota as m')
             ->where('m.id_tramite', $idTramite)
             ->join('tipo_tramite_multinota as ttm', 'm.id_tipo_tramite_multinota', '=', 'ttm.id_tipo_tramite_multinota')
-            ->select('ttm.nombre', 'm.fecha_alta')
+            ->leftJoin('tramite_estado_tramite as tet', function($join) {
+                $join->on('tet.id_tramite', '=', 'm.id_tramite')
+                     ->where('tet.activo', 1);
+            })
+            ->leftJoin('usuario_interno as ui', 'ui.id_usuario_interno', '=', 'tet.id_usuario_interno')
+            ->leftJoin('estado_tramite as et', 'et.id_estado_tramite', '=', 'tet.id_estado_tramite')
+            ->select(
+                'ttm.nombre',
+                'm.fecha_alta',
+                'ui.nombre as nombre_usuario',
+                'ui.apellido as apellido_usuario',
+                'et.nombre as estado_actual'
+            )
             ->first();
-
+        
         $historialTramite = DB::table('historial_tramite as h')
             ->join('evento as e', 'h.id_evento', '=', 'e.id_evento')
             ->join('usuario_interno as u', 'h.id_usuario_interno_asignado', '=', 'u.id_usuario_interno')
