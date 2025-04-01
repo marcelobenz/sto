@@ -415,13 +415,30 @@ class SeccionesMultinotaController extends Controller
         return view('secciones-multinota.index');
     }
 
-    public function updateSeccion(Request $request) {
-        $campos = Campo::hydrate($request->input('array'));
-        foreach ($campos as $index => $c) {
+    public function setearNuevoOrdenCampos($array) {
+        $campos = Session::get('CAMPOS_ACTUALES');
+        $camposArray = $campos->map(function ($item) {
+            return (object) $item;
+        })->all();
+
+        // Se guardan los IDs de los campos, parseados y en orden en un array
+        $arrayIdsCampoOrdenados = explode(',', $array);
+
+        // Se reubican los campos
+        $camposOrdenados = [];
+        foreach ($arrayIdsCampoOrdenados as $index => $id) {
+            $camposOrdenados[] = current(array_filter($camposArray, fn($c) => $c->id_campo == (int) $id));
+        }
+
+        // Se acomoda el atributo 'orden'
+        foreach ($camposOrdenados as $index => $c) {
             $c->orden = $index;
         }
+
+        // Se setean los campos en sesion
+        $campos = collect($camposOrdenados);
+
         Session::put('CAMPOS_ACTUALES', $campos);
-        $seccion = Session::get('SECCION_ACTUAL');
 
         // Render the partial view with updated data
         $html = view('partials.seccion-campos', compact('campos'))->render();
@@ -443,14 +460,6 @@ class SeccionesMultinotaController extends Controller
 
         // Return JSON response with rendered HTML
         return response()->json(['html' => $html]);
-    }
-
-    public function refresh() {
-        $campos = Session::get('CAMPOS_ACTUALES');
-
-        return response()->json([
-            'updatedCampos' => $campos,
-        ]);
     }
 
     public function refreshOpcionesCampo() {

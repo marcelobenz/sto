@@ -47,6 +47,7 @@ Route::get('/secciones-multinota/nuevoCampo', [SeccionesMultinotaController::cla
 Route::post('/secciones-multinota/actualizarDatosCampo', [SeccionesMultinotaController::class, 'actualizarDatosCampo'])->name('secciones-multinota.actualizarDatosCampo');
 Route::get('/secciones-multinota/{id}/deleteCampo', [SeccionesMultinotaController::class, 'deleteCampo'])->name('secciones-multinota.deleteCampo');
 Route::post('/secciones-multinota/updateSeccion', [SeccionesMultinotaController::class, 'updateSeccion'])->name('secciones-multinota.updateSeccion');
+Route::get('/secciones-multinota/setearNuevoOrdenCampos/{array}', [SeccionesMultinotaController::class, 'setearNuevoOrdenCampos'])->name('secciones-multinota.setearNuevoOrdenCampos');
 Route::get('/secciones-multinota/addOpcionCampo/{nueva_opcion}', [SeccionesMultinotaController::class, 'addOpcionCampo'])->name('secciones-multinota.addOpcionCampo');
 Route::get('/secciones-multinota/getOpcionesCampo', [SeccionesMultinotaController::class, 'getOpcionesCampo'])->name('secciones-multinota.getOpcionesCampo');
 Route::get('/secciones-multinota/getOpcionesCampoAlfabeticamente', [SeccionesMultinotaController::class, 'getOpcionesCampoAlfabeticamente'])->name('secciones-multinota.getOpcionesCampoAlfabeticamente');
