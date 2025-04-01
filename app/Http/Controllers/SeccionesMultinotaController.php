@@ -435,39 +435,44 @@ class SeccionesMultinotaController extends Controller
             $c->orden = $index;
         }
 
-        // Se setean los campos en sesion
+        // Se convierte el array de campos ordenados en la coleccion correspondiente al modelo de Eloquent
         $campos = collect($camposOrdenados);
 
+        // Se setean los campos en sesion
         Session::put('CAMPOS_ACTUALES', $campos);
 
-        // Render the partial view with updated data
         $html = view('partials.seccion-campos', compact('campos'))->render();
-
-        // Return JSON response with rendered HTML
         return response()->json(['html' => $html]);
     }
 
-    public function updateSeccionOpcionesCampo(Request $request) {
-        //TO-DO - Checkear porque estoy usando Campo::hydrate. No se si esta bien
-        $opcionesCampo = Campo::hydrate($request->input('array'));
-        foreach ($opcionesCampo as $index => $opc) {
+    public function setearNuevoOrdenOpcionesCampo($array) {
+        $opcionesCampo = Session::get('OPCIONES_CAMPO_ACTUALES');
+        $opcionesCampoArray = $opcionesCampo->map(function ($item) {
+            return (object) $item;
+        })->all();
+
+        // Se guardan los IDs de las opciones, parseados y en orden en un array
+        $arrayIdsOpcionesCampoOrdenados = explode(',', $array);
+
+        // Se reubican las opciones
+        $opcionesCampoOrdenadas = [];
+        foreach ($arrayIdsOpcionesCampoOrdenados as $index => $id) {
+            $opcionesCampoOrdenadas[] = current(array_filter($opcionesCampoArray, fn($opc) => $opc->id_opcion_campo == (int) $id));
+        }
+
+        // Se acomoda el atributo 'orden'
+        foreach ($opcionesCampoOrdenadas as $index => $opc) {
             $opc->orden = $index;
         }
+
+        //Se convierte el array de opciones ordenadas en la coleccion correspondiente al modelo de Eloquent
+        $opcionesCampo = collect($opcionesCampoOrdenadas);
+
+        // Se setean las opciones en sesion
         Session::put('OPCIONES_CAMPO_ACTUALES', $opcionesCampo);
 
-        // Render the partial view with updated data
         $html = view('partials.seccion-opciones-campo', compact('opcionesCampo'))->render();
-
-        // Return JSON response with rendered HTML
         return response()->json(['html' => $html]);
-    }
-
-    public function refreshOpcionesCampo() {
-        $opcionesCampo = Session::get('OPCIONES_CAMPO_ACTUALES');
-
-        return response()->json([
-            'updatedOpcionesCampo' => $opcionesCampo,
-        ]);
     }
 
     public function setCampos(String $campos) {

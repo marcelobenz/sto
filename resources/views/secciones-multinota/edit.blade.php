@@ -235,7 +235,7 @@
         draggedRow = null; // Reset
     }
 
-    function handleDragEnter(event) {
+    function handleDragEnterCampo(event) {
         event.preventDefault();
         const container = document.querySelector('#tabla-campos');
         const isEmptySpace = !event.target.closest('.fila-campo');
@@ -252,130 +252,109 @@
         }
     }
 
-    document.querySelectorAll('.seccion').forEach(seccion => {
-        seccion.addEventListener('dragstart', handleDragCamposStart);
-        seccion.addEventListener('dragover', handleDragCamposOver);
-        seccion.addEventListener('drop', handleDropCampos);
+    document.querySelectorAll('.fila-campo').forEach(filaCampo => {
+        filaCampo.addEventListener('dragstart', handleDragCamposStart);
+        filaCampo.addEventListener('dragover', handleDragCamposOver);
+        filaCampo.addEventListener('drop', handleDropCampos);
     });
 
-    document.querySelector('#tabla-campos').addEventListener('dragover', handleDragEnter);
+    document.querySelector('#tabla-campos').addEventListener('dragover', handleDragEnterCampo);
 
     //Drag handlers de opciones de campos
 
-    function handleDragOpcionesCampoStart(){  
-        row = event.target;
+    function handleDragOpcionesCampoStart(event) {
+        draggedRow = event.target.closest('.fila-opcion-campo');
+        event.dataTransfer.effectAllowed = 'move';
+    }
 
-        fetch("{{ route('secciones-multinota.refreshOpcionesCampo') }}", {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+    function handleDragOpcionesCampoOver(event) {
+        event.preventDefault();
+
+        const container = document.querySelector('#tabla-opciones-campo');
+        const targetRow = event.target.closest('.fila-opcion-campo');
+
+        if (!targetRow || targetRow === draggedRow) return;
+
+        const rows = Array.from(container.children);
+
+        // Get bounding rectangles to check cursor position
+        const targetRect = targetRow.getBoundingClientRect();
+        const offset = event.clientY - targetRect.top;
+
+        if (offset < targetRect.height / 2) {
+            targetRow.before(draggedRow); // Move up (including to the first position)
+        } else {
+            targetRow.after(draggedRow); // Move down
+        }
+    }
+
+    function handleDropOpcionesCampo(event) {
+        event.preventDefault();
+
+        const container = document.querySelector('#tabla-opciones-campo');
+        const rows = Array.from(container.children);
+
+        arrayOpcionesCampo = rows.map(row => row.dataset.id);
+        console.log('Updated array:', arrayOpcionesCampo);
+
+        // Se llama funcion del controlador para setear nuevo orden
+        $.ajax({
+            type: 'GET',
+            url: `/secciones-multinota/setearNuevoOrdenOpcionesCampo/${arrayOpcionesCampo}`,
+            success: function(data) {
+                $('#opciones-div').html(data.html);
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            arrayOpcionesCampo = data.updatedOpcionesCampo;
-        })
-        .catch(error => console.error('Error:', error));
+        });
+
+        draggedRow = null; // Reset
     }
 
-    function handleDragOpcionesCampoOver(){
-        let e = event;
-        e.preventDefault();
+    function handleDragEnterOpcionesCampo(event) {
+        event.preventDefault();
+        const container = document.querySelector('#tabla-opciones-campo');
+        const isEmptySpace = !event.target.closest('.fila-opcion-campo');
 
-        if (!isDraggingOver) {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => {
-                isDraggingOver = true;
-                /* var arrayOpcionesCampo = @json(session('OPCIONES_CAMPO_ACTUALES')); */
-                console.log('Array entrante: ' + JSON.stringify(arrayOpcionesCampo));
-                
-                let children = Array.from(e.target.parentNode.parentNode.children);
-                
-                //row: el que draggeas, e.target.parentNode: el reemplazado
-                if(children.indexOf(e.target.parentNode) > children.indexOf(row)) {
-                    //De arriba hacia abajo
-                    e.target.parentNode.after(row);
-                    moveElement(arrayOpcionesCampo, children.indexOf(row), children.indexOf(e.target.parentNode));
-                    console.log('Array modificado: ' + JSON.stringify(arrayOpcionesCampo));
-                    updateSeccionOpcionesCampo(arrayOpcionesCampo);
-                } else {
-                    //De abajo hacia arriba
-                    e.target.parentNode.before(row);
-                    moveElement(arrayOpcionesCampo, children.indexOf(row), children.indexOf(e.target.parentNode));
-                    console.log('Array modificado: ' + JSON.stringify(arrayOpcionesCampo));
-                    updateSeccionOpcionesCampo(arrayOpcionesCampo);
-                }
-            }, 500);
+        if (isEmptySpace && draggedRow) {
+            const rows = Array.from(container.children);
+
+            // Check if dragging above the first element
+            if (event.clientY < rows[0].getBoundingClientRect().top) {
+                container.prepend(draggedRow); // Move to the first position
+            } else {
+                container.appendChild(draggedRow); // Move to the last position
+            }
         }
     }
 
-    function handleDragOpcionesCampoLeave() {
-        isDraggingOver = false;
-    }
+    document.querySelectorAll('.fila-opcion-campo').forEach(fila => {
+        fila.addEventListener('dragstart', handleDragOpcionesCampoStart);
+        fila.addEventListener('dragover', handleDragOpcionesCampoOver);
+        fila.addEventListener('drop', handleDropOpcionesCampo);
+    });
 
-    function moveElement(arr, fromIndex, toIndex) {
-        // Check if indices are within bounds
-        if (fromIndex < 0 || fromIndex >= arr.length || toIndex < 0 || toIndex >= arr.length) {
-            console.error("Invalid index");
-            return arr; // Return the original array if indices are invalid
-        }
-
-        // Remove the element from its original position
-        const [element] = arr.splice(fromIndex, 1); // Remove 1 element at fromIndex
-
-        // Insert the element at the new position
-        arr.splice(toIndex, 0, element); // Insert at toIndex
-
-        return arr; // Return the modified array
-    }
-
-    function updateSeccionOpcionesCampo(arrayOpcionesCampo) {
-        fetch("{{ route('secciones-multinota.updateSeccionOpcionesCampo') }}", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({ array: arrayOpcionesCampo })
-        })
-        .then(response => response.json())
-        .then(data => {
-            $('#opciones-div').html(data.html);
-        })
-        .catch(error => console.error('Error:', error));
-    }
+    document.querySelector('#tabla-opciones-campo').addEventListener('dragover', handleDragEnterOpcionesCampo);
 </script>
 
 <style>
-    /* tr {
-        cursor: grab;
-    }
-    tr:active {
-       cursor: grabbing !important;
-    } */
-
-    .fila-campo {
+    .fila-campo, .fila-opcion-campo {
         background-color: #ededed;
         border: 1px solid black;
-        /* border-radius: 10px; */
         padding: 10px;
         cursor: grab;
         transition: all 0.2s ease;
         position: relative;
-        /* display: inline-block; */
     }
 
-    .fila-campo:active {
+    .fila-campo:active, .fila-opcion-campo:active {
         cursor: grabbing;
         opacity: 0.7;
     }
 
-    .fila-campo.dragging {
+    .fila-campo.dragging, .fila-opcion-campo.dragging {
         opacity: 0.5;
     }
 
-    .fila-campo:hover {
+    .fila-campo:hover, .fila-opcion-campo:hover {
         background-color: #b9b7b7;
     }
 </style>
