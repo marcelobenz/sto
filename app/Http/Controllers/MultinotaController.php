@@ -174,7 +174,12 @@ class MultinotaController extends Controller
     }
 
     public function view($id) {
-        $array = MultinotaController::buildMultinotaSelected($id);
+        $data = Cache::get('DATA_MULTINOTAS');
+        if($data == null) {
+            return redirect()->route('multinotas.index');
+        }
+
+        $array = MultinotaController::buildMultinotaSelected($id, $data);
 
         $multinotaSelected = $array[0];
         $seccionesAsociadas = $array[1];
@@ -183,7 +188,12 @@ class MultinotaController extends Controller
     }
 
     public function edit($id) {
-        $array = MultinotaController::buildMultinotaSelected($id);
+        $data = Cache::get('DATA_MULTINOTAS');
+        if($data == null) {
+            return redirect()->route('multinotas.index');
+        }
+
+        $array = MultinotaController::buildMultinotaSelected($id, $data);
 
         $multinotaSelected = $array[0];
         $seccionesAsociadas = $array[1];
@@ -232,8 +242,7 @@ class MultinotaController extends Controller
         return view('multinotas.edit', compact('multinotaSelected', 'seccionesAsociadas', 'todasLasSecciones', 'subcategorias', 'categoriasPadre', 'codigos', 'isEditar'));
     }
 
-    private static function buildMultinotaSelected($id) {
-        $data = Cache::get('DATA_MULTINOTAS');
+    private static function buildMultinotaSelected($id, $data) {
         $categorias = Cache::get('CATEGORIAS');
         $multinotaSelected = null;
 
@@ -456,18 +465,18 @@ class MultinotaController extends Controller
     public function setearNuevoOrdenSeccion($array) {
         $seccionesAsociadas = Session::get('SECCIONES_ASOCIADAS');
 
-        // Se guardan los IDs de multinota, parseados y en orden en un array
-        $arrayIdsMultinotaOrdenados = explode(',', $array);
+        // Se guardan los IDs de las secciones multinota, parseados y en orden en un array
+        $arrayIdsSeccionOrdenados = explode(',', $array);
 
         foreach ($seccionesAsociadas as $index => $s) {
             if(count(Session::get('SECCIONES_ASOCIADAS')[$index]->campos) == 0) {
-                array_splice($arrayIdsMultinotaOrdenados, $index, 0, $s->id_seccion);
+                array_splice($arrayIdsSeccionOrdenados, $index, 0, $s->id_seccion);
             }
         }
 
         // Se reubican las secciones
         $seccionesOrdenadas = [];
-        foreach ($arrayIdsMultinotaOrdenados as $id) {
+        foreach ($arrayIdsSeccionOrdenados as $id) {
             $seccionesOrdenadas[] = current(array_filter($seccionesAsociadas, fn($s) => $s->id_seccion == (int) $id));
         }
 
