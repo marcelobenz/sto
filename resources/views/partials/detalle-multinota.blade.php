@@ -25,7 +25,7 @@
                 <label>{{ $multinotaSelected->nombre }}
             </div>
             <div style="display: flex; flex-direction: column;">
-                <label>Público</label>
+                <label>Pública</label>
                 <label>
                     @if ($multinotaSelected->publico == '1')
                         Sí
@@ -67,6 +67,7 @@
         </div>
     </div>
 </div>
+@if ($multinotaSelected->muestra_mensaje == '1')
 <div class="card-body">
     <h3>Mensaje</h3>
     <div style="display: flex; width: 100%; border-top: 2px solid gray;">
@@ -75,6 +76,7 @@
         </div>
     </div>
 </div>
+@endif
 <div class="card-body">
     <div style="display: flex; width: 100%; border-top: 2px solid gray;">
         <div style="display: flex; flex-direction: column; width: 100%; margin-top: 10px; gap: 10px;">

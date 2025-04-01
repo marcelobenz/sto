@@ -73,12 +73,12 @@
                 </div>
             </div>
             <div style="background-color: #ededed; padding: 40px 10px;">
-                 {{-- <form method="GET" action="{{ route('multinotas.crearNuevaMultinota') }}">
-                @csrf --}}
-                <div style="display: flex; justify-content: flex-end;">
-                    <button type="submit" id="boton-crear-multinota" class="btn btn-primary">Crear</button>
-                </div>
-                {{-- </form> --}}
+                <form method="GET" action="{{ route('multinotas.crearNuevaMultinota') }}">
+                    @csrf
+                    <div style="display: flex; justify-content: flex-end;">
+                        <button type="submit" id="boton-crear-multinota" class="btn btn-primary">Crear</button>
+                    </div>
+                </form>
                 <table id="multinotas-table" class="table table-bordered table-striped table-hover">
                     <h3>LISTADO</h1>
                     <thead>
@@ -129,7 +129,7 @@
                         "data": null,
                         "render": function(data, type, row) {
                             return `
-                                <input type="checkbox" id="publico" name="publico" ${row.publico === 1 ? 'checked' : ''}>
+                                <input onclick="return false;" type="checkbox" id="publico" name="publico" ${row.publico === 1 ? 'checked' : ''}>
                             `;
                         }
                     },
@@ -137,7 +137,7 @@
                         "data": null,
                         "render": function(data, type, row) {
                             return `
-                                <input type="checkbox" id="muestra_mensaje" name="muestra_mensaje" ${row.muestra_mensaje === 1 ? 'checked' : ''}>
+                                <input onclick="return false;" type="checkbox" id="muestra_mensaje" name="muestra_mensaje" ${row.muestra_mensaje === 1 ? 'checked' : ''}>
                             `;
                         }
                     },
@@ -174,6 +174,46 @@
 
         function editarMultinota(id) {
             window.location.href = `/multinotas/${id}/edit`;
+        }
+
+        function confirmarEliminar(id) {
+            Swal.fire({
+                title: '¿Está seguro que desea eliminar la multinota?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/multinotas/' + id + '/desactivar',
+                        type: 'PUT', 
+                        data: {
+                            _token: '{{ csrf_token() }}',
+                        },
+                        success: function(response) {
+                            console.log('Sección desactivada correctamente.');
+                            Swal.fire(
+                                'Eliminado!',
+                                'La multinota ha sido eliminada.',
+                                'success'
+                            )
+                            // Recargar la tabla para reflejar el cambio
+                            $('#multinotas-table').DataTable().ajax.reload(null, false); // false mantiene la página actual
+                        },
+                        error: function(err) {
+                            console.error('Error al desactivar la multinota.');
+                            Swal.fire(
+                                'Error!',
+                                'Hubo un problema al eliminar la multinota.',
+                                'error'
+                            )
+                        }
+                    });
+                } else {
+                    console.log('Se canceló desactivación de multinota con ID: ' + id);
+                }
+            });
         }
     </script>
 @endsection

@@ -2,7 +2,7 @@
 <script>
     tinymce.init({
         selector: 'textarea#myeditorinstance', // Match the textarea ID
-        plugins: 'powerpaste advcode table lists checklist',
+        plugins: 'lists, image, link, table',
         toolbar: 'undo redo | blocks | bold italic | bullist numlist checklist | code | table'
     });
 </script>

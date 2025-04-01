@@ -48,8 +48,8 @@
                         <a class="dropdown-item" href="usuario">Usuarios</a>
                         <a class="dropdown-item" href="cuestionarios">Cuestionarios</a>
                         <a class="dropdown-item" href="estados">Estados</a>
-                        <a class="dropdown-item" href="secciones-multinota">Secciones Multinota</a>
-                    	<a class="dropdown-item" href="multinotas">Multinotas</a>
+                        <a class="dropdown-item" href="{{ route('secciones-multinota.index') }}">Secciones Multinota</a>
+                        <a class="dropdown-item" href="{{ route('multinotas.index') }}">Multinotas</a>
                     </div>
                 </li>
                 <li class="nav-item dropdown">

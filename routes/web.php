@@ -93,16 +93,14 @@ Route::get('/secciones-multinota/{id}/select', [SeccionesMultinotaController::cl
 Route::get('/secciones-multinota/nuevoCampo', [SeccionesMultinotaController::class, 'nuevoCampo'])->name('secciones-multinota.nuevoCampo');
 Route::post('/secciones-multinota/actualizarDatosCampo', [SeccionesMultinotaController::class, 'actualizarDatosCampo'])->name('secciones-multinota.actualizarDatosCampo');
 Route::get('/secciones-multinota/{id}/deleteCampo', [SeccionesMultinotaController::class, 'deleteCampo'])->name('secciones-multinota.deleteCampo');
-Route::post('/secciones-multinota/updateSeccion', [SeccionesMultinotaController::class, 'updateSeccion'])->name('secciones-multinota.updateSeccion');
+Route::get('/secciones-multinota/setearNuevoOrdenCampos/{array}', [SeccionesMultinotaController::class, 'setearNuevoOrdenCampos'])->name('secciones-multinota.setearNuevoOrdenCampos');
+Route::get('/secciones-multinota/setearNuevoOrdenOpcionesCampo/{array}', [SeccionesMultinotaController::class, 'setearNuevoOrdenOpcionesCampo'])->name('secciones-multinota.setearNuevoOrdenOpcionesCampo');
 Route::get('/secciones-multinota/addOpcionCampo/{nueva_opcion}', [SeccionesMultinotaController::class, 'addOpcionCampo'])->name('secciones-multinota.addOpcionCampo');
 Route::get('/secciones-multinota/getOpcionesCampo', [SeccionesMultinotaController::class, 'getOpcionesCampo'])->name('secciones-multinota.getOpcionesCampo');
 Route::get('/secciones-multinota/getOpcionesCampoAlfabeticamente', [SeccionesMultinotaController::class, 'getOpcionesCampoAlfabeticamente'])->name('secciones-multinota.getOpcionesCampoAlfabeticamente');
 Route::get('/secciones-multinota/getOpcionesFormTipoCampo/{nombre_campo}/{tipo}', [SeccionesMultinotaController::class, 'getOpcionesFormTipoCampo'])->name('secciones-multinota.getOpcionesFormTipoCampo');
 Route::get('/secciones-multinota/deleteOpcionCampo/{id}', [SeccionesMultinotaController::class, 'deleteOpcionCampo'])->name('secciones-multinota.deleteOpcionCampo');
 Route::get('/secciones-multinota/{id}/edit', [SeccionesMultinotaController::class, 'edit'])->name('secciones-multinota.edit');
-Route::post('/secciones-multinota/updateSeccionOpcionesCampo', [SeccionesMultinotaController::class, 'updateSeccionOpcionesCampo'])->name('secciones-multinota.updateSeccionOpcionesCampo');
-Route::get('/secciones-multinota/refresh', [SeccionesMultinotaController::class, 'refresh'])->name('secciones-multinota.refresh');
-Route::get('/secciones-multinota/refreshOpcionesCampo', [SeccionesMultinotaController::class, 'refreshOpcionesCampo'])->name('secciones-multinota.refreshOpcionesCampo');
 Route::get('/secciones-multinota/crearNuevaSeccion', [SeccionesMultinotaController::class, 'crearNuevaSeccion'])->name('secciones-multinota.crearNuevaSeccion');
 Route::post('/secciones-multinota/editarSeccion', [SeccionesMultinotaController::class, 'editarSeccion'])->name('secciones-multinota.editarSeccion');
 Route::put('/secciones-multinota/{id}/desactivar', [SeccionesMultinotaController::class, 'desactivarSeccion'])->name('secciones-multinota.desactivarSeccion');
@@ -112,9 +110,14 @@ Route::get('/multinotas', [MultinotaController::class, 'index'])->name('multinot
 Route::get('/multinotas/{id}/view', [MultinotaController::class, 'view'])->name('multinotas.view');
 Route::get('/multinotas/{id}/edit', [MultinotaController::class, 'edit'])->name('multinotas.edit');
 Route::get('/multinotas/refresh', [MultinotaController::class, 'refresh'])->name('multinotas.refresh');
+Route::get('/multinotas/recargarSubcategorias/{id}', [MultinotaController::class, 'recargarSubcategorias'])->name('multinotas.recargarSubcategorias');
 Route::post('/multinotas/agregarSeccion', [MultinotaController::class, 'agregarSeccion'])->name('multinotas.agregarSeccion');
 Route::post('/multinotas/quitarSeccion', [MultinotaController::class, 'quitarSeccion'])->name('multinotas.quitarSeccion');
-Route::get('/multinotas/previsualizarCambiosMultinota', [MultinotaController::class, 'previsualizarCambiosMultinota'])->name('multinotas.previsualizarCambiosMultinota');
+Route::get('/multinotas/setearNuevoOrdenSeccion/{array}', [MultinotaController::class, 'setearNuevoOrdenSeccion'])->name('multinotas.setearNuevoOrdenSeccion');
+Route::post('/multinotas/previsualizarCambiosMultinota', [MultinotaController::class, 'previsualizarCambiosMultinota'])->name('multinotas.previsualizarCambiosMultinota');
+Route::get('/multinotas/guardarMultinota/{id}', [MultinotaController::class, 'guardarMultinota'])->name('multinotas.guardarMultinota');
+Route::put('/multinotas/{id}/desactivar', [MultinotaController::class, 'desactivarMultinota'])->name('multinotas.desactivarMultinota');
+Route::get('/multinotas/crearNuevaMultinota', [MultinotaController::class, 'crearNuevaMultinota'])->name('multinotas.crearNuevaMultinota');
 
 //Usuarios
 Route::get('usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');

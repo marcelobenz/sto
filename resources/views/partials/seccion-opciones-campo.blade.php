@@ -6,9 +6,12 @@
             </th>
             <th class="border border-slate-300 p-2">Acciones</th>
         </thead>
-        <tbody>
+        <tbody id="tabla-opciones-campo">
             @foreach ($opcionesCampo as $index => $opc)
-                <tr draggable="true" data-id="{{ $opc->id_opcion_campo }}" ondragstart="handleDragOpcionesCampoStart()" ondragover="handleDragOpcionesCampoOver()" ondragleave="handleDragOpcionesCampoLeave()">
+                <tr class="fila-opcion-campo" draggable="true" data-id="{{ $opc->id_opcion_campo }}"
+                    ondragstart="handleDragOpcionesCampoStart(event)" 
+                    ondragover="handleDragOpcionesCampoOver(event)" 
+                    ondrop="handleDropOpcionesCampo(event)">
                     <td class="border border-slate-300 p-2">{{ $opc->opcion }}</td>
                     <td class="border border-slate-300 p-2">
                         <button type="button" name="eliminar-opcion-campo" data-row-id="{{ $opc->id_opcion_campo }}" class="boton-eliminar-opcion btn btn-secondary">
