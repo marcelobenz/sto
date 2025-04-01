@@ -33,12 +33,26 @@
                     <span class="badge 
                         @if($tramiteInfo->estado_actual === 'Aprobado') bg-success
                         @elseif($tramiteInfo->estado_actual === 'Rechazado') bg-danger
-                        @elseif($tramiteInfo->estado_actual === 'Iniciado') bg-warning text-dark
-                        @else bg-secondary
+                        @elseif($tramiteInfo->estado_actual === 'Dado de Baja') bg-secondary
+                        @elseif($tramiteInfo->estado_actual === 'Iniciado') bg-primary
+                        @elseif($tramiteInfo->estado_actual === 'Finalizado') bg-success
+                        @else bg-dark
                         @endif">
                         {{ $tramiteInfo->estado_actual ?? 'Desconocido' }}
                     </span>
                 </div>
+                <div class="border rounded p-2 flex-grow-1 bg-white">
+                    Prioridad:
+                    <span class="badge
+                        @if(strtolower($tramiteInfo->prioridad) === 'baja') bg-success
+                        @elseif(strtolower($tramiteInfo->prioridad) === 'normal') bg-warning text-dark
+                        @elseif(strtolower($tramiteInfo->prioridad) === 'alta') bg-danger
+                        @else bg-secondary
+                        @endif">
+                        {{ ucfirst($tramiteInfo->prioridad) ?? 'Sin prioridad' }}
+                    </span>
+                </div>
+
                 <div class="border rounded p-2 flex-grow-1 bg-white">
                     Asignado a: <strong>{{ $tramiteInfo->nombre_usuario }} {{ $tramiteInfo->apellido_usuario }}</strong>
                 </div>
@@ -206,7 +220,7 @@
                     <label for="id_prioridad">Seleccione nueva prioridad:</label>
                     <select name="id_prioridad" id="id_prioridad" class="form-select" required>
                         @foreach($prioridades as $prioridad)
-                            <option value="{{ $prioridad->id_prioridad }}">{{ $prioridad->nombre }} (Peso: {{ $prioridad->peso }})</option>
+                            <option value="{{ $prioridad->id_prioridad }}">{{ $prioridad->nombre }} </option>
                         @endforeach
                     </select>
                 </div>

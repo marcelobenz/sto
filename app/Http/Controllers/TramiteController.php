@@ -117,7 +117,7 @@ class TramiteController extends Controller
             ->get();
 
         $tramiteInfo = DB::table('multinota as m')
-            ->where('m.id_tramite', $idTramite)
+            ->join('tramite as t', 'm.id_tramite', '=', 't.id_tramite') // 👈 Agregá esta línea
             ->join('tipo_tramite_multinota as ttm', 'm.id_tipo_tramite_multinota', '=', 'ttm.id_tipo_tramite_multinota')
             ->leftJoin('tramite_estado_tramite as tet', function($join) {
                 $join->on('tet.id_tramite', '=', 'm.id_tramite')
@@ -125,15 +125,34 @@ class TramiteController extends Controller
             })
             ->leftJoin('usuario_interno as ui', 'ui.id_usuario_interno', '=', 'tet.id_usuario_interno')
             ->leftJoin('estado_tramite as et', 'et.id_estado_tramite', '=', 'tet.id_estado_tramite')
+            ->leftJoin('prioridad as p', 't.id_prioridad', '=', 'p.id_prioridad')
             ->select(
                 'ttm.nombre',
                 'm.fecha_alta',
                 'ui.nombre as nombre_usuario',
                 'ui.apellido as apellido_usuario',
-                'et.nombre as estado_actual'
+                'et.nombre as estado_actual',
+                't.flag_cancelado',
+                't.flag_rechazado',
+                'p.nombre as prioridad'
             )
+            ->where('m.id_tramite', $idTramite)
             ->first();
         
+ 
+            if ($tramiteInfo) {
+                if ($tramiteInfo->flag_cancelado == 1) {
+                    $tramiteInfo->estado_actual = 'Dado de Baja';
+                } elseif ($tramiteInfo->flag_rechazado == 1) {
+                    $tramiteInfo->estado_actual = 'Rechazado';
+                } elseif ($tramiteInfo->estado_actual === 'A Finalizar') {
+                    $tramiteInfo->estado_actual = 'Finalizado';
+                }
+            
+                unset($tramiteInfo->flag_cancelado);
+                unset($tramiteInfo->flag_rechazado);
+            }
+            
         $historialTramite = DB::table('historial_tramite as h')
             ->join('evento as e', 'h.id_evento', '=', 'e.id_evento')
             ->join('usuario_interno as u', 'h.id_usuario_interno_asignado', '=', 'u.id_usuario_interno')
@@ -149,7 +168,7 @@ class TramiteController extends Controller
             ->orderBy('a.descripcion')
             ->get();
 
-        $prioridades = DB::table('prioridad')->orderBy('nombre')->get();
+        $prioridades = DB::table('prioridad')->orderBy('id_prioridad')->get();
 
         return view('tramites.detalle', compact('detalleTramite', 'idTramite', 'tramiteInfo', 'historialTramite', 'tramiteArchivo', 'prioridades'));
     }
