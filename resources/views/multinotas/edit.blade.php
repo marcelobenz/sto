@@ -88,7 +88,7 @@
                             <textarea name="mensajeInicial" id="myeditorinstance">{{ $multinotaSelected->mensaje_inicial ?? '' }}</textarea>
                         </div>
                         <div id="secciones-container" class="card-body flex flex-col">
-                            <label>Secciones precargadas</label>
+                            <label>Secciones</label>
                             @include('partials.secciones-container', ['seccionesAsociadas' => $seccionesAsociadas, 'todasLasSecciones' => $todasLasSecciones])
                         </div>
                         <div id="seccion-boton-previsualizar" class="flex justify-flex-end">
