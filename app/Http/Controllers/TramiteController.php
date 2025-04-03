@@ -32,6 +32,8 @@ class TramiteController extends Controller
         $columnSortOrder = $request->get('order')[0]['dir']; // Orden (asc o desc)
         $searchValue = $request->get('search')['value']; // Valor de búsqueda
         $soloIniciados = $request->get('soloIniciados') === 'true';
+        $idUsuarioSesion = $request->get('id_usuario_sesion');
+        $soloAsignados = $request->get('soloAsignados') === 'true';
 
         Log::debug('soloIniciados recibido:', ['soloIniciados' => $soloIniciados]);
 
@@ -62,6 +64,9 @@ class TramiteController extends Controller
             $query->where('t.flag_cancelado', '!=', 1)
             ->where('t.flag_rechazado', '!=', 1)
             ->where('e.nombre', 'Iniciado');
+        }
+        if ($soloAsignados && $idUsuarioSesion) {
+            $query->where('u.id_usuario_interno', $idUsuarioSesion);
         }
                 
         // Filtro de búsqueda
@@ -120,8 +125,36 @@ class TramiteController extends Controller
 
     public function show($idTramite)
     {
-        $usuarios = DB::table('usuario_interno')->orderBy('apellido')->get(); // 👉 esta línea
-
+        $idEstadoTramite = DB::table('tramite_estado_tramite')
+            ->where('id_tramite', $idTramite)
+            ->where('activo', 1)
+            ->value('id_estado_tramite');
+        
+        $usuariosAsignables = DB::table('estado_tramite_asignable')
+            ->where('id_estado_tramite', $idEstadoTramite)
+            ->get();
+        
+        $idsUsuarios = $usuariosAsignables
+            ->whereNotNull('id_usuario_interno')
+            ->pluck('id_usuario_interno')
+            ->toArray();
+        
+        $idsGrupos = $usuariosAsignables
+            ->whereNull('id_usuario_interno')
+            ->pluck('id_grupo_interno')
+            ->unique()
+            ->toArray();
+        
+        $usuarios = DB::table('usuario_interno')
+            ->where(function ($query) use ($idsUsuarios, $idsGrupos) {
+                $query->whereIn('id_usuario_interno', $idsUsuarios);
+                if (!empty($idsGrupos)) {
+                    $query->orWhereIn('id_grupo_interno', $idsGrupos);
+                }
+            })
+            ->orderBy('apellido')
+            ->get();
+    
         $detalleTramite = DB::table('multinota_seccion_valor as ms')
             ->join('seccion as s', 'ms.id_seccion', '=', 's.id_seccion')
             ->join('campo as c', 'ms.id_campo', '=', 'c.id_campo')
@@ -303,6 +336,34 @@ class TramiteController extends Controller
             $idTramite = $request->input('idTramite');
             $usuario = Session::get('usuario_interno');
 
+            // ✅ 1. Verificar si ya está asignado al mismo usuario
+            $asignado = DB::table('tramite_estado_tramite')
+            ->where('id_tramite', $idTramite)
+            ->where('activo', 1)
+            ->value('id_usuario_interno');
+
+            if ($asignado == $usuario->id_usuario_interno) {
+                return response()->json(['success' => false,'message' => 'El trámite ya está tomado por este usuario.']);
+            }
+
+            // ✅ 2. Verificar si el usuario puede tomar el trámite en este estado
+            $idEstadoTramite = DB::table('tramite_estado_tramite')
+                ->where('id_tramite', $idTramite)
+                ->where('activo', 1)
+                ->value('id_estado_tramite');
+
+            $esAsignable = DB::table('estado_tramite_asignable')
+                ->where('id_estado_tramite', $idEstadoTramite)
+                ->where('id_usuario_interno', $usuario->id_usuario_interno)
+                ->exists();
+
+            if (!$esAsignable) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No tiene permiso para tomar el trámite en este estado.'
+                ]);
+            }
+
             DB::beginTransaction();
             // 2️⃣ Actualizar el trámite
             $affected = DB::table('tramite_estado_tramite')
@@ -357,7 +418,7 @@ class TramiteController extends Controller
         try {
             $idTramite = $request->input('idTramite');
             $idUsuario = $request->input('id_usuario_interno');
-    
+
             DB::beginTransaction();
     
             DB::table('tramite_estado_tramite')
@@ -392,5 +453,42 @@ class TramiteController extends Controller
             return response()->json(['success' => false]);
         }
     }
-        
+
+    public function bandejaPersonal()
+    {
+        return view('tramites.index', [
+            'tituloPagina' => 'Bandeja Personal',
+            'soloIniciados' => false,
+            'soloAsignados' => true,
+            'id_usuario_sesion' => Session::get('usuario_interno')->id_usuario_interno ?? null
+        ]);
+    }
+
+    public function getUsuariosAsignables($idTramite)
+    {
+        $idEstadoTramite = DB::table('tramite_estado_tramite')
+            ->where('id_tramite', $idTramite)
+            ->where('activo', 1)
+            ->value('id_estado_tramite');
+
+        $asignables = DB::table('estado_tramite_asignable')
+            ->where('id_estado_tramite', $idEstadoTramite)
+            ->get();
+
+        $idsUsuarios = $asignables->whereNotNull('id_usuario_interno')->pluck('id_usuario_interno')->toArray();
+        $idsGrupos = $asignables->whereNull('id_usuario_interno')->pluck('id_grupo_interno')->unique()->toArray();
+
+        $usuarios = DB::table('usuario_interno')
+            ->where(function ($query) use ($idsUsuarios, $idsGrupos) {
+                $query->whereIn('id_usuario_interno', $idsUsuarios);
+                if (!empty($idsGrupos)) {
+                    $query->orWhereIn('id_grupo_interno', $idsGrupos);
+                }
+            })
+            ->orderBy('apellido')
+            ->get();
+
+        return response()->json($usuarios);
+    }
+
 }

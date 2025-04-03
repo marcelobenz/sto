@@ -249,7 +249,7 @@
             <label for="usuarioSelect">Seleccione un usuario:</label>
             <select class="form-control" id="usuarioSelect" name="id_usuario_interno">
               @foreach ($usuarios as $usuario)
-                  <option value="{{ $usuario->id_usuario_interno }}">{{ $usuario->nombre }} {{ $usuario->apellido }}</option>
+                  <option value="{{ $usuario->id_usuario_interno }}">{{ $usuario->apellido }} {{ $usuario->nombre }}</option>
               @endforeach
             </select>
           </div>

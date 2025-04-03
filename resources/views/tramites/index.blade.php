@@ -143,6 +143,35 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Reasignar desde Index -->
+    <div class="modal fade" id="modalReasignarTramiteIndex" tabindex="-1" aria-labelledby="modalReasignarTramiteLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form id="formReasignarTramiteIndex">
+                @csrf
+                <input type="hidden" name="idTramite" id="idTramiteReasignarIndex">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Reasignar Trámite</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <label for="usuarioSelectIndex">Seleccione un usuario:</label>
+                        <select class="form-control" id="usuarioSelectIndex" name="id_usuario_interno">
+                            <option value="">Cargando...</option>
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary" onclick="reasignarTramite()">Reasignar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
 @endsection
 
 @section('scripting')
@@ -163,6 +192,8 @@
                     type: 'GET',
                     data: function (d) {
                         d.soloIniciados = soloIniciados;
+                        d.soloAsignados = "{{ $soloAsignados ?? false }}" === "1" || "{{ $soloAsignados ?? false }}" === "true";
+                        d.id_usuario_sesion = "{{ $id_usuario_sesion ?? '' }}";
                     }
                 },
                 autoWidth: false, // Desactiva el ajuste automático
@@ -210,8 +241,8 @@
                             return `
                                 <div class="actions text-center">
                                     <a href="/tramites/${row.id_tramite}/detalle" class="btn btn-primary btn-sm btn-action" title="Ver detalle"><i class="fas fa-eye"></i></a>
-                                    <button class="btn btn-success btn-sm btn-action" title="Tomar trámite"><i class="fas fa-hand-paper"></i></button>
-                                    <button class="btn btn-warning btn-sm btn-action" title="Reasignar"><i class="fas fa-exchange-alt"></i></button>
+                                    <button class="btn btn-success btn-sm btn-action" title="Tomar trámite" onclick="tomarTramite( ${row.id_tramite} )"><i class="fas fa-hand-paper"></i></button>
+                                    <button class="btn btn-warning btn-sm btn-action" title="Reasignar" onclick="abrirModalReasignarIndex( ${row.id_tramite} )"><i class="fas fa-exchange-alt"></i></button>
                                     <button class="btn btn-danger btn-sm btn-action" title="Dar de Baja" onclick="darDeBajaTramite( ${row.id_tramite} )"><i class="fas fa-trash"></i></button>
                                 </div>`;
                         }
@@ -291,5 +322,68 @@
         }
     }
 
-    </script>
+    function tomarTramite(idTramite) {
+        if (confirm("¿Estás seguro de que deseas tomar este trámite?")) {
+            fetch("{{ route('tramites.tomarTramite') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                body: JSON.stringify({ idTramite })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    $('#tramitesTable').DataTable().ajax.reload(null, false);
+                } else {
+                    alert("Error: " + data.message);
+                }
+            });
+        }
+    }
+
+    function abrirModalReasignarIndex(idTramite) {
+        $('#idTramiteReasignarIndex').val(idTramite); // usar nuevo ID
+
+        fetch(`/tramites/${idTramite}/usuarios-asignables`)
+            .then(response => response.json())
+            .then(data => {
+                const select = $('#usuarioSelectIndex'); // usar nuevo ID
+                select.empty();
+
+                if (data.length === 0) {
+                    select.append('<option value="">Sin usuarios disponibles</option>');
+                } else {
+                    data.forEach(usuario => {
+                        select.append(
+                            `<option value="${usuario.id_usuario_interno}">
+                                ${usuario.apellido} ${usuario.nombre}
+                            </option>`
+                        );
+                    });
+                }
+
+                $('#modalReasignarTramiteIndex').modal('show');
+            })
+            .catch(error => {
+                console.error('Error al cargar usuarios:', error);
+                alert('No se pudieron cargar los usuarios asignables.');
+            });
+    }
+
+    function reasignarTramite() {
+        const data = $('#formReasignarTramiteIndex').serialize();
+
+        $.post("{{ route('tramites.reasignar') }}", data, function(response) {
+            if (response.success) {
+                $('#modalReasignarTramiteIndex').modal('hide');
+                $('#tramitesTable').DataTable().ajax.reload(null, false); // Recarga la tabla sin reiniciar la página
+            } else {
+                alert("Error al reasignar trámite.");
+            }
+        });
+    }
+
+</script>
 @endsection

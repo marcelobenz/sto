@@ -29,8 +29,8 @@
                         Bandejas
                     </a>
                     <div class="dropdown-menu" aria-labelledby="bandejasDropdown">
-                        <a class="dropdown-item" href="#">Bandeja Personal</a>
-                        <a class="dropdown-item" href="{{ route('tramites.enCurso') }}">Trámites en Curso</a>
+                    <a class="dropdown-item" href="{{ route('tramites.bandejaPersonal') }}">Bandeja Personal</a>
+                    <a class="dropdown-item" href="{{ route('tramites.enCurso') }}">Trámites en Curso</a>
                         <a class="dropdown-item" href="{{ route('tramites.index') }}">Todos los Trámites</a>
                     </div>
                 </li>
@@ -86,6 +86,7 @@
                             <span class="dropdown-item-text">No estás autenticado</span>
                         @endif
                         <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="/set-usuario-interno">Set Usuario</a>
                         <a class="dropdown-item" href="#">Perfil</a>
                         <a class="dropdown-item" href="/clear-session">Salir</a>
                     </div>
