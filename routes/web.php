@@ -77,6 +77,7 @@ Route::get('/cambiar-clave', [ContribuyenteMultinotaController::class, 'showChan
 Route::post('/cambiar-clave', [ContribuyenteMultinotaController::class, 'changePassword'])->name('cambiar-clave.submit');
 Route::get('/estados', [AdministracionWorkflowController::class, 'index'])->name('estados.index');
 Route::get('/workflow/{id}', [AdministracionWorkflowController::class, 'crear'])->name('workflow.crear');
+Route::post('/workflow/guardar/{id}', [AdministracionWorkflowController::class, 'guardar'])->name('workflow.guardar');
 
 
 Route::get('/set-usuario-interno', [UsuarioController::class, 'setUsuarioInterno']);
