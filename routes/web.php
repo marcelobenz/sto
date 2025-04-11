@@ -175,7 +175,7 @@ Route::get('/estados', [AdministracionWorkflowController::class, 'index'])->name
 Route::get('/workflow/{id}', [AdministracionWorkflowController::class, 'crear'])->name('workflow.crear');
 
 //Navbar
-Route::view('/navbar','/navbar')->name('navbar');
+Route::view('/navbar', [NavbarController::class, 'cargarElementos'])->name('navbar');
 
 //Bandeja Personal
 Route::get('/bandeja-personal', [BandejaPersonalController::class, 'index'])->name('bandeja-personal.index');

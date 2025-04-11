@@ -8,7 +8,24 @@
     <x-head.tinymce-config />
     @yield('heading')
 </head>
+<style>
+    /* Enable nested dropdowns */
+    .dropdown-submenu {
+        position: relative;
+    }
 
+    .dropdown-submenu > .dropdown-menu {
+        top: 0;
+        left: 100%;
+        margin-top: -1px;
+        display: none;
+        position: absolute;
+    }
+
+    .dropdown-submenu:hover > .dropdown-menu {
+        display: block;
+    }
+</style>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,8 +51,43 @@
                         <a class="dropdown-item" href="{{ route('tramites.index') }}">Todos los Trámites</a>
                     </div>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Formularios</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="formulariosDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Formularios
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="formulariosDropdown">
+                        @foreach ($categoriasSubcategoriasMap as $idPadre => $categorias)
+                            @foreach($categorias as $c)
+                                @if($c->id_categoria == $idPadre)
+                                    @if($categoriaPadreTieneCategoriasConMulinotasActivas[$idPadre] == true)
+                                        <div class="dropdown-submenu">
+                                            <a class="dropdown-item dropdown-toggle" href="#">
+                                                {{ $c->nombre }}
+                                            </a>
+                                            <div class="dropdown-menu">
+                                                @foreach($categorias as $c)
+                                                    @if($c->id_categoria != $idPadre)
+                                                        @if(count($subcategoriasMultinotasMap[$c->id_categoria]) > 0)
+                                                            <div class="dropdown-submenu">
+                                                                <a class="dropdown-item dropdown-toggle" href="#">
+                                                                    {{ $c->nombre }}
+                                                                </a>
+                                                                <div class="dropdown-menu">
+                                                                    @foreach ($subcategoriasMultinotasMap[$c->id_categoria] as $multinota)
+                                                                        <a class="dropdown-item" href="#">{{ $multinota->nombre }}</a>
+                                                                    @endforeach
+                                                                </div>
+                                                            </div>
+                                                        @endif
+                                                    @endif
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
+                                @endif
+                            @endforeach
+                        @endforeach
+                    </div>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="administracionDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

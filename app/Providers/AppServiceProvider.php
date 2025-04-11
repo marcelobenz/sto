@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use App\Models\ParametroMail;
+use Illuminate\Support\Facades\View;
+use App\Http\Controllers\NavbarController;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -28,5 +30,11 @@ class AppServiceProvider extends ServiceProvider
                 'mail.from.name' => 'Cognisys',
             ]);
         }
+
+        View::composer('*', function ($view) {
+            $data = app(NavbarController::class)->cargarItemsFormularios();
+    
+            $view->with($data);
+        });
     }
 }
