@@ -74,7 +74,7 @@
                                                                     </a>
                                                                     <div class="dropdown-menu">
                                                                         @foreach ($subcategoriasMultinotasMap[$c->id_categoria] as $multinota)
-                                                                            <a class="dropdown-item" href="#">{{ $multinota->nombre }}</a>
+                                                                            <a class="dropdown-item" href={{ route('estadoTramite.tienePermiso', ['multinota' => $multinota]) }}>{{ $multinota->nombre }}</a>
                                                                         @endforeach
                                                                     </div>
                                                                 </div>

@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AutorizacionController;
 use App\Http\Controllers\TramiteController;
+use App\Http\Controllers\EstadoTramiteController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\UsuarioController;
@@ -82,6 +83,9 @@ Route::get('/tramites/en-curso', [TramiteController::class, 'enCurso'])->name('t
 Route::post('/tramites/tomarTramite', [TramiteController::class, 'tomarTramite'])->name('tramites.tomarTramite');
 Route::post('/tramites/cambiar-prioridad', [TramiteController::class, 'cambiarPrioridad'])->name('tramites.cambiarPrioridad');
 Route::post('/tramites/darDeBaja', [TramiteController::class, 'darDeBaja'])->name('tramites.darDeBaja');
+
+//Estado Trámite
+Route::get('/estadoTramite/tienePermiso/{multinota}', [EstadoTramiteController::class, 'tienePermiso'])->name('estadoTramite.tienePermiso');
 
 //Categorías
 Route::get('/categorias', [CategoriaController::class, 'index'])->name('categorias.index');
