@@ -27,10 +27,11 @@ class EstadoTramiteController extends Controller {
         ->get();
 
         if(count($results) == 0) {
-            //Return a no autorizado
+            //Return a vista "No autorizado"
             return view('no-autorizado.index');
         } else {
-            //Return a vista de proximo paso instanciacion tramite
+            //Return a vista "Buscar usuario"
+            return view('buscar-usuario.index');
         }
     }
 }
