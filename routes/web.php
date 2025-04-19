@@ -34,6 +34,7 @@ Route::get('/', function () {
     return view('navbar');
 });*/
 
+Route::post('/tramites/completar', [TramiteController::class, 'completarEstado'])->name('tramites.completar');
 Route::get('/tramites/{idTramite}/usuarios-asignables', [TramiteController::class, 'getUsuariosAsignables']);
 Route::get('/tramites/bandeja-personal', [TramiteController::class, 'bandejaPersonal'])->name('tramites.bandejaPersonal');
 Route::post('/tramites/reasignar', [TramiteController::class, 'reasignar'])->name('tramites.reasignar');

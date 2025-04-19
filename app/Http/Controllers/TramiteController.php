@@ -181,7 +181,8 @@ class TramiteController extends Controller
                 'et.nombre as estado_actual',
                 't.flag_cancelado',
                 't.flag_rechazado',
-                'p.nombre as prioridad'
+                'p.nombre as prioridad',
+                'ui.id_usuario_interno as id_asignado'
             )
             ->where('m.id_tramite', $idTramite)
             ->first();
@@ -203,7 +204,15 @@ class TramiteController extends Controller
         $historialTramite = DB::table('historial_tramite as h')
             ->join('evento as e', 'h.id_evento', '=', 'e.id_evento')
             ->join('usuario_interno as u', 'h.id_usuario_interno_asignado', '=', 'u.id_usuario_interno')
-            ->selectRaw('COALESCE(e.descripcion, e.desc_contrib) AS descripcion, e.fecha_alta, e.clave, u.legajo, CONCAT(u.nombre, u.apellido) as usuario')
+            ->leftJoin('estado_tramite as est', 'est.id_estado_tramite', '=', 'h.id_estado_tramite')
+            ->selectRaw('
+                COALESCE(e.descripcion, e.desc_contrib) AS descripcion,
+                e.fecha_alta,
+                e.clave,
+                u.legajo,
+                CONCAT(u.nombre, " ", u.apellido) as usuario,
+                est.nombre as nombre_estado
+            ')
             ->where('h.id_tramite', $idTramite)
             ->orderBy('e.fecha_alta', 'desc') // Ordenar por fecha de forma descendente
             ->get();
@@ -320,6 +329,13 @@ class TramiteController extends Controller
                 'id_usuario_interno_asignado' => auth()->user()->id_usuario_interno ?? 107
             ]);
 
+            // Registrar log en storage/logs/laravel.log
+            Log::info('Historial creado', [
+                'tramite' => $request->id_tramite,
+                'evento' => $idEvento,
+                'usuario' => auth()->user()->id_usuario_interno ?? 107,
+                'timestamp' => now()->toDateTimeString()
+            ]);
             DB::commit();
 
             return redirect()->back()->with('success', 'Prioridad actualizada correctamente.');
@@ -491,4 +507,150 @@ class TramiteController extends Controller
         return response()->json($usuarios);
     }
 
+    public function completarEstado(Request $request)
+    {
+        try {
+            $idTramite = $request->input('idTramite');
+            $idEstadoElegido = $request->input('id_estado_tramite_siguiente'); // si viene desde modal
+            $usuario = Session::get('usuario_interno');
+    
+            // 1️⃣ Obtener estado actual activo
+            $estadoActual = DB::table('tramite_estado_tramite')
+                ->where('id_tramite', $idTramite)
+                ->where('activo', 1)
+                ->first();
+    
+            if (!$estadoActual) {
+                return response()->json(['success' => false, 'message' => 'No se encontró un estado activo para el trámite.']);
+            }
+    
+            if ($estadoActual->id_usuario_interno != $usuario->id_usuario_interno) {
+                return response()->json(['success' => false, 'message' => 'No tiene permiso para completar este trámite.']);
+            }
+    
+            // 2️⃣ Obtener id_tipo_tramite_multinota desde tabla multinota
+            $tipoTramite = DB::table('multinota')
+                ->where('id_tramite', $idTramite)
+                ->value('id_tipo_tramite_multinota');
+    
+            if (!$tipoTramite) {
+                return response()->json(['success' => false, 'message' => 'No se encontró el tipo de trámite.']);
+            }
+    
+            // 3️⃣ Verificar si el estado permite elegir camino
+            $estado = DB::table('estado_tramite')
+                ->where('id_estado_tramite', $estadoActual->id_estado_tramite)
+                ->first();
+    
+            if (!$estado) {
+                return response()->json(['success' => false, 'message' => 'No se encontró información del estado actual.']);
+            }
+    
+            $estadoSiguiente = null;
+    
+            if ($estado->puede_elegir_camino) {
+                // 🔄 Obtener posibles caminos desde configuracion_estado_tramite
+                $caminos = DB::table('configuracion_estado_tramite as c')
+                    ->join('estado_tramite as e', 'e.id_estado_tramite', '=', 'c.id_proximo_estado')
+                    ->where('c.id_tipo_tramite_multinota', $tipoTramite)
+                    ->where('c.id_estado_tramite', $estadoActual->id_estado_tramite)
+                    ->where('c.activo', 1)
+                    ->select('c.id_proximo_estado as id', 'e.nombre as nombre')
+                    ->get();
+    
+                if (!$idEstadoElegido) {
+                    return response()->json([
+                        'success' => true,
+                        'requires_selection' => true,
+                        'siguientes_estados' => $caminos
+                    ]);
+                }
+    
+                if (!$caminos->pluck('id')->contains($idEstadoElegido)) {
+                    return response()->json(['success' => false, 'message' => 'El estado seleccionado no es válido para este trámite.']);
+                }
+    
+                $estadoSiguiente = $idEstadoElegido;
+            } else {
+                // 🔁 Solo un camino posible
+                $estadoDestino = DB::table('configuracion_estado_tramite')
+                    ->where('id_tipo_tramite_multinota', $tipoTramite)
+                    ->where('id_estado_tramite', $estadoActual->id_estado_tramite)
+                    ->where('activo', 1)
+                    ->value('id_proximo_estado');
+    
+                if (!$estadoDestino) {
+                    return response()->json(['success' => false, 'message' => 'Este estado no tiene un estado siguiente configurado.']);
+                }
+    
+                $estadoSiguiente = $estadoDestino;
+            }
+    
+            // 💾 Iniciar transacción
+            DB::beginTransaction();
+    
+            // 4️⃣ Marcar estado actual como completo e inactivo
+            DB::table('tramite_estado_tramite')
+                ->where('id_tramite_estado_tramite', $estadoActual->id_tramite_estado_tramite)
+                ->update(['completo' => 1, 'activo' => 0]);
+    
+            // 5️⃣ Evento de finalización
+            $idEventoCompletar = DB::table('evento')->insertGetId([
+                'id_tipo_evento' => 12,
+                'descripcion' => "Se completó el estado\n{$estadoActual->id_estado_tramite}",
+                'clave' => 'COMPLETAR_ESTADO',
+                'fecha_alta' => now(),
+                'fecha_modificacion' => now()
+            ]);
+    
+            DB::table('historial_tramite')->insert([
+                'id_estado_tramite' => $estadoActual->id_estado_tramite,
+                'id_usuario_interno_asignado' => $usuario->id_usuario_interno,
+                'id_evento' => $idEventoCompletar,
+                'id_tramite' => $idTramite,
+                'id_usuario_interno_administrador' => $usuario->id_usuario_interno,
+                'fecha' => now()
+            ]);
+    
+            // 6️⃣ Crear nuevo estado
+            DB::table('tramite_estado_tramite')->insert([
+                'id_tramite' => $idTramite,
+                'id_estado_tramite' => $estadoSiguiente,
+                'id_usuario_interno' => $usuario->id_usuario_interno,
+                'activo' => 1,
+                'completo' => 0,
+                'reiniciado' => 0,
+                'espera_documentacion' => 0,
+                'fecha_sistema' => now(),
+                'id_tramite_estado_tramite_anterior' => $estadoActual->id_tramite_estado_tramite
+            ]);
+    
+            // 7️⃣ Evento de avance
+            $idEventoAvance = DB::table('evento')->insertGetId([
+                'id_tipo_evento' => 11,
+                'descripcion' => "Se avanzó al estado\n{$estadoSiguiente}",
+                'clave' => 'AVANCE_ESTADO',
+                'fecha_alta' => now(),
+                'fecha_modificacion' => now()
+            ]);
+    
+            DB::table('historial_tramite')->insert([
+                'id_estado_tramite' => $estadoSiguiente,
+                'id_usuario_interno_asignado' => $usuario->id_usuario_interno,
+                'id_evento' => $idEventoAvance,
+                'id_tramite' => $idTramite,
+                'id_usuario_interno_administrador' => $usuario->id_usuario_interno,
+                'fecha' => now()
+            ]);
+    
+            DB::commit();
+            return response()->json(['success' => true]);
+    
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error al completar estado: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Error interno: ' . $e->getMessage()]);
+        }
+    }
+        
 }
