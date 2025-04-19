@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
+use App\Helpers\PermisosHelper;
 
 use DB;
 
@@ -125,6 +126,8 @@ class TramiteController extends Controller
 
     public function show($idTramite)
     {
+        $usuario = Session::get('usuario_interno');
+
         $idEstadoTramite = DB::table('tramite_estado_tramite')
             ->where('id_tramite', $idTramite)
             ->where('activo', 1)
@@ -226,12 +229,20 @@ class TramiteController extends Controller
 
         $prioridades = DB::table('prioridad')->orderBy('id_prioridad')->get();
 
-        return view('tramites.detalle', compact('detalleTramite', 'idTramite', 'tramiteInfo', 'historialTramite', 'tramiteArchivo', 'prioridades', 'usuarios'));
+        $permisos = PermisosHelper::getPermisos($usuario->id_usuario_interno, ['TOMAR_TRAMITE', 'REASIGNAR_TRAMITE']);
+
+        $puedeTomar = in_array('TOMAR_TRAMITE', $permisos);
+        $puedeReasignar = in_array('REASIGNAR_TRAMITE', $permisos);
+        $puedeDardebaja = in_array('DAR_DE_BAJA_TRAMITE', $permisos);
+
+        return view('tramites.detalle', compact('detalleTramite', 'idTramite', 'tramiteInfo', 'historialTramite', 'tramiteArchivo', 'prioridades', 'usuarios', 'puedeTomar', 'puedeReasignar', 'puedeDardebaja'));
     }
 
     public function darDeBaja(Request $request)
     {
         try {
+            $usuario = Session::get('usuario_interno');
+
             Log::debug('Inicio de la función darDeBaja');
             Log::debug('Contenido del Request:', $request->all());
     
@@ -266,7 +277,7 @@ class TramiteController extends Controller
                 'fecha' => now(),
                 'id_tramite' => $idTramite,
                 'id_evento' => $idEvento,
-                'id_usuario_interno_asignado' => 107
+                'id_usuario_interno_asignado' => $usuario->id_usuario_interno
             ], 'id_historial_tramite'); // <- especificar el nombre de la PK autoincremental
             
             Log::debug("Historial de trámite registrado con ID: " . $idHistorial);
@@ -293,6 +304,7 @@ class TramiteController extends Controller
 
     public function cambiarPrioridad(Request $request)
     {
+        $usuario = Session::get('usuario_interno');
         $request->validate([
             'id_tramite' => 'required|exists:tramite,id_tramite',
             'id_prioridad' => 'required|exists:prioridad,id_prioridad',
@@ -333,7 +345,7 @@ class TramiteController extends Controller
             Log::info('Historial creado', [
                 'tramite' => $request->id_tramite,
                 'evento' => $idEvento,
-                'usuario' => auth()->user()->id_usuario_interno ?? 107,
+                'usuario' => $usuario->id_usuario_interno,
                 'timestamp' => now()->toDateTimeString()
             ]);
             DB::commit();
@@ -352,6 +364,19 @@ class TramiteController extends Controller
             $idTramite = $request->input('idTramite');
             $usuario = Session::get('usuario_interno');
 
+            // 🔐 Verificar si el usuario tiene permiso TOMAR_TRAMITE
+            $tienePermiso = DB::table('usuario_permiso')
+                ->where('id_usuario_interno', $usuario->id_usuario_interno)
+                ->where('permiso', 'TOMAR_TRAMITE')
+                ->exists();
+
+            if (!$tienePermiso) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No tiene permiso para tomar trámites.'
+                ]);
+            }
+            
             // ✅ 1. Verificar si ya está asignado al mismo usuario
             $asignado = DB::table('tramite_estado_tramite')
             ->where('id_tramite', $idTramite)

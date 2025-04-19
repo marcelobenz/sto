@@ -138,23 +138,29 @@
                     <a href="{{ url()->previous() }}" class="btn btn-secondary btn-expandible">
                         <i class="fas fa-arrow-left"></i><span> Volver</span>
                     </a>
+                    @if($puedeReasignar)
                     <button class="btn btn-naranja btn-expandible" data-bs-toggle="modal" data-bs-target="#modalReasignarTramite" data-id="{{ $idTramite }}">
                         <i class="fas fa-random"></i><span> Reasignar</span>
                     </button>
+                    @endif
                     <button class="btn btn-warning btn-expandible" data-bs-toggle="modal" data-bs-target="#modalCambiarPrioridad">
                         <i class="fas fa-hourglass-half"></i><span> Prioridad</span>
                     </button>
-                    <button class="btn btn-primary btn-expandible" onclick="tomarTramite({{ $idTramite }})">
-                        <i class="fas fa-sign-out-alt"></i><span> Tomar</span>
-                    </button>
+                    @if($puedeTomar)
+                        <button class="btn btn-primary btn-expandible" onclick="tomarTramite({{ $idTramite }})">
+                            <i class="fas fa-sign-out-alt"></i><span> Tomar</span>
+                        </button>
+                    @endif
                     @if(Session::get('usuario_interno')->id_usuario_interno === $tramiteInfo->id_asignado)
                         <button class="btn btn-success btn-expandible" onclick="completarEstado({{ $idTramite }})">
                             <i class="bi bi-check2-square"></i><span> Completar Estado</span>
                         </button>
                     @endif
+                    @if($puedeDardebaja)
                     <button class="btn btn-danger btn-expandible" onclick="darDeBajaTramite({{ $idTramite }})">
                         <i class="fas fa-ban"></i><span> Baja</span>
                     </button>
+                    @endif
                     <button class="btn btn-celeste btn-expandible" onclick="window.open('{{ route('reporte.constancia', ['idTramite' => $idTramite]) }}', '_blank')">
                         <i class="fas fa-print"></i><span> Imprimir</span>
                     </button>
