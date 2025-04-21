@@ -67,6 +67,26 @@
                                             <input name="nombre" id="nombre-tramite" type="text" value="{{ $multinotaSelected->nombre }}" required />
                                         @endif
                                     </div>
+                                    <div style="display: flex; flex-direction: column; width: 100%;">
+                                        <label style="font-weight: bold;">Servicio</label>
+                                        <select id="select-servicio" name="servicio" id="servicio" required>
+                                            @if($multinotaSelected->id_multinota_servicio == null)
+                                                <option selected value="0">Ninguno</option>
+                                                @foreach($multinotaServicios as $ms)
+                                                    <option value="{{ $ms->id_multinota_servicio }}">{{ $ms->nombre }}</option>
+                                                @endforeach
+                                            @else
+                                                <option value="0">Ninguno</option>
+                                                @foreach($multinotaServicios as $ms)
+                                                    @if($multinotaSelected->id_multinota_servicio == $ms->id_multinota_servicio)
+                                                        <option selected value="{{ $ms->id_multinota_servicio }}">{{ $ms->nombre }}</option>
+                                                    @else
+                                                        <option value="{{ $ms->id_multinota_servicio }}">{{ $ms->nombre }}</option>
+                                                    @endif
+                                                @endforeach
+                                            @endif
+                                        </select>
+                                    </div>
                                 </div>
                                 <div style="display: flex; width: 100%; gap: 50px;">
                                     <div style="display: flex; gap: 15px;">
