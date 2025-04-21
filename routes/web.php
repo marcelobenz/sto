@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AutorizacionController;
 use App\Http\Controllers\TramiteController;
 use App\Http\Controllers\EstadoTramiteController;
+use App\Http\Controllers\BusquedaContribuyenteController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\UsuarioController;
@@ -86,6 +87,9 @@ Route::post('/tramites/darDeBaja', [TramiteController::class, 'darDeBaja'])->nam
 
 //Estado Trámite
 Route::get('/estadoTramite/tienePermiso/{multinota}', [EstadoTramiteController::class, 'tienePermiso'])->name('estadoTramite.tienePermiso');
+
+//Busqueda Contribuyente
+Route::post('/busquedaContribuyente/buscar', [BusquedaContribuyenteController::class, 'buscar'])->name('busquedaContribuyente.buscar');
 
 //Categorías
 Route::get('/categorias', [CategoriaController::class, 'index'])->name('categorias.index');
