@@ -60,7 +60,7 @@
                                         @endif
                                     </div>
                                     <div style="display: flex; flex-direction: column; width: 100%;">
-                                        <label style="font-weight: bold;">Nombre del Trámite</label>
+                                        <label style="font-weight: bold;">Nombre del trámite</label>
                                         @if($multinotaSelected->nombre == null)
                                             <input name="nombre" id="nombre-tramite" type="text" required />
                                         @else
@@ -68,15 +68,15 @@
                                         @endif
                                     </div>
                                     <div style="display: flex; flex-direction: column; width: 100%;">
-                                        <label style="font-weight: bold;">Servicio</label>
+                                        <label style="font-weight: bold;">¿Llama a un servicio?</label>
                                         <select id="select-servicio" name="servicio" id="servicio" required>
                                             @if($multinotaSelected->id_multinota_servicio == null)
-                                                <option selected value="0">Ninguno</option>
+                                                <option selected value="0">No</option>
                                                 @foreach($multinotaServicios as $ms)
                                                     <option value="{{ $ms->id_multinota_servicio }}">{{ $ms->nombre }}</option>
                                                 @endforeach
                                             @else
-                                                <option value="0">Ninguno</option>
+                                                <option value="0">No</option>
                                                 @foreach($multinotaServicios as $ms)
                                                     @if($multinotaSelected->id_multinota_servicio == $ms->id_multinota_servicio)
                                                         <option selected value="{{ $ms->id_multinota_servicio }}">{{ $ms->nombre }}</option>

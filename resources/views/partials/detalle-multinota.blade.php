@@ -25,7 +25,7 @@
                 <label>{{ $multinotaSelected->nombre }}
             </div>
             <div style="display: flex; flex-direction: column;">
-                <label>Servicio</label>
+                <label>¿Llama a un servicio?</label>
                 <label>{{ $multinotaSelected->nombre_servicio }}</label>
             </div>
             <div style="display: flex; flex-direction: column;">

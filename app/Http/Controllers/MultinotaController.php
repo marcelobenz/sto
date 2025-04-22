@@ -226,7 +226,7 @@ class MultinotaController extends Controller
         $multinotaSelected->nombre_subcategoria = null;
         $multinotaSelected->mensaje_inicial = '';
         $multinotaSelected->id_multinota_servicio = null;
-        $multinotaSelected->nombre_servicio = 'Ninguno';
+        $multinotaSelected->nombre_servicio = 'No';
 
         $seccionesAsociadas = [];
         $todasLasSecciones = MultinotaController::getTodasLasSecciones();
@@ -333,7 +333,7 @@ class MultinotaController extends Controller
         if($multinotaSelected->id_multinota_servicio != 0) {
             $multinotaSelected->nombre_servicio = MultinotaController::getNombreServicioPorId($multinotaSelected->id_multinota_servicio);
         } else {
-            $multinotaSelected->nombre_servicio = 'Ninguno';
+            $multinotaSelected->nombre_servicio = 'No';
         }
 
         return array($multinotaSelected, $seccionesAsociadas, $todasLasSecciones, $categoriasPadre, $multinotaServicios);
@@ -385,13 +385,11 @@ class MultinotaController extends Controller
     }
 
     public static function getTodosLosServicios() {
-        //Se recuperan todos los servicios (APIs)
         $multinotaServicios = MultinotaServicio::all();
         return $multinotaServicios;
     }
 
     public static function getNombreServicioPorId($id) {
-        //Se recuperan el servicio (API) asignado
         $nombreServicio = MultinotaServicio::where('id_multinota_servicio', (int) $id)->value('nombre');
         return $nombreServicio;
     }
@@ -570,7 +568,7 @@ class MultinotaController extends Controller
             $multinotaSelected->nombre_servicio = MultinotaController::getNombreServicioPorId($request->post('servicio'));
         } else {
             $multinotaSelected->id_multinota_servicio = null;
-            $multinotaSelected->nombre_servicio = 'Ninguno';
+            $multinotaSelected->nombre_servicio = 'No';
         }
 
         // Categoria y Subcategoria
