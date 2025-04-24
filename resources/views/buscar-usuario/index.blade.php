@@ -34,6 +34,7 @@
                                     <span style="display: flex; gap: 10px;">
                                         <form method="POST" style="width: 100%;" action="{{ route('busquedaContribuyente.buscar') }}">
                                             @csrf
+                                            <input type="hidden" name="idMultinota" value="{{ $multinota }}">
                                             <input name="cuil" id="cuil" type="text" placeholder="99-99999999-9" minlength="13" maxlength="13" style="width: 30%;" />
                                             <button type="submit" class="btn btn-secondary">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 512 512">

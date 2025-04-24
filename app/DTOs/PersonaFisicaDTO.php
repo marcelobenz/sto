@@ -1,0 +1,116 @@
+<?php
+
+namespace App\DTOs;
+
+use App\DTOs\DomicilioDTO;
+
+class PersonaFisicaDTO {
+    private string $cuilCuit;
+    private string $dni;
+    private string $nombre;
+    private string $apellido;
+    private string $nacionalidad;
+    private string $fechaNacimiento;
+    private string $estadoCivil;
+    private string $sexo;
+    private string $correo;
+    private string $telefono;
+    private string $celular;
+    private DomicilioDTO $domicilio;
+
+    public function getCuilCuit(): string {
+        return $this->cuilCuit;
+    }
+
+    public function setCuilCuit(string $cuilCuit): void {
+        $this->cuilCuit = $cuilCuit;
+    }
+
+    public function getDni(): string {
+        return $this->dni;
+    }
+
+    public function setDni(string $dni): void {
+        $this->dni = $dni;
+    }
+
+    public function getNombre(): string {
+        return $this->nombre;
+    }
+
+    public function setNombre(string $nombre): void {
+        $this->nombre = $nombre;
+    }
+
+    public function getApellido(): string {
+        return $this->apellido;
+    }
+
+    public function setApellido(string $apellido): void {
+        $this->apellido = $apellido;
+    }
+
+    public function getNacionalidad(): string {
+        return $this->nacionalidad;
+    }
+
+    public function setNacionalidad(string $nacionalidad): void {
+        $this->nacionalidad = $nacionalidad;
+    }
+
+    public function getFechaNacimiento(): string {
+        return $this->fechaNacimiento;
+    }
+
+    public function setFechaNacimiento(string $fechaNacimiento): void {
+        $this->fechaNacimiento = $fechaNacimiento;
+    }
+
+    public function getEstadoCivil(): string {
+        return $this->estadoCivil;
+    }
+
+    public function setEstadoCivil(string $estadoCivil): void {
+        $this->estadoCivil = $estadoCivil;
+    }
+
+    public function getSexo(): string {
+        return $this->sexo;
+    }
+
+    public function setSexo(string $sexo): void {
+        $this->sexo = $sexo;
+    }
+
+    public function getCorreo(): string {
+        return $this->correo;
+    }
+
+    public function setCorreo(string $correo): void {
+        $this->correo = $correo;
+    }
+
+    public function getTelefono(): string {
+        return $this->telefono;
+    }
+
+    public function setTelefono(string $telefono): void {
+        $this->telefono = $telefono;
+    }
+
+    public function getCelular(): string {
+        return $this->celular;
+    }
+
+    public function setCelular(string $celular): void {
+        $this->celular = $celular;
+    }
+
+    public function getDomicilio(): DomicilioDTO {
+        return $this->domicilio;
+    }
+
+    public function setDomicilio(DomicilioDTO $domicilio): void {
+        $this->domicilio = $domicilio;
+    }
+}
