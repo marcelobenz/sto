@@ -135,7 +135,7 @@ class UsuarioController extends Controller
     public function setUsuarioInterno()
     {
     
-        $usuarioInterno = UsuarioInterno::with('rol.permisos')->find(59); // Cargar relaciones
+        $usuarioInterno = UsuarioInterno::with('rol.permisos')->find(24); // Cargar relaciones
 
         if ($usuarioInterno) {
             Session::put('usuario_interno', $usuarioInterno); // Guardar en la sesión

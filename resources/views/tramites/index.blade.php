@@ -180,6 +180,9 @@
     <script src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script>
     <script>
 
+        //Variable para recuperar permisos de usuario
+        var permisos = @json($permisos);
+
         // Variable para filtro de bandeja tranites en curso
         var soloIniciados = {{ isset($soloIniciados) && $soloIniciados ? 'true' : 'false' }};
 
@@ -238,13 +241,51 @@
                         orderable: false,
                         searchable: false,
                         render: function(data, type, row) {
-                            return `
-                                <div class="actions text-center">
-                                    <a href="/tramites/${row.id_tramite}/detalle" class="btn btn-primary btn-sm btn-action" title="Ver detalle"><i class="fas fa-eye"></i></a>
-                                    <button class="btn btn-success btn-sm btn-action" title="Tomar trámite" onclick="tomarTramite( ${row.id_tramite} )"><i class="fas fa-hand-paper"></i></button>
-                                    <button class="btn btn-warning btn-sm btn-action" title="Reasignar" onclick="abrirModalReasignarIndex( ${row.id_tramite} )"><i class="fas fa-exchange-alt"></i></button>
-                                    <button class="btn btn-danger btn-sm btn-action" title="Dar de Baja" onclick="darDeBajaTramite( ${row.id_tramite} )"><i class="fas fa-trash"></i></button>
-                                </div>`;
+                            let botones = '';
+
+                            // Botón Ver
+                            botones += `
+                                <a href="/tramites/${row.id_tramite}/detalle"
+                                class="btn btn-primary btn-sm btn-action"
+                                title="Ver detalle">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            `;
+
+                            // Botón Tomar o espacio vacío
+                            botones += permisos.includes('TOMAR_TRAMITE') && row.flag_cancelado != 1 && row.flag_rechazado != 1 && row.estado != 'Finalizado'
+                                ? `
+                                    <button class="btn btn-success btn-sm btn-action"
+                                            title="Tomar trámite"
+                                            onclick="tomarTramite(${row.id_tramite})">
+                                        <i class="fas fa-hand-paper"></i>
+                                    </button>
+                                `
+                                : `<span style="display:inline-block; width:32px; height:32px;"></span>`;
+
+                            // Botón Reasignar o espacio vacío
+                            botones += permisos.includes('REASIGNAR_TRAMITE') && row.flag_cancelado != 1 && row.flag_rechazado != 1 && row.estado != 'Finalizado'
+                                ? `
+                                    <button class="btn btn-warning btn-sm btn-action"
+                                            title="Reasignar"
+                                            onclick="abrirModalReasignarIndex(${row.id_tramite})">
+                                        <i class="fas fa-exchange-alt"></i>
+                                    </button>
+                                `
+                                : `<span style="display:inline-block; width:32px; height:32px;"></span>`;
+
+                            // Botón Dar de Baja o espacio vacío
+                            botones += permisos.includes('DAR_DE_BAJA_TRAMITE') && row.flag_cancelado != 1 && row.flag_rechazado != 1
+                                ? `
+                                    <button class="btn btn-danger btn-sm btn-action"
+                                            title="Dar de Baja"
+                                            onclick="darDeBajaTramite(${row.id_tramite})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                `
+                                : `<span style="display:inline-block; width:32px; height:32px;"></span>`;
+
+                            return `<div class="actions text-center">${botones}</div>`;
                         }
                     }
                 ],

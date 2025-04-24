@@ -16,10 +16,14 @@ class TramiteController extends Controller
      */
     public function index()
     {
+        $usuario = Session::get('usuario_interno');
+
+        $permisos = PermisosHelper::getPermisos($usuario->id_usuario_interno, ['TOMAR_TRAMITE', 'REASIGNAR_TRAMITE', 'DAR_DE_BAJA_TRAMITE']);
 
         return view('tramites.index', [
             'tituloPagina' => 'Todos los Trámites',
-            'soloIniciados' => false
+            'soloIniciados' => false,
+            'permisos' => $permisos
         ]);
     }
 
@@ -103,8 +107,8 @@ class TramiteController extends Controller
             }elseif ($item['estado'] === "A Finalizar") {
                 $item['estado'] = "Finalizado";
             }
-            unset($item['flag_cancelado']);
-            unset($item['flag_rechazado']);
+            //unset($item['flag_cancelado']);
+            //unset($item['flag_rechazado']);
 
             return (object) $item;
         });
@@ -448,10 +452,16 @@ class TramiteController extends Controller
 
     public function enCurso()
     {
+        $usuario = Session::get('usuario_interno');
+
+        $permisos = PermisosHelper::getPermisos($usuario->id_usuario_interno, ['TOMAR_TRAMITE', 'REASIGNAR_TRAMITE', 'DAR_DE_BAJA_TRAMITE']);
+
         return view('tramites.index', [
+            'tituloPagina' => 'Trámites en Curso',
             'soloIniciados' => true,
-            'tituloPagina' => 'Trámites en Curso'
+            'permisos' => $permisos
         ]);
+
     }
     
     public function reasignar(Request $request)
@@ -497,11 +507,16 @@ class TramiteController extends Controller
 
     public function bandejaPersonal()
     {
+        $usuario = Session::get('usuario_interno');
+
+        $permisos = PermisosHelper::getPermisos($usuario->id_usuario_interno, ['TOMAR_TRAMITE', 'REASIGNAR_TRAMITE', 'DAR_DE_BAJA_TRAMITE']);
+
         return view('tramites.index', [
             'tituloPagina' => 'Bandeja Personal',
             'soloIniciados' => false,
             'soloAsignados' => true,
-            'id_usuario_sesion' => Session::get('usuario_interno')->id_usuario_interno ?? null
+            'id_usuario_sesion' => Session::get('usuario_interno')->id_usuario_interno ?? null,
+            'permisos' => $permisos
         ]);
     }
 
