@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AutorizacionController;
 use App\Http\Controllers\TramiteController;
 use App\Http\Controllers\EstadoTramiteController;
-use App\Http\Controllers\BusquedaContribuyenteController;
+use App\Http\Controllers\InstanciaTramiteController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\UsuarioController;
@@ -88,10 +88,10 @@ Route::post('/tramites/darDeBaja', [TramiteController::class, 'darDeBaja'])->nam
 //Estado Trámite
 Route::get('/estadoTramite/tienePermiso/{multinota}', [EstadoTramiteController::class, 'tienePermiso'])->name('estadoTramite.tienePermiso');
 
-//Busqueda Contribuyente
-Route::post('/busquedaContribuyente/buscar', [BusquedaContribuyenteController::class, 'buscar'])->name('busquedaContribuyente.buscar');
-Route::get('/busquedaContribuyente/avanzarPaso', [BusquedaContribuyenteController::class, 'avanzarPaso'])->name('busquedaContribuyente.avanzarPaso');
-Route::get('/busquedaContribuyente/retrocederPaso', [BusquedaContribuyenteController::class, 'retrocederPaso'])->name('busquedaContribuyente.retrocederPaso');
+// Instancia Tramite
+Route::post('/instanciaTramite/buscar', [InstanciaTramiteController::class, 'buscar'])->name('instanciaTramite.buscar');
+Route::get('/instanciaTramite/avanzarPaso', [InstanciaTramiteController::class, 'avanzarPaso'])->name('instanciaTramite.avanzarPaso');
+Route::get('/instanciaTramite/retrocederPaso', [InstanciaTramiteController::class, 'retrocederPaso'])->name('instanciaTramite.retrocederPaso');
 
 //Categorías
 Route::get('/categorias', [CategoriaController::class, 'index'])->name('categorias.index');

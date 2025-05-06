@@ -16,7 +16,7 @@
     <script>
         $(document).ready(function () {
             $(document).on('click', '#boton-avanzar-paso', function () {
-                fetch('/busquedaContribuyente/avanzarPaso')
+                fetch('/instanciaTramite/avanzarPaso')
                     .then(response => response.json())
                     .then(data => {
                         document.getElementById("pasos-container").innerHTML = data.html;
@@ -25,7 +25,7 @@
             });
 
             $(document).on('click', '#boton-retroceder-paso', function () {
-                fetch('/busquedaContribuyente/retrocederPaso')
+                fetch('/instanciaTramite/retrocederPaso')
                     .then(response => response.json())
                     .then(data => {
                         document.getElementById("pasos-container").innerHTML = data.html;

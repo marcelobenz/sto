@@ -22,7 +22,7 @@ use App\DTOs\FormularioMultinotaDTO;
 use App\Transformers\PersonaFisicaTransformer;
 use App\Transformers\PersonaJuridicaTransformer;
 
-class BusquedaContribuyenteController extends Controller {
+class InstanciaTramiteController extends Controller {
     public function buscar(Request $request) {
         try {
             $cuil = $request->post('cuil');
@@ -140,7 +140,7 @@ class BusquedaContribuyenteController extends Controller {
                 ->cuentas($cuentas)
                 ->transform();
 
-                return BusquedaContribuyenteController::showMultinotaInterna($multinota, $contribuyenteTransformed, 'Juridica');
+                return InstanciaTramiteController::showMultinotaInterna($multinota, $contribuyenteTransformed, 'Juridica');
 
                 //return view('multinota-interno', compact('multinota', 'contribuyente'));
 
