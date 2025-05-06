@@ -9,6 +9,17 @@ class PersonaJuridicaDTO {
     private string $razonSocial;
     private string $tipoSociedad;
     private DomicilioDTO $domicilio;
+    
+    public function __construct(
+        private bool $debeCargarRepresentante = true,
+        private bool $debePersistirseConTramite = false,
+        private bool $edicionBloqueada = false,
+        private bool $puedeIniciarTramite = false
+    ) {}
+    
+    public function getTitular(): string {
+        return $this->razonSocial;
+    }
 
     public function getCuit(): string {
         return $this->cuit;
@@ -40,5 +51,21 @@ class PersonaJuridicaDTO {
 
     public function setDomicilio(DomicilioDTO $domicilio): void {
         $this->domicilio = $domicilio;
+    }
+
+    public function getDebeCargarRepresentante(): bool {
+        return $this->debeCargarRepresentante;
+    }
+
+    public function getDebePersistirseConTramite(): bool {
+        return $this->debePersistirseConTramite;
+    }
+    
+    public function getEdicionBloqueada(): bool {
+        return $this->edicionBloqueada;
+    }
+    
+    public function getPuedeIniciarTramite(): bool {
+        return $this->puedeIniciarTramite;
     }
 }
