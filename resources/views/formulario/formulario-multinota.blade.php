@@ -64,7 +64,7 @@
         }
 
         .f1-progress-line { 
-            position: absolute; top: 0; left: 0; height: 1px; background: #27ace3; 
+            position: absolute; top: 0; left: 0; height: 2px; background: #27ace3; 
         }
 
         .f1-step { 
