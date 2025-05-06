@@ -90,6 +90,8 @@ Route::get('/estadoTramite/tienePermiso/{multinota}', [EstadoTramiteController::
 
 //Busqueda Contribuyente
 Route::post('/busquedaContribuyente/buscar', [BusquedaContribuyenteController::class, 'buscar'])->name('busquedaContribuyente.buscar');
+Route::get('/busquedaContribuyente/avanzarPaso', [BusquedaContribuyenteController::class, 'avanzarPaso'])->name('busquedaContribuyente.avanzarPaso');
+Route::get('/busquedaContribuyente/retrocederPaso', [BusquedaContribuyenteController::class, 'retrocederPaso'])->name('busquedaContribuyente.retrocederPaso');
 
 //Categorías
 Route::get('/categorias', [CategoriaController::class, 'index'])->name('categorias.index');
