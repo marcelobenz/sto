@@ -3,15 +3,12 @@
 namespace App\DTOs;
 
 class CuentaDTO {
-    private string $codigo;
-    private string $descripcion;
+    private $codigo;
+    private $descripcion;
 
-    public function __construct(
-        string $codigo,
-        string $descripcion,
-    ) {
-        $this->codigo = $codigo;
-        $this->descripcion = $descripcion;
+    public function __construct(array $data = []) {
+        $this->codigo = $data['codigo'] ?? null;
+        $this->descripcion = $data['descripcion'] ?? null;
     }
 
     public function getCodigo(): string {

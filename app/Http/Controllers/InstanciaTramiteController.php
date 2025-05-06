@@ -58,13 +58,13 @@ class InstanciaTramiteController extends Controller {
                 $data = $response->json();
 
                 if($data['res'] === 'success') {
-                    if(array_key_exists('status', $data)) {
+                    if(array_key_exists('status', $data['data'])) {
                         $cuentaDTO = new CuentaDTO();
                     } else {
                         //200
                         $cuentasArray = $data['data'];
                         $cuentas = array_map(function ($item) {
-                            return new CuentaDTO($item['codigo'], $item['descripcion']);
+                            return new CuentaDTO(['codigo' => $item['codigo'], 'descripcion' => $item['descripcion']]);
                         }, $cuentasArray);
                     }
 
@@ -104,10 +104,10 @@ class InstanciaTramiteController extends Controller {
 
                 $contribuyenteTransformed = (new PersonaFisicaTransformer())
                 ->personaFisica($personaFisica)
-                ->cuentas($cuentas)
+                ->cuentas($cuentas ?? [])
                 ->transform();
-
-                //this.navegador.navegar(contribuyente, this.claveCategoria, this.getUnmaskCuit());
+                
+                return InstanciaTramiteController::showMultinotaInterna($multinota, $contribuyenteTransformed, 'Fisica');
             } else if ($tipo->isPersonaJuridica()) {
                 $model = ContribuyenteMultinota::where('cuit', str_replace('-', '', $cuil))->first();
 
@@ -141,10 +141,6 @@ class InstanciaTramiteController extends Controller {
                 ->transform();
 
                 return InstanciaTramiteController::showMultinotaInterna($multinota, $contribuyenteTransformed, 'Juridica');
-
-                //return view('multinota-interno', compact('multinota', 'contribuyente'));
-
-                //this.navegador.navegar(contribuyente, this.claveCategoria, this.getUnmaskCuit());
             } else {
                 /* return new SinPersonalidadJuridicaTransformer().cuentas( cuentas ).cuit( cuit ).transform(); */
             }
