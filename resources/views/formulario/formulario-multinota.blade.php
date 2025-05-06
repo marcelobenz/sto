@@ -1,0 +1,125 @@
+<div style="display: grid; width: 90%; margin-left: auto; margin-right: auto;">
+    <div>
+        <h3>
+            FORMULARIO: {{ $formulario->nombre }} ({{ $formulario->categoria }})
+        </h3>
+        <h3>{{ $formulario->fechaActual }}</h3>
+    </div>
+    @if ($formulario->llevaMensaje)
+        @include('partials.requisitos') 
+    @endif
+    <div id="pasos-container">
+        @include('partials.pasos-container', ['formulario' => $formulario])
+    </div>
+</div>
+@section('scripting')
+    <script>
+        $(document).ready(function () {
+            $(document).on('click', '#boton-avanzar-paso', function () {
+                fetch('/busquedaContribuyente/avanzarPaso')
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById("pasos-container").innerHTML = data.html;
+                    })
+                    .catch(error => console.error('Error:', error));
+            });
+
+            $(document).on('click', '#boton-retroceder-paso', function () {
+                fetch('/busquedaContribuyente/retrocederPaso')
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById("pasos-container").innerHTML = data.html;
+                    })
+                    .catch(error => console.error('Error:', error));
+            });
+        });
+    </script>
+    <style>
+        .cont-pasos .f1-steps {
+            line-height: 15px;
+            text-align: center;
+        }
+
+        .cont-pasos strong { font-weight: 500; }
+
+        .cont-pasos a, .cont-pasos a:hover, .cont-pasos a:focus {
+            color: #f35b3f;
+            text-decoration: none;
+            -o-transition: all .3s; -moz-transition: all .3s; -webkit-transition: all .3s; -ms-transition: all .3s; transition: all .3s;
+        }
+       .f1 {
+            word-break: break-word;
+        }
+
+        .f1 h3 {
+            margin-top: 0; margin-bottom: 5px; text-transform: uppercase;
+        }
+
+        .f1-steps {
+            overflow: hidden; position: relative; margin: 3em 2em 2em 2em;
+        }
+
+        .f1-progress { 
+            position: absolute; top: 24px; left: 0; width: 100%; height: 1px; background: #ddd; 
+        }
+
+        .f1-progress-line { 
+            position: absolute; top: 0; left: 0; height: 1px; background: #27ace3; 
+        }
+
+        .f1-step { 
+            position: relative; float: left; padding: 0 5px; 
+        }
+
+        .f1-step-icon {
+            display: inline-block; width: 40px; height: 40px; margin-top: 4px; background: #ddd;
+            font-size: 16px; color: #666; line-height: 40px;
+            -moz-border-radius: 50%; -webkit-border-radius: 50%; border-radius: 50%;
+        }
+        .f1-step.activated .f1-step-icon {
+            background: #27ace3;
+            border: 1px solid #27ace3;
+            color: #f35b3f;
+            line-height: 38px;
+            margin: 4px;
+        }
+        .f1-step.activated .f1-step-icon i {
+            color: #ffffff;
+        }
+
+        .f1-step.active .f1-step-icon {
+            width: 48px; height: 48px; margin-top: 0; background: #27ace3; font-size: 22px; line-height: 48px;
+        }
+        .f1-step.active .f1-step-icon i {
+            color: #fff;
+        }
+
+        .f1-step p { 
+            color: #ccc; 
+        }
+
+        .f1-step.activated p { 
+            color: #27ace3; margin: 4px;
+        }
+
+        .f1-step.active p { 
+            color: #27ace3; margin: 4px;
+        }
+
+        .f1 fieldset { 
+            display: none; text-align: left; 
+        }
+
+        .f1-buttons { 
+            text-align: right; margin-bottom: 50px;
+        }
+
+        .f1 .input-error { 
+            border-color: #f35b3f; 
+        }
+        .f1-steps p {
+            margin-bottom: 0;
+            margin-top: 4px;
+        }
+    </style>
+@endsection

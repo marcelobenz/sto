@@ -1,0 +1,1 @@
+{!! $multinota->mensaje_inicial !!}
