@@ -10,10 +10,15 @@ use Illuminate\Support\Facades\Session;
 use App\Models\TipoPersonalidadJuridica;
 use App\Models\MultinotaServicio;
 use App\Models\ContribuyenteMultinota;
+use App\Models\TipoTramiteMultinota;
+use App\Models\SeccionMultinota;
+use App\Models\MensajeInicial;
 use App\DTOs\ContribuyenteMultinotaDTO;
 use App\DTOs\PersonaFisicaDTO;
 use App\DTOs\PersonaJuridicaDTO;
+use App\DTOs\TramiteMultinotaDTO;
 use App\DTOs\CuentaDTO;
+use App\DTOs\FormularioMultinotaDTO;
 use App\Transformers\PersonaFisicaTransformer;
 use App\Transformers\PersonaJuridicaTransformer;
 
@@ -42,6 +47,9 @@ class BusquedaContribuyenteController extends Controller {
             ->where('ttm.id_tipo_tramite_multinota', (int) $request->post('idMultinota'))
             ->select('multinota_servicios.url')
             ->first();
+
+            // Se recupera objeto de la multinota          
+            $multinota = TipoTramiteMultinota::where('id_tipo_tramite_multinota', (int) $request->post('idMultinota'))->first();
 
             // Se reemplaza el CUIT en el template de la URL
             if($servicio) {
@@ -73,7 +81,7 @@ class BusquedaContribuyenteController extends Controller {
                     throw new \Exception("El usuario ingresado no existe");
                 }
 
-                $dto = new ContribuyenteMultinotaDTO(
+                $contribuyente = new ContribuyenteMultinotaDTO(
                     $model->id_contribuyente_multinota,
                     $model->cuit,
                     $model->nombre,
@@ -90,11 +98,11 @@ class BusquedaContribuyenteController extends Controller {
                 );
 
                 $personaFisica = new PersonaFisicaDTO();
-                $personaFisica->setCuilCuit($dto->getCuit());
-                $personaFisica->setNombre($dto->getNombre());
-                $personaFisica->setApellido($dto->getApellido());
+                $personaFisica->setCuilCuit($contribuyente->getCuit());
+                $personaFisica->setNombre($contribuyente->getNombre());
+                $personaFisica->setApellido($contribuyente->getApellido());
 
-                $contribuyente = (new PersonaFisicaTransformer())
+                $contribuyenteTransformed = (new PersonaFisicaTransformer())
                 ->personaFisica($personaFisica)
                 ->cuentas($cuentas)
                 ->transform();
@@ -107,7 +115,7 @@ class BusquedaContribuyenteController extends Controller {
                     throw new \Exception("El usuario ingresado no existe");
                 }
 
-                $dto = new ContribuyenteMultinotaDTO(
+                $contribuyente = new ContribuyenteMultinotaDTO(
                     $model->id_contribuyente_multinota,
                     $model->cuit,
                     $model->nombre,
@@ -124,13 +132,17 @@ class BusquedaContribuyenteController extends Controller {
                 );
 
                 $personaJuridica = new PersonaJuridicaDTO();
-                $personaJuridica->setCuit($dto->getCuit());
-                $personaJuridica->setRazonSocial($dto->getApellido());
+                $personaJuridica->setCuit($contribuyente->getCuit());
+                $personaJuridica->setRazonSocial($contribuyente->getApellido());
 
-                $contribuyente = (new PersonaJuridicaTransformer())
+                $contribuyenteTransformed = (new PersonaJuridicaTransformer())
                 ->personaJuridica($personaJuridica)
                 ->cuentas($cuentas)
                 ->transform();
+
+                return BusquedaContribuyenteController::showMultinotaInterna($multinota, $contribuyenteTransformed, 'Juridica');
+
+                //return view('multinota-interno', compact('multinota', 'contribuyente'));
 
                 //this.navegador.navegar(contribuyente, this.claveCategoria, this.getUnmaskCuit());
             } else {
@@ -141,5 +153,93 @@ class BusquedaContribuyenteController extends Controller {
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public static function showMultinotaInterna($multinota, $contribuyente, $persona) {
+        $pasos = [];
+
+        // Get secciones multinota
+        $secciones = SeccionMultinota::join('multinota_seccion', 'seccion.id_seccion', '=', 'multinota_seccion.id_seccion')
+        ->where('multinota_seccion.id_tipo_tramite_multinota', $multinota->id_tipo_tramite_multinota)
+        ->select('seccion.*', 'multinota_seccion.orden')
+        ->orderBy('multinota_seccion.orden')
+        ->get();
+
+        // Get mensaje inicial
+        $mensajeInicial = MensajeInicial::join('tipo_tramite_mensaje_inicial', 'mensaje_inicial.id_mensaje_inicial', '=', 'tipo_tramite_mensaje_inicial.id_mensaje_inicial')
+        ->where('tipo_tramite_mensaje_inicial.id_tipo_tramite_multinota', $multinota->id_tipo_tramite_multinota)
+        ->select('mensaje_inicial.*')
+        ->orderBy('mensaje_inicial.id_mensaje_inicial', 'desc')
+        ->first(); 
+
+        $multinota->mensaje_inicial = $mensajeInicial->mensaje_inicial;
+
+        $llevaMensaje = !empty($mensajeInicial->mensaje_inicial);
+
+        // Get pasos
+        if($persona === 'Fisica') {
+            $pasos = [
+                ['orden' => 1, 'titulo' => 'Datos del Solicitante', 'iconoPaso' => 'fa-plus', 'ruta' => 'inicio-tramite-general', 'completado' => false],
+                ['orden' => 2, 'titulo' => 'Datos a Completar', 'iconoPaso' => 'fa-pen-to-square', 'ruta' => 'seccion-valor-multinota', 'completado' => false],
+                ['orden' => 3, 'titulo' => 'Información Adicional', 'iconoPaso' => 'fa-info', 'ruta' => 'informacion-adicional', 'completado' => false],
+                ['orden' => 4, 'titulo' => 'Adjuntar Documentación', 'iconoPaso' => 'fa-upload', 'ruta' => 'adjunta-documentacion', 'completado' => false],
+                ['orden' => 5, 'titulo' => 'Resúmen', 'iconoPaso' => 'fa-file-lines', 'ruta' => 'resumen-multinota', 'completado' => false],
+            ];
+        } else {
+            $pasos = [
+                ['orden' => 1, 'titulo' => 'Datos del Solicitante', 'iconoPaso' => 'fa-plus', 'ruta' => 'inicio-tramite-general', 'completado' => false],
+                ['orden' => 2, 'titulo' => 'Datos a Representante', 'iconoPaso' => 'fa-street-view', 'ruta' => 'solicitante', 'completado' => false],
+                ['orden' => 3, 'titulo' => 'Datos a Completar', 'iconoPaso' => 'fa-pen-to-square', 'ruta' => 'seccion-valor-multinota', 'completado' => false],
+                ['orden' => 4, 'titulo' => 'Información Adicional', 'iconoPaso' => 'fa-info', 'ruta' => 'informacion-adicional', 'completado' => false],
+                ['orden' => 5, 'titulo' => 'Adjuntar Documentación', 'iconoPaso' => 'fa-upload', 'ruta' => 'adjunta-documentacion', 'completado' => false],
+                ['orden' => 6, 'titulo' => 'Resúmen', 'iconoPaso' => 'fa-file-lines', 'ruta' => 'resumen-multinota', 'completado' => false],
+            ]; 
+        }
+
+        $tramiteMultinotaDTO = new TramiteMultinotaDTO();
+                       
+        $formulario = new FormularioMultinotaDTO($multinota, $secciones, $contribuyente['cuentas'], $pasos, $llevaMensaje);
+
+        Session::put('FORMULARIO', $formulario);
+        Session::put('MULTINOTA', $multinota);
+
+        return view('multinota-interno', [
+            'formulario' => $formulario,
+            'multinota' => $multinota,
+        ]);
+    }
+    
+    public function avanzarPaso() {
+        $formulario = Session::get('FORMULARIO');
+        $multinota = Session::get('MULTINOTA');
+        
+        foreach ($formulario->pasosFormulario as &$paso) {
+            if ($paso['completado'] === false) {
+                $paso['completado'] = true;
+                break;
+            }
+        }
+
+        unset($paso);
+        Session::put('FORMULARIO', $formulario);
+        $html = view('partials.pasos-container', compact('formulario'))->render();
+        return response()->json(['html' => $html]);
+    }
+
+    public function retrocederPaso() {
+        $formulario = Session::get('FORMULARIO');
+        $multinota = Session::get('MULTINOTA');
+        
+        foreach ($formulario->pasosFormulario as $i => &$paso) {
+            if ($paso['completado'] === false) {
+                $formulario->pasosFormulario[$i-1]['completado'] = false;
+                break;
+            }
+        }
+
+        unset($paso);
+        Session::put('FORMULARIO', $formulario);
+        $html = view('partials.pasos-container', compact('formulario'))->render();
+        return response()->json(['html' => $html]);
     }
 }
