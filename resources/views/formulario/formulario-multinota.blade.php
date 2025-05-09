@@ -11,6 +11,12 @@
     <div id="pasos-container">
         @include('partials.pasos-container', ['formulario' => $formulario])
     </div>
+    <div id="ruta-paso-tramite" style="border: 2px solid gray; margin-bottom: 0.5rem;">
+        @include('partials.ruta-paso-tramite', ['formulario' => $formulario])
+    </div>
+    <div id="botones-avance-tramite">
+        @include('partials.botones-avance-tramite', ['formulario' => $formulario])
+    </div>
 </div>
 @section('scripting')
     <script>
@@ -19,7 +25,8 @@
                 fetch('/instanciaTramite/avanzarPaso')
                     .then(response => response.json())
                     .then(data => {
-                        document.getElementById("pasos-container").innerHTML = data.html;
+                        document.getElementById("pasos-container").innerHTML = data.htmlPasos;
+                        document.getElementById("botones-avance-tramite").innerHTML = data.htmlBotones;
                     })
                     .catch(error => console.error('Error:', error));
             });
@@ -28,7 +35,8 @@
                 fetch('/instanciaTramite/retrocederPaso')
                     .then(response => response.json())
                     .then(data => {
-                        document.getElementById("pasos-container").innerHTML = data.html;
+                        document.getElementById("pasos-container").innerHTML = data.htmlPasos;
+                        document.getElementById("botones-avance-tramite").innerHTML = data.htmlBotones;
                     })
                     .catch(error => console.error('Error:', error));
             });
