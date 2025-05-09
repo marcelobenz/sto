@@ -10,7 +10,7 @@ use App\Models\SeccionMultinota;
 class FormularioMultinotaDTO {
     public string $nombre;
     public string $categoria;
-    public array $cuentas;
+    public ?array $cuentas = null;
     public string $fechaActual;
     public bool $llevaMensaje;
     public array $pasosFormulario;
@@ -68,5 +68,14 @@ class FormularioMultinotaDTO {
         }
 
         return 100.0 / $total;
+    }
+
+    public function puedeCompletar(): bool {
+        return count($this->cuentas) > 0;
+    }
+
+    public function muestro($orden): bool {
+        $ordenActual = $this->getOrdenActual();
+        return $ordenActual == $orden;
     }
 }
