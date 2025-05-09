@@ -175,20 +175,20 @@ class InstanciaTramiteController extends Controller {
         // Get pasos
         if($persona === 'Fisica') {
             $pasos = [
-                ['orden' => 1, 'titulo' => 'Datos del Solicitante', 'iconoPaso' => 'fa-plus', 'ruta' => 'inicio-tramite-general', 'completado' => false],
-                ['orden' => 2, 'titulo' => 'Datos a Completar', 'iconoPaso' => 'fa-pen-to-square', 'ruta' => 'seccion-valor-multinota', 'completado' => false],
-                ['orden' => 3, 'titulo' => 'Información Adicional', 'iconoPaso' => 'fa-info', 'ruta' => 'informacion-adicional', 'completado' => false],
-                ['orden' => 4, 'titulo' => 'Adjuntar Documentación', 'iconoPaso' => 'fa-upload', 'ruta' => 'adjunta-documentacion', 'completado' => false],
-                ['orden' => 5, 'titulo' => 'Resúmen', 'iconoPaso' => 'fa-file-lines', 'ruta' => 'resumen-multinota', 'completado' => false],
+                ['orden' => 1, 'titulo' => 'Datos del Solicitante', 'iconoPaso' => 'fa-plus', 'ruta' => 'partials.etapas-tramite.inicio-tramite-general', 'completado' => false],
+                ['orden' => 2, 'titulo' => 'Datos a Completar', 'iconoPaso' => 'fa-pen-to-square', 'ruta' => 'partials.etapas-tramite.seccion-valor-multinota', 'completado' => false],
+                ['orden' => 3, 'titulo' => 'Información Adicional', 'iconoPaso' => 'fa-info', 'ruta' => 'partials.etapas-tramite.informacion-adicional', 'completado' => false],
+                ['orden' => 4, 'titulo' => 'Adjuntar Documentación', 'iconoPaso' => 'fa-upload', 'ruta' => 'partials.etapas-tramite.adjunta-documentacion', 'completado' => false],
+                ['orden' => 5, 'titulo' => 'Resúmen', 'iconoPaso' => 'fa-file-lines', 'ruta' => 'partials.etapas-tramite.resumen-multinota', 'completado' => false],
             ];
         } else {
             $pasos = [
-                ['orden' => 1, 'titulo' => 'Datos del Solicitante', 'iconoPaso' => 'fa-plus', 'ruta' => 'inicio-tramite-general', 'completado' => false],
-                ['orden' => 2, 'titulo' => 'Datos a Representante', 'iconoPaso' => 'fa-street-view', 'ruta' => 'solicitante', 'completado' => false],
-                ['orden' => 3, 'titulo' => 'Datos a Completar', 'iconoPaso' => 'fa-pen-to-square', 'ruta' => 'seccion-valor-multinota', 'completado' => false],
-                ['orden' => 4, 'titulo' => 'Información Adicional', 'iconoPaso' => 'fa-info', 'ruta' => 'informacion-adicional', 'completado' => false],
-                ['orden' => 5, 'titulo' => 'Adjuntar Documentación', 'iconoPaso' => 'fa-upload', 'ruta' => 'adjunta-documentacion', 'completado' => false],
-                ['orden' => 6, 'titulo' => 'Resúmen', 'iconoPaso' => 'fa-file-lines', 'ruta' => 'resumen-multinota', 'completado' => false],
+                ['orden' => 1, 'titulo' => 'Datos del Solicitante', 'iconoPaso' => 'fa-plus', 'ruta' => 'partials.etapas-tramite.inicio-tramite-general', 'completado' => false],
+                ['orden' => 2, 'titulo' => 'Datos a Representante', 'iconoPaso' => 'fa-street-view', 'ruta' => 'partials.etapas-tramite.solicitante', 'completado' => false],
+                ['orden' => 3, 'titulo' => 'Datos a Completar', 'iconoPaso' => 'fa-pen-to-square', 'ruta' => 'partials.etapas-tramite.seccion-valor-multinota', 'completado' => false],
+                ['orden' => 4, 'titulo' => 'Información Adicional', 'iconoPaso' => 'fa-info', 'ruta' => 'partials.etapas-tramite.informacion-adicional', 'completado' => false],
+                ['orden' => 5, 'titulo' => 'Adjuntar Documentación', 'iconoPaso' => 'fa-upload', 'ruta' => 'partials.etapas-tramite.adjunta-documentacion', 'completado' => false],
+                ['orden' => 6, 'titulo' => 'Resúmen', 'iconoPaso' => 'fa-file-lines', 'ruta' => 'partials.etapas-tramite.resumen-multinota', 'completado' => false],
             ]; 
         }
 
@@ -218,8 +218,13 @@ class InstanciaTramiteController extends Controller {
 
         unset($paso);
         Session::put('FORMULARIO', $formulario);
-        $html = view('partials.pasos-container', compact('formulario'))->render();
-        return response()->json(['html' => $html]);
+        $htmlPasos = view('partials.pasos-container', compact('formulario'))->render();
+        $htmlBotones = view('partials.botones-avance-tramite', compact('formulario'))->render();
+
+        return response()->json([
+            'htmlPasos' => $htmlPasos,
+            'htmlBotones' => $htmlBotones,
+        ]);
     }
 
     public function retrocederPaso() {
@@ -235,7 +240,12 @@ class InstanciaTramiteController extends Controller {
 
         unset($paso);
         Session::put('FORMULARIO', $formulario);
-        $html = view('partials.pasos-container', compact('formulario'))->render();
-        return response()->json(['html' => $html]);
+        $htmlPasos = view('partials.pasos-container', compact('formulario'))->render();
+        $htmlBotones = view('partials.botones-avance-tramite', compact('formulario'))->render();
+
+        return response()->json([
+            'htmlPasos' => $htmlPasos,
+            'htmlBotones' => $htmlBotones,
+        ]);
     }
 }
