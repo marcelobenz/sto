@@ -19,10 +19,11 @@ use App\DTOs\PersonaJuridicaDTO;
 use App\DTOs\TramiteMultinotaDTO;
 use App\DTOs\CuentaDTO;
 use App\DTOs\FormularioMultinotaDTO;
+use App\DTOs\InstanciaMultinotaDTO;
 use App\Transformers\PersonaFisicaTransformer;
 use App\Transformers\PersonaJuridicaTransformer;
 
-class InstanciaTramiteController extends Controller {
+class InstanciaMultinotaController extends Controller {
     public function buscar(Request $request) {
         try {
             $cuil = $request->post('cuil');
@@ -107,7 +108,7 @@ class InstanciaTramiteController extends Controller {
                 ->cuentas($cuentas ?? [])
                 ->transform();
                 
-                return InstanciaTramiteController::showMultinotaInterna($multinota, $contribuyenteTransformed, 'Fisica');
+                return InstanciaMultinotaController::showMultinotaInterna($multinota, $contribuyenteTransformed, 'Fisica');
             } else if ($tipo->isPersonaJuridica()) {
                 $model = ContribuyenteMultinota::where('cuit', str_replace('-', '', $cuil))->first();
 
@@ -140,7 +141,7 @@ class InstanciaTramiteController extends Controller {
                 ->cuentas($cuentas)
                 ->transform();
 
-                return InstanciaTramiteController::showMultinotaInterna($multinota, $contribuyenteTransformed, 'Juridica');
+                return InstanciaMultinotaController::showMultinotaInterna($multinota, $contribuyenteTransformed, 'Juridica');
             } else {
                 /* return new SinPersonalidadJuridicaTransformer().cuentas( cuentas ).cuit( cuit ).transform(); */
             }
@@ -184,7 +185,7 @@ class InstanciaTramiteController extends Controller {
         } else {
             $pasos = [
                 ['orden' => 1, 'titulo' => 'Datos del Solicitante', 'iconoPaso' => 'fa-plus', 'ruta' => 'partials.etapas-tramite.inicio-tramite-general', 'completado' => false],
-                ['orden' => 2, 'titulo' => 'Datos a Representante', 'iconoPaso' => 'fa-street-view', 'ruta' => 'partials.etapas-tramite.solicitante', 'completado' => false],
+                ['orden' => 2, 'titulo' => 'Datos del Representante', 'iconoPaso' => 'fa-street-view', 'ruta' => 'partials.etapas-tramite.solicitante', 'completado' => false],
                 ['orden' => 3, 'titulo' => 'Datos a Completar', 'iconoPaso' => 'fa-pen-to-square', 'ruta' => 'partials.etapas-tramite.seccion-valor-multinota', 'completado' => false],
                 ['orden' => 4, 'titulo' => 'Información Adicional', 'iconoPaso' => 'fa-info', 'ruta' => 'partials.etapas-tramite.informacion-adicional', 'completado' => false],
                 ['orden' => 5, 'titulo' => 'Adjuntar Documentación', 'iconoPaso' => 'fa-upload', 'ruta' => 'partials.etapas-tramite.adjunta-documentacion', 'completado' => false],
@@ -192,22 +193,25 @@ class InstanciaTramiteController extends Controller {
             ]; 
         }
 
-        $tramiteMultinotaDTO = new TramiteMultinotaDTO();
-                       
         $formulario = new FormularioMultinotaDTO($multinota, $secciones, $contribuyente['cuentas'], $pasos, $llevaMensaje);
+
+        $instanciaMultinota = new InstanciaMultinotaDTO();
 
         Session::put('FORMULARIO', $formulario);
         Session::put('MULTINOTA', $multinota);
+        Session::put('INSTANCIA_MULTINOTA', $instanciaMultinota);
 
         return view('multinota-interno', [
             'formulario' => $formulario,
             'multinota' => $multinota,
+            'instanciaMultinota' => $instanciaMultinota
         ]);
     }
     
     public function avanzarPaso() {
         $formulario = Session::get('FORMULARIO');
         $multinota = Session::get('MULTINOTA');
+        $instanciaMultinota = Session::get('INSTANCIA_MULTINOTA');
         
         foreach ($formulario->pasosFormulario as &$paso) {
             if ($paso['completado'] === false) {
@@ -219,10 +223,12 @@ class InstanciaTramiteController extends Controller {
         unset($paso);
         Session::put('FORMULARIO', $formulario);
         $htmlPasos = view('partials.pasos-container', compact('formulario'))->render();
+        $htmlRuta = view('partials.ruta-paso-tramite', compact('formulario', 'instanciaMultinota'))->render();
         $htmlBotones = view('partials.botones-avance-tramite', compact('formulario'))->render();
 
         return response()->json([
             'htmlPasos' => $htmlPasos,
+            'htmlRuta' => $htmlRuta,
             'htmlBotones' => $htmlBotones,
         ]);
     }
@@ -230,6 +236,7 @@ class InstanciaTramiteController extends Controller {
     public function retrocederPaso() {
         $formulario = Session::get('FORMULARIO');
         $multinota = Session::get('MULTINOTA');
+        $instanciaMultinota = Session::get('INSTANCIA_MULTINOTA');
         
         foreach ($formulario->pasosFormulario as $i => &$paso) {
             if ($paso['completado'] === false) {
@@ -241,11 +248,20 @@ class InstanciaTramiteController extends Controller {
         unset($paso);
         Session::put('FORMULARIO', $formulario);
         $htmlPasos = view('partials.pasos-container', compact('formulario'))->render();
+        $htmlRuta = view('partials.ruta-paso-tramite', compact('formulario', 'instanciaMultinota'))->render();
         $htmlBotones = view('partials.botones-avance-tramite', compact('formulario'))->render();
 
         return response()->json([
             'htmlPasos' => $htmlPasos,
+            'htmlRuta' => $htmlRuta,
             'htmlBotones' => $htmlBotones,
         ]);
+    }
+
+    public function guardarDatosSeccion(Request $request) {
+        $instanciaMultinota = Session::get('INSTANCIA_MULTINOTA');
+        $instanciaMultinota->setCuenta($request->post('cuenta'));
+        $instanciaMultinota->setCorreo($request->post('correo'));
+        Session::put('INSTANCIA_MULTINOTA', $instanciaMultinota);
     }
 }

@@ -4,6 +4,7 @@
             <div>
                 @include($paso['ruta'])
             </div>
+            @break
         @endif
     @endforeach
 @endif
@@ -19,3 +20,25 @@
         padding: 5px;
     }
 </style>
+<script>
+    function saveSectionData() {
+        const cuentaUsuario = document.querySelector('#cuentasUsuario')?.value;
+        const cuentaInput = document.querySelector('#cuentaGeneralSinCuentas')?.value;
+
+        const cuenta = (cuentaUsuario && cuentaUsuario !== 'Otra') ? cuentaUsuario : cuentaInput;
+        const correo = document.querySelector('#correo')?.value;
+
+        fetch('{{ route('instanciaTramite.guardarDatosSeccion') }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ cuenta, correo }),
+        }).then(res => {
+            if (!res.ok) {
+                console.error('Error al guardar datos');
+            }
+        });
+    }
+</script>

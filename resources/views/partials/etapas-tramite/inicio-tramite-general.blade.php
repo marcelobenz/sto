@@ -1,3 +1,10 @@
+@php
+    $cuentasCodigos = array_map(function($c) {
+        return str_replace(' ', '', $c->getCodigo());
+    }, $formulario->cuentas);
+    $otraSeleccionada = !in_array(session('INSTANCIA_MULTINOTA')->cuenta, $cuentasCodigos);
+@endphp
+
 <div>
     <div class="titulo-seccion-tramite">
         <h3>Iniciar Trámite</h3>
@@ -8,11 +15,20 @@
                 <div class="col-md-3 col-xs-12">
                     <div class="form-group requerido">
                         <label for="cuentasUsuario">Cuenta *</label>
-                        <select id="cuentasUsuario" name="cuentaCuentas" class="form-control" onchange="showOption()">
-                            @foreach($formulario->cuentas as $c)
-                                <option value="{{ $c->getCodigo() }}">{{ $c->getCodigo() }}</option>
+                        <select name="cuentasUsuario" id="cuentasUsuario" class="form-control" onchange="showOption(); saveSectionData();">
+                            @foreach ($formulario->cuentas as $cuenta)
+                                @php
+                                    $cuenta = str_replace(' ', '', $cuenta->getCodigo());
+                                @endphp
+                                <option value="{{ $cuenta }}"
+                                    {{ $cuenta == session('INSTANCIA_MULTINOTA')->cuenta ?? '' ? 'selected' : '' }}>
+                                    {{ $cuenta }}
+                                </option>
                             @endforeach
-                            <option value="Otra">Otra</option>
+                            <option value="Otra" 
+                                {{ (session('INSTANCIA_MULTINOTA')->cuenta !== '' && $otraSeleccionada) ? 'selected' : '' }}>
+                                Otra
+                            </option>
                         </select>
                     </div>
                 </div>
@@ -21,28 +37,28 @@
                     <div class="col-xs-12 no-padding">
                         <div class="form-group requerido">
                             <label for="cuentaGeneral">Dominio *</label>
-                            <input type="text" id="cuentaGeneralSinCuentas" class="form-control"
-                                name="cuentaGeneral" {{-- value="{{ old('cuentaGeneral', $inicioTramiteGeneral->cuenta) }}" --}}>
+                            <input type="text" id="cuentaGeneral" class="form-control"
+                                name="cuentaGeneral" value="{{ session('INSTANCIA_MULTINOTA')->cuenta ?? '' }}" onblur="saveSectionData()">
                         </div>
                     </div>
                 </div>
             @endif
-            <div class="col-md-4 col-xs-12" id="outputPanel" style="display: none;">
+            <div class="col-md-4 col-xs-12" id="outputPanel" style="display: {{ (session('INSTANCIA_MULTINOTA')->cuenta !== '' && $otraSeleccionada) ? 'block' : 'none' }};">
                 <div class="col-xs-12 no-padding">
                     <div class="form-group requerido">
-                        <label for="cuentaGeneral">Dominio *</label>
+                        <label for="cuentaGeneralSinCuentas">Dominio *</label>
                         <input type="text" id="cuentaGeneralSinCuentas" class="form-control"
-                            name="cuentaGeneral" {{-- value="{{ old('cuentaGeneral', $inicioTramiteGeneral->cuenta) }}" --}}>
+                            name="cuentaGeneralSinCuentas" value="{{ session('INSTANCIA_MULTINOTA')->cuenta ?? '' }}" onblur="saveSectionData()">
                     </div>
                 </div>
             </div>
             <div class="col-md-4 col-xs-12">
                 <div class="col-xs-12 no-padding">
                     <div class="form-group requerido">
-                        <label for="cuentaModalAbl">Correo *</label>
-                        <input type="text" id="cuentaModalAbl" class="form-control"
-                            name="correo" {{-- value="{{ old('correo', $inicioTramiteGeneral->correo) }}" --}}
-                            pattern="[a-zA-Z0-9_.@\-]+">
+                        <label for="correo">Correo *</label>
+                        <input type="text" id="correo" class="form-control"
+                            name="correo" value="{{ session('INSTANCIA_MULTINOTA')->correo ?? '' }}"
+                            pattern="[a-zA-Z0-9_.@\-]+" onblur="saveSectionData()">
                     </div>
                 </div>
             </div>
@@ -53,6 +69,8 @@
     </div>
 </div>
 <script>
+    /* showOption(); */
+
     function showOption() {
         const select = document.getElementById("cuentasUsuario");
         const option = select.options[select.selectedIndex].value;

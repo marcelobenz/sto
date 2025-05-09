@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AutorizacionController;
 use App\Http\Controllers\TramiteController;
 use App\Http\Controllers\EstadoTramiteController;
-use App\Http\Controllers\InstanciaTramiteController;
+use App\Http\Controllers\InstanciaMultinotaController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\UsuarioController;
@@ -89,9 +89,10 @@ Route::post('/tramites/darDeBaja', [TramiteController::class, 'darDeBaja'])->nam
 Route::get('/estadoTramite/tienePermiso/{multinota}', [EstadoTramiteController::class, 'tienePermiso'])->name('estadoTramite.tienePermiso');
 
 // Instancia Tramite
-Route::post('/instanciaTramite/buscar', [InstanciaTramiteController::class, 'buscar'])->name('instanciaTramite.buscar');
-Route::get('/instanciaTramite/avanzarPaso', [InstanciaTramiteController::class, 'avanzarPaso'])->name('instanciaTramite.avanzarPaso');
-Route::get('/instanciaTramite/retrocederPaso', [InstanciaTramiteController::class, 'retrocederPaso'])->name('instanciaTramite.retrocederPaso');
+Route::post('/instanciaTramite/buscar', [InstanciaMultinotaController::class, 'buscar'])->name('instanciaTramite.buscar');
+Route::get('/instanciaTramite/avanzarPaso', [InstanciaMultinotaController::class, 'avanzarPaso'])->name('instanciaTramite.avanzarPaso');
+Route::get('/instanciaTramite/retrocederPaso', [InstanciaMultinotaController::class, 'retrocederPaso'])->name('instanciaTramite.retrocederPaso');
+Route::post('/instanciaTramite/guardarDatosSeccion', [InstanciaMultinotaController::class, 'guardarDatosSeccion'])->name('instanciaTramite.guardarDatosSeccion');
 
 //Categorías
 Route::get('/categorias', [CategoriaController::class, 'index'])->name('categorias.index');
