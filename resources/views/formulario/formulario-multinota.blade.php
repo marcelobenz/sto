@@ -19,17 +19,66 @@
     </div>
 </div>
 @section('scripting')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function () {
-            $(document).on('click', '#boton-avanzar-paso', function () {
-                fetch('/instanciaTramite/avanzarPaso')
+            async function validarDatosSeccion() {
+                const response = await fetch('/instanciaTramite/session-data');
+                const data = await response.json();
+
+                const cuenta = data.cuenta;
+                const correo = data.correo;
+
+                console.log(`Cuenta: ${cuenta}`)
+                console.log(`Correo: ${correo}`)
+
+                const input = document.querySelector('#correo');
+                const pattern = new RegExp(input.getAttribute('pattern'));
+
+                const mensajeErrorCorreo = 'El correo electrónico ingresado no es correcto.';
+                const mensajeErrorCuenta = 'Debe ingresar una cuenta.';
+
+                if (!pattern.test(correo)) {
+                    Swal.fire({
+                        position: "top-end",
+                        icon: "warning",
+                        title: `${mensajeErrorCorreo}`,
+                        showConfirmButton: false,
+                        timer: 5000,
+                        timerProgressBar: true
+                    });
+                    throw new Error(`${mensajeErrorCorreo}`);
+                }
+
+                if(cuenta === '') {
+                    Swal.fire({
+                        position: "top-end",
+                        icon: "warning",
+                        title: `${mensajeErrorCuenta}`,
+                        showConfirmButton: false,
+                        timer: 5000,
+                        timerProgressBar: true
+                    });
+                    throw new Error(`${mensajeErrorCuenta}`);
+                }
+            }
+
+            $(document).on('click', '#boton-avanzar-paso', async function () {
+                try {
+                    await validarDatosSeccion();
+
+                    fetch('/instanciaTramite/avanzarPaso')
                     .then(response => response.json())
                     .then(data => {
+                        
                         document.getElementById("pasos-container").innerHTML = data.htmlPasos;
                         document.getElementById('ruta-paso-tramite').innerHTML = data.htmlRuta;
                         document.getElementById("botones-avance-tramite").innerHTML = data.htmlBotones;
                     })
                     .catch(error => console.error('Error:', error));
+                } catch (error) {
+                    console.log(error.message);
+                }
             });
 
             $(document).on('click', '#boton-retroceder-paso', function () {

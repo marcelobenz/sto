@@ -15,7 +15,7 @@
                 <div class="col-md-3 col-xs-12">
                     <div class="form-group requerido">
                         <label for="cuentasUsuario">Cuenta *</label>
-                        <select name="cuentasUsuario" id="cuentasUsuario" class="form-control" onchange="showOption(); saveSectionData();">
+                        <select name="cuentasUsuario" id="cuentasUsuario" class="form-control" onchange="mostrarInputCuenta(); guardarDatosSeccion();">
                             @foreach ($formulario->cuentas as $cuenta)
                                 @php
                                     $cuenta = str_replace(' ', '', $cuenta->getCodigo());
@@ -38,7 +38,7 @@
                         <div class="form-group requerido">
                             <label for="cuentaGeneral">Dominio *</label>
                             <input type="text" id="cuentaGeneral" class="form-control"
-                                name="cuentaGeneral" value="{{ session('INSTANCIA_MULTINOTA')->cuenta ?? '' }}" onblur="saveSectionData()">
+                                name="cuentaGeneral" value="{{ session('INSTANCIA_MULTINOTA')->cuenta ?? '' }}" onblur="guardarDatosSeccion()">
                         </div>
                     </div>
                 </div>
@@ -48,7 +48,7 @@
                     <div class="form-group requerido">
                         <label for="cuentaGeneralSinCuentas">Dominio *</label>
                         <input type="text" id="cuentaGeneralSinCuentas" class="form-control"
-                            name="cuentaGeneralSinCuentas" value="{{ session('INSTANCIA_MULTINOTA')->cuenta ?? '' }}" onblur="saveSectionData()">
+                            name="cuentaGeneralSinCuentas" value="{{ session('INSTANCIA_MULTINOTA')->cuenta ?? '' }}" onblur="guardarDatosSeccion()">
                     </div>
                 </div>
             </div>
@@ -58,7 +58,7 @@
                         <label for="correo">Correo *</label>
                         <input type="text" id="correo" class="form-control"
                             name="correo" value="{{ session('INSTANCIA_MULTINOTA')->correo ?? '' }}"
-                            pattern="[a-zA-Z0-9_.@\-]+" onblur="saveSectionData()">
+                            pattern="^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$" onblur="guardarDatosSeccion()">
                     </div>
                 </div>
             </div>
@@ -69,9 +69,7 @@
     </div>
 </div>
 <script>
-    /* showOption(); */
-
-    function showOption() {
+    function mostrarInputCuenta() {
         const select = document.getElementById("cuentasUsuario");
         const option = select.options[select.selectedIndex].value;
         const panel = document.getElementById("outputPanel");

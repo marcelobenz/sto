@@ -21,12 +21,12 @@
     }
 </style>
 <script>
-    function saveSectionData() {
-        const cuentaUsuario = document.querySelector('#cuentasUsuario')?.value;
-        const cuentaInput = document.querySelector('#cuentaGeneralSinCuentas')?.value;
+    function guardarDatosSeccion() {
+        const cuentaUsuario = document.querySelector('#cuentasUsuario').value;
+        const cuentaInput = document.querySelector('#cuentaGeneralSinCuentas').value;
 
         const cuenta = (cuentaUsuario && cuentaUsuario !== 'Otra') ? cuentaUsuario : cuentaInput;
-        const correo = document.querySelector('#correo')?.value;
+        const correo = document.querySelector('#correo').value;
 
         fetch('{{ route('instanciaTramite.guardarDatosSeccion') }}', {
             method: 'POST',

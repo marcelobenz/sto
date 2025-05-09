@@ -93,6 +93,13 @@ Route::post('/instanciaTramite/buscar', [InstanciaMultinotaController::class, 'b
 Route::get('/instanciaTramite/avanzarPaso', [InstanciaMultinotaController::class, 'avanzarPaso'])->name('instanciaTramite.avanzarPaso');
 Route::get('/instanciaTramite/retrocederPaso', [InstanciaMultinotaController::class, 'retrocederPaso'])->name('instanciaTramite.retrocederPaso');
 Route::post('/instanciaTramite/guardarDatosSeccion', [InstanciaMultinotaController::class, 'guardarDatosSeccion'])->name('instanciaTramite.guardarDatosSeccion');
+Route::get('/instanciaTramite/session-data', function () {
+    return response()->json([
+        'cuenta' => session('INSTANCIA_MULTINOTA')->cuenta,
+        'correo' => session('INSTANCIA_MULTINOTA')->correo,
+    ]);
+});
+
 
 //Categorías
 Route::get('/categorias', [CategoriaController::class, 'index'])->name('categorias.index');
