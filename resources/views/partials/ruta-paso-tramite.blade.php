@@ -21,14 +21,14 @@
     }
 </style>
 <script>
-    function guardarDatosSeccion() {
+    function guardarDatosDelSolicitante() {
         const cuentaUsuario = document.querySelector('#cuentasUsuario').value;
         const cuentaInput = document.querySelector('#cuentaGeneralSinCuentas').value;
 
         const cuenta = (cuentaUsuario && cuentaUsuario !== 'Otra') ? cuentaUsuario : cuentaInput;
         const correo = document.querySelector('#correo').value;
 
-        fetch('{{ route('instanciaTramite.guardarDatosSeccion') }}', {
+        fetch('{{ route('instanciaTramite.guardarDatosDelSolicitante') }}', {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',

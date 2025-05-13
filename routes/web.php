@@ -92,7 +92,7 @@ Route::get('/estadoTramite/tienePermiso/{multinota}', [EstadoTramiteController::
 Route::post('/instanciaTramite/buscar', [InstanciaMultinotaController::class, 'buscar'])->name('instanciaTramite.buscar');
 Route::get('/instanciaTramite/avanzarPaso', [InstanciaMultinotaController::class, 'avanzarPaso'])->name('instanciaTramite.avanzarPaso');
 Route::get('/instanciaTramite/retrocederPaso', [InstanciaMultinotaController::class, 'retrocederPaso'])->name('instanciaTramite.retrocederPaso');
-Route::post('/instanciaTramite/guardarDatosSeccion', [InstanciaMultinotaController::class, 'guardarDatosSeccion'])->name('instanciaTramite.guardarDatosSeccion');
+Route::post('/instanciaTramite/guardarDatosDelSolicitante', [InstanciaMultinotaController::class, 'guardarDatosDelSolicitante'])->name('instanciaTramite.guardarDatosDelSolicitante');
 Route::get('/instanciaTramite/session-data', function () {
     return response()->json([
         'cuenta' => session('INSTANCIA_MULTINOTA')->cuenta,

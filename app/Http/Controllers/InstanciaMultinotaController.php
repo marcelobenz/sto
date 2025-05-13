@@ -258,10 +258,16 @@ class InstanciaMultinotaController extends Controller {
         ]);
     }
 
-    public function guardarDatosSeccion(Request $request) {
+    // Guardar datos de las distintas etapas de un trámite
+
+    // Etapa "Datos del Solicitante"
+    public function guardarDatosDelSolicitante(Request $request) {
         $instanciaMultinota = Session::get('INSTANCIA_MULTINOTA');
         $instanciaMultinota->setCuenta($request->post('cuenta'));
         $instanciaMultinota->setCorreo($request->post('correo'));
         Session::put('INSTANCIA_MULTINOTA', $instanciaMultinota);
     }
+
+    // Etapa "Datos del Representante" (solo personas jurídicas)
+    
 }
