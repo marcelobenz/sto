@@ -115,7 +115,7 @@
         }
 
         .f1-steps {
-            overflow: hidden; position: relative; margin: 3em 2em 2em 2em;
+            overflow: hidden; position: relative; margin: 2em 2em 2em 2em;
         }
 
         .f1-progress { 
