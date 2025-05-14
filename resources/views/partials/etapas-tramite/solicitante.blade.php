@@ -11,7 +11,9 @@
                     <div class="col-xs-10" style="margin-right: 10px;">
                         <input id="documentoSolicitante" name="documentoSolicitante" 
                             type="text" class="form-control"
-                            value="{{ $representante ? $representante->getDocumento()->getNumero() : '' }}">
+                            @if($representante)
+                                value="{{ $representante->getDocumento()->getNumero() }}"
+                            @endif>
                     </div>
                     <div class="col-xs-2 no-padding">
                         <button id="boton-buscar-contribuyente" type="button" class="btn btn-secondary" style="background-color: #27ace3;">
@@ -29,9 +31,12 @@
             <div class="form-group requerido">
                 <label for="nombreSolicitante">Nombre *</label>
                 <input id="nombreSolicitante" name="nombreSolicitante" type="text"
-                       class="form-control uppercase"
-                       {{-- :disabled="!esCuitRegistrado" --}}
-                       value="{{ $representante ? $representante->getNombre() : '' }}">
+                    class="form-control uppercase"
+                    @if($representante)
+                        value="{{ $representante->getNombre() }}"
+                    @else
+                        disabled
+                    @endif>
             </div>
         </div>
 
@@ -40,9 +45,12 @@
             <div class="form-group requerido">
                 <label for="apellidoSolicitante">Apellido *</label>
                 <input id="apellidoSolicitante" name="apellidoSolicitante" type="text"
-                       class="form-control uppercase"
-                       {{-- :disabled="!esCuitRegistrado" --}}
-                       value="{{ $representante ? $representante->getApellido() : '' }}">
+                    class="form-control uppercase"
+                    @if($representante)
+                        value="{{ $representante->getApellido() }}"
+                    @else
+                        disabled
+                    @endif>
             </div>
         </div>
 
@@ -50,9 +58,7 @@
         <div class="col-lg-2 col-md-3 col-xs-12">
             <div class="form-group requerido">
                 <label for="codarea">Cod. Área *</label>
-                <select id="codarea" name="codarea" class="form-control"
-                        {{-- :disabled="!esCuitRegistrado" --}}
-                        {{-- @change="actualizarTelefono" --}}>
+                <select id="codarea" name="codarea" class="form-control" @if(!$representante) disabled @endif {{-- @change="actualizarTelefono" --}}>
                     <option value="">SELECCIONE</option>
                     <option value="{{ $representante ? $representante->getCodigoArea()->getCodigo() : '' }}" {{-- :value="cod" --}}>
                         {{-- {{ cod.codigo }} --}}
@@ -67,8 +73,11 @@
                 <label for="telefonoSolicitante">Teléfono *</label>
                 <input id="telefonoSolicitante" name="telefonoSolicitante" type="text" 
                     class="form-control uppercase"
-                    {{-- :disabled="!esCuitRegistrado" --}}
-                    value="{{ $representante ? $representante->getTelefono() : '' }}"
+                    @if($representante)
+                        value="{{ $representante->getTelefono() }}"
+                    @else
+                        disabled
+                    @endif
                     {{-- v-mask="obtenerMascara()" --}}>
             </div>
         </div>
@@ -77,9 +86,7 @@
         <div class="col-lg-4 col-md-6 col-xs-12">
             <div class="form-group requerido">
                 <label for="tipoCaracterSolicitante">Caracter *</label>
-                <select id="tipoCaracterSolicitante" name="tipoCaracterSolicitante" class="form-control"
-                        {{-- :disabled="!esCuitRegistrado" --}}
-                        {{-- v-model="solicitante.tipoCaracter" --}}>
+                <select id="tipoCaracterSolicitante" name="tipoCaracterSolicitante" class="form-control" @if(!$representante) disabled @endif {{-- v-model="solicitante.tipoCaracter" --}}>
                     <option value="">SELECCIONE</option>
                     <option value="{{ $representante ? $representante->getTipoCaracter()->getNombre() : '' }}" {{-- :value="caracter" --}}>
                         {{-- {{ caracter.nombre }} --}}
@@ -93,9 +100,12 @@
             <div class="form-group requerido">
                 <label for="correoSolicitante">Correo electrónico *</label>
                 <input id="correoSolicitante" name="correoSolicitante" type="text" class="form-control uppercase"
-                       {{-- :disabled="!esCuitRegistrado" --}}
-                       value="{{ $representante ? $representante->getCorreo() : '' }}"
-                       pattern="[a-z0-9_\.-@]+">
+                    @if($representante)
+                        value="{{ $representante->getCorreo() }}"
+                    @else
+                        disabled
+                    @endif
+                    pattern="[a-z0-9_\.-@]+">
             </div>
         </div>
 
@@ -104,8 +114,10 @@
             <div class="form-group requerido">
                 <label for="correoSolicitanteRepetido">Repetir correo electrónico *</label>
                 <input id="correoSolicitanteRepetido" name="correoSolicitanteRepetido" type="text" class="form-control uppercase"
-                       {{-- :disabled="!esCuitRegistrado" --}}
-                       pattern="[a-z0-9_\.-@]+">
+                    @if(!$representante)
+                        disabled
+                    @endif
+                    pattern="[a-z0-9_\.-@]+">
             </div>
         </div>
 
