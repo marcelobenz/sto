@@ -3,7 +3,11 @@
         @if ($formulario->muestro($paso['orden']))
             @if($paso['ruta'] === 'partials.etapas-tramite.solicitante')
                 <div id="paso-solicitante">
-                    @include($paso['ruta'], ['representante' => $representante ?? null])
+                    @include($paso['ruta'], [
+                        'representante' => $representante ?? null,
+                        'codigosArea' => $codigosArea ?? null,
+                        'caracteres' => $caracteres ?? null
+                    ])
                 </div>
             @else
                 <div>

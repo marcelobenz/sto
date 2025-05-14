@@ -339,7 +339,17 @@ class InstanciaMultinotaController extends Controller {
             $representante->setCodigoArea($codigoAreaDTO);
             $representante->setTelefono($telefonoSinMascara);
 
-            $htmlVista = view('partials.etapas-tramite.solicitante', compact('representante'))->render();
+            // Obtener todos los códigos de área y todos los caractéres
+            $codigosArea = CodigoArea::select('codigo')
+            ->distinct()
+            ->orderBy('codigo', 'asc')
+            ->get();
+            $caracteres = array_map(
+                fn($case) => $case->descripcion(),
+                TipoCaracterEnum::cases()
+            );
+
+            $htmlVista = view('partials.etapas-tramite.solicitante', compact('representante', 'codigosArea', 'caracteres'))->render();
 
             return response()->json([
                 'htmlVista' => $htmlVista,

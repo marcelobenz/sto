@@ -60,9 +60,19 @@
                 <label for="codarea">Cod. Área *</label>
                 <select id="codarea" name="codarea" class="form-control" @if(!$representante) disabled @endif {{-- @change="actualizarTelefono" --}}>
                     <option value="">SELECCIONE</option>
-                    <option value="{{ $representante ? $representante->getCodigoArea()->getCodigo() : '' }}" {{-- :value="cod" --}}>
-                        {{-- {{ cod.codigo }} --}}
-                    </option>
+                    @if($codigosArea)
+                        @foreach($codigosArea as $c)
+                            @if($c->codigo === $representante->getCodigoArea()->getCodigo())
+                                <option value="{{ $c->codigo }}" selected>
+                                    {{ $c->codigo }}
+                                </option>
+                            @else
+                                <option value="{{ $c->codigo }}">
+                                    {{ $c->codigo }}
+                                </option>
+                            @endif
+                        @endforeach
+                    @endif
                 </select>
             </div>
         </div>
@@ -86,11 +96,21 @@
         <div class="col-lg-4 col-md-6 col-xs-12">
             <div class="form-group requerido">
                 <label for="tipoCaracterSolicitante">Caracter *</label>
-                <select id="tipoCaracterSolicitante" name="tipoCaracterSolicitante" class="form-control" @if(!$representante) disabled @endif {{-- v-model="solicitante.tipoCaracter" --}}>
+                <select id="tipoCaracterSolicitante" name="tipoCaracterSolicitante" class="form-control" @if(!$representante) disabled @endif>
                     <option value="">SELECCIONE</option>
-                    <option value="{{ $representante ? $representante->getTipoCaracter()->getNombre() : '' }}" {{-- :value="caracter" --}}>
-                        {{-- {{ caracter.nombre }} --}}
-                    </option>
+                    @if($caracteres)
+                        @foreach($caracteres as $c)
+                            @if($c === $representante->getTipoCaracter()->getNombre())
+                                <option value="{{ $c }}" selected>
+                                    {{ $c }}
+                                </option>
+                            @else
+                                <option value="{{ $c }}">
+                                    {{ $c }}
+                                </option>
+                            @endif
+                        @endforeach
+                    @endif
                 </select>
             </div>
         </div>
