@@ -43,15 +43,43 @@
             const cuit = document.getElementById('documentoSolicitante').value;
             console.log('cuit: ', cuit)
 
-            if (cuit === '') {
-                Swal.fire('Error!', 'CUITTT', 'error');
+            if (cuit === '' /* || No cumple formato del CUIT */) {
+                Swal.fire({
+                    position: "top-end",
+                    icon: "warning",
+                    title: 'Debe ingresar un CUIT',
+                    showConfirmButton: false,
+                    timer: 5000,
+                    timerProgressBar: true
+                });
             } else {
                 fetch(`/instanciaTramite/buscarContribuyente/${cuit}`)
                     .then(response => response.json())
                     .then(data => {
+                        if (!data.success) {
+                            Swal.fire({
+                                position: "top-end",
+                                icon: "warning",
+                                title: 'No se encontraron resultados',
+                                showConfirmButton: false,
+                                timer: 5000,
+                                timerProgressBar: true
+                            });
+                            return;
+                        }
                         document.getElementById("paso-solicitante").innerHTML = data.htmlVista;
                     })
-                    .catch(error => console.error('Error:', error));
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            position: "top-end",
+                            icon: "error",
+                            title: 'No se encontraron resultados',
+                            showConfirmButton: false,
+                            timer: 5000,
+                            timerProgressBar: true
+                        });
+                    });
             }
         });
     });

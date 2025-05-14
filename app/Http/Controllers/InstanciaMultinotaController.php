@@ -205,6 +205,7 @@ class InstanciaMultinotaController extends Controller {
 
         $formulario = new FormularioMultinotaDTO($multinota, $secciones, $contribuyente['cuentas'], $pasos, $llevaMensaje);
 
+        /* $instanciaMultinota = new InstanciaMultinotaDTO(str_replace(' ', '', $contribuyente['cuentas'][0]->getCodigo()), ''); */
         $instanciaMultinota = new InstanciaMultinotaDTO();
 
         Session::put('FORMULARIO', $formulario);
@@ -352,12 +353,18 @@ class InstanciaMultinotaController extends Controller {
             $htmlVista = view('partials.etapas-tramite.solicitante', compact('representante', 'codigosArea', 'caracteres'))->render();
 
             return response()->json([
+                'success' => true,
                 'htmlVista' => $htmlVista,
             ]);
         } else {
-            // Sino, 
-                // Instanciar RepresentanteDTO sin el caracter
-                // Mostrar toast alert de "No se encontraron resultados"
+            // Instanciar RepresentanteDTO sin el caracter
+
+
+            // Mostrar toast alert de "No se encontraron resultados"
+            return response()->json([
+                'success' => false,
+                'message' => 'No se encontraron resultados.'
+            ]);
         }
             
         // Setear codigo de area
