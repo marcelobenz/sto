@@ -29,7 +29,7 @@
             <div class="form-group requerido">
                 <label for="nombreSolicitante">Nombre *</label>
                 <input id="nombreSolicitante" name="nombreSolicitante" type="text"
-                       class="form-control"
+                       class="form-control uppercase"
                        {{-- :disabled="!esCuitRegistrado" --}}
                        value="{{ $representante ? $representante->getNombre() : '' }}">
             </div>
@@ -40,7 +40,7 @@
             <div class="form-group requerido">
                 <label for="apellidoSolicitante">Apellido *</label>
                 <input id="apellidoSolicitante" name="apellidoSolicitante" type="text"
-                       class="form-control"
+                       class="form-control uppercase"
                        {{-- :disabled="!esCuitRegistrado" --}}
                        value="{{ $representante ? $representante->getApellido() : '' }}">
             </div>
@@ -66,7 +66,7 @@
             <div class="form-group requerido">
                 <label for="telefonoSolicitante">Teléfono *</label>
                 <input id="telefonoSolicitante" name="telefonoSolicitante" type="text" 
-                    class="form-control"
+                    class="form-control uppercase"
                     {{-- :disabled="!esCuitRegistrado" --}}
                     value="{{ $representante ? $representante->getTelefono() : '' }}"
                     {{-- v-mask="obtenerMascara()" --}}>
@@ -92,7 +92,7 @@
         <div class="col-lg-4 col-md-6 col-xs-12">
             <div class="form-group requerido">
                 <label for="correoSolicitante">Correo electrónico *</label>
-                <input id="correoSolicitante" name="correoSolicitante" type="text" class="form-control"
+                <input id="correoSolicitante" name="correoSolicitante" type="text" class="form-control uppercase"
                        {{-- :disabled="!esCuitRegistrado" --}}
                        value="{{ $representante ? $representante->getCorreo() : '' }}"
                        pattern="[a-z0-9_\.-@]+">
@@ -103,7 +103,7 @@
         <div class="col-lg-4 col-md-6 col-xs-12">
             <div class="form-group requerido">
                 <label for="correoSolicitanteRepetido">Repetir correo electrónico *</label>
-                <input id="correoSolicitanteRepetido" name="correoSolicitanteRepetido" type="text" class="form-control"
+                <input id="correoSolicitanteRepetido" name="correoSolicitanteRepetido" type="text" class="form-control uppercase"
                        {{-- :disabled="!esCuitRegistrado" --}}
                        pattern="[a-z0-9_\.-@]+">
             </div>

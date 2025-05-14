@@ -37,7 +37,7 @@
                     <div class="col-xs-12 no-padding">
                         <div class="form-group requerido">
                             <label for="cuentaGeneral">Dominio *</label>
-                            <input type="text" id="cuentaGeneral" class="form-control"
+                            <input type="text" id="cuentaGeneral" class="form-control uppercase"
                                 name="cuentaGeneral" value="{{ session('INSTANCIA_MULTINOTA')->cuenta ?? '' }}" onblur="guardarDatosDelSolicitante()">
                         </div>
                     </div>
@@ -47,7 +47,7 @@
                 <div class="col-xs-12 no-padding">
                     <div class="form-group requerido">
                         <label for="cuentaGeneralSinCuentas">Dominio *</label>
-                        <input type="text" id="cuentaGeneralSinCuentas" class="form-control"
+                        <input type="text" id="cuentaGeneralSinCuentas" class="form-control uppercase"
                             name="cuentaGeneralSinCuentas" value="{{ session('INSTANCIA_MULTINOTA')->cuenta ?? '' }}" onblur="guardarDatosDelSolicitante()">
                     </div>
                 </div>
@@ -56,7 +56,7 @@
                 <div class="col-xs-12 no-padding">
                     <div class="form-group requerido">
                         <label for="correo">Correo *</label>
-                        <input type="text" id="correo" class="form-control"
+                        <input type="text" id="correo" class="form-control uppercase"
                             name="correo" value="{{ session('INSTANCIA_MULTINOTA')->correo ?? '' }}"
                             pattern="^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$" onblur="guardarDatosDelSolicitante()">
                     </div>
