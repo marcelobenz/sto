@@ -321,7 +321,8 @@ class InstanciaMultinotaController extends Controller {
                 $solicitante->telefono,
                 $solicitante->correo,
                 '',
-                $domicilioDTO
+                $domicilioDTO,
+                true
             );
 
             $codigoArea = $representante->getAreaTelefono();

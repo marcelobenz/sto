@@ -110,9 +110,11 @@
         </div>
 
         <!-- Geolocalización -->
-        {{-- <div class="col-xs-12" v-if="esCuitRegistrado">
-            @include('tiles.geolocalizacion')
-        </div> --}}
+        @if ($representante)
+            <div class="col-xs-12" style="display: {{ $representante->getEsCuitRegistrado() === true ? 'block' : 'none' }};">
+                @include('partials.geolocalizacion', ['representante' => $representante])
+            </div>
+        @endif
 
         <!-- Nota -->
         <div class="col-xs-12">

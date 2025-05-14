@@ -17,6 +17,7 @@ class RepresentanteDTO {
     private string $correo;
     private string $correoRepetido;
     private DomicilioDTO $domicilio;
+    private bool $esCuitRegistrado;
 
     public function __construct(
         TipoCaracterDTO $tipoCaracter,
@@ -26,7 +27,8 @@ class RepresentanteDTO {
         string $telefono,
         string $correo,
         string $correoRepetido,
-        DomicilioDTO $domicilio
+        DomicilioDTO $domicilio,
+        bool $esCuitRegistrado
     ) {
         $this->tipoCaracter = $tipoCaracter;
         $this->nombre = $nombre;
@@ -36,6 +38,7 @@ class RepresentanteDTO {
         $this->correo = $correo;
         $this->correoRepetido = $correoRepetido;
         $this->domicilio = $domicilio;
+        $this->esCuitRegistrado = $esCuitRegistrado;
     }
 
     public function getTipoCaracter(): TipoCaracterDTO {
@@ -102,12 +105,20 @@ class RepresentanteDTO {
         $this->correoRepetido = $correoRepetido;
     }
 
-    public function getDireccion(): DomicilioDTO {
-        return $this->direccion;
+    public function getDomicilio(): DomicilioDTO {
+        return $this->domicilio;
     }
 
-    public function setDireccion(DomicilioDTO $direccion): void {
-        $this->direccion = $direccion;
+    public function setDomicilio(DomicilioDTO $domicilio): void {
+        $this->domicilio = $domicilio;
+    }
+
+    public function getEsCuitRegistrado(): bool {
+        return $this->esCuitRegistrado;
+    }
+
+    public function setEsCuitRegistrado(bool $esCuitRegistrado): void {
+        $this->esCuitRegistrado = $esCuitRegistrado;
     }
 
     public function getTelefonoSinMascara(): string {
