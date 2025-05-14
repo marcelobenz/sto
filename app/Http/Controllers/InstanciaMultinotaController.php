@@ -13,6 +13,10 @@ use App\Models\ContribuyenteMultinota;
 use App\Models\TipoTramiteMultinota;
 use App\Models\SeccionMultinota;
 use App\Models\MensajeInicial;
+use App\Models\Solicitante;
+use App\Models\SolicitanteCuentaCaracter;
+use App\Models\Direccion;
+use App\Models\CodigoArea;
 use App\DTOs\ContribuyenteMultinotaDTO;
 use App\DTOs\PersonaFisicaDTO;
 use App\DTOs\PersonaJuridicaDTO;
@@ -20,6 +24,12 @@ use App\DTOs\TramiteMultinotaDTO;
 use App\DTOs\CuentaDTO;
 use App\DTOs\FormularioMultinotaDTO;
 use App\DTOs\InstanciaMultinotaDTO;
+use App\DTOs\RepresentanteDTO;
+use App\DTOs\CodigoAreaDTO;
+use App\DTOs\DocumentoDTO;
+use App\DTOs\DomicilioDTO;
+use App\DTOs\TipoCaracterDTO;
+use App\Enums\TipoCaracterEnum;
 use App\Transformers\PersonaFisicaTransformer;
 use App\Transformers\PersonaJuridicaTransformer;
 
@@ -258,7 +268,7 @@ class InstanciaMultinotaController extends Controller {
         ]);
     }
 
-    // Guardar datos de las distintas etapas de un trámite
+    // Funciones específicas a las distintas etapas de instanciación de un trámite
 
     // Etapa "Datos del Solicitante"
     public function guardarDatosDelSolicitante(Request $request) {
@@ -269,5 +279,80 @@ class InstanciaMultinotaController extends Controller {
     }
 
     // Etapa "Datos del Representante" (solo personas jurídicas)
-    
+    public function buscarContribuyente($cuit) {
+        // Validar CUIT
+
+        // Buscar Representante (sin máscara)
+        $solicitante = Solicitante::where('documento', $cuit)
+        ->orderByRaw('1 desc')
+        ->first();
+
+        if(!is_null($solicitante)) {
+            // Buscar cuenta caracter del representante
+            $cuentaCaracter = SolicitanteCuentaCaracter::where('id_solicitante', $solicitante->id_solicitante)
+            ->orderBy('id_solicitante_cuenta_caracter', 'desc')
+            ->first();
+
+            // Obtener tipo caracter
+            $caracterEnum = TipoCaracterEnum::from($cuentaCaracter->r_caracter);
+
+            // Instanciar RepresentanteDTO
+            $tipoCaracterDTO = new TipoCaracterDTO($caracterEnum->value, $caracterEnum->name);
+            $documentoDTO = new DocumentoDTO('CUIT', $solicitante->documento);
+            $domicilio = Direccion::where('id_direccion', $solicitante->id_direccion)->first();
+
+            $domicilioDTO = new DomicilioDTO(
+                $domicilio->calle, 
+                $domicilio->numero,
+                $domicilio->localidad,
+                $domicilio->provincia,
+                $domicilio->codigo_postal,
+                $domicilio->pais,
+                $domicilio->latitud,
+                $domicilio->longitud,
+                $domicilio->piso,
+                $domicilio->departamento);
+
+            $representante = new RepresentanteDTO(
+                $tipoCaracterDTO,
+                $solicitante->nombre,
+                $solicitante->apellido,
+                $documentoDTO,
+                $solicitante->telefono,
+                $solicitante->correo,
+                '',
+                $domicilioDTO
+            );
+
+            $codigoArea = $representante->getAreaTelefono();
+            $codigoAreaObject = CodigoArea::where('codigo', $codigoArea)->first();
+            $codigoAreaDTO = new CodigoAreaDTO(
+                $codigoAreaObject->id_codigo_area,
+                $codigoAreaObject->provincia,
+                $codigoAreaObject->localidad,
+                $codigoAreaObject->codigo);
+
+            $telefonoSinMascara = $representante->getTelefonoSinMascara();
+
+            // Asignar código de área y teléfono sin máscara a RepresentanteDTO
+            $representante->setCodigoArea($codigoAreaDTO);
+            $representante->setTelefono($telefonoSinMascara);
+
+            $htmlVista = view('partials.etapas-tramite.solicitante', compact('representante'))->render();
+
+            return response()->json([
+                'htmlVista' => $htmlVista,
+            ]);
+        } else {
+            // Sino, 
+                // Instanciar RepresentanteDTO sin el caracter
+                // Mostrar toast alert de "No se encontraron resultados"
+        }
+            
+        // Setear codigo de area
+        // Setear telefono
+        // Setear direccion
+        // Cargar geolocalizacion
+        // Setear esCuitRegistrado = true
+    }
 }

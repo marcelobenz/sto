@@ -70,7 +70,6 @@
                     fetch('/instanciaTramite/avanzarPaso')
                     .then(response => response.json())
                     .then(data => {
-                        
                         document.getElementById("pasos-container").innerHTML = data.htmlPasos;
                         document.getElementById('ruta-paso-tramite').innerHTML = data.htmlRuta;
                         document.getElementById("botones-avance-tramite").innerHTML = data.htmlBotones;

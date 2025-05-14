@@ -92,6 +92,7 @@ Route::get('/estadoTramite/tienePermiso/{multinota}', [EstadoTramiteController::
 Route::post('/instanciaTramite/buscar', [InstanciaMultinotaController::class, 'buscar'])->name('instanciaTramite.buscar');
 Route::get('/instanciaTramite/avanzarPaso', [InstanciaMultinotaController::class, 'avanzarPaso'])->name('instanciaTramite.avanzarPaso');
 Route::get('/instanciaTramite/retrocederPaso', [InstanciaMultinotaController::class, 'retrocederPaso'])->name('instanciaTramite.retrocederPaso');
+/* Etapa 1: Datos del Solicitante */
 Route::post('/instanciaTramite/guardarDatosDelSolicitante', [InstanciaMultinotaController::class, 'guardarDatosDelSolicitante'])->name('instanciaTramite.guardarDatosDelSolicitante');
 Route::get('/instanciaTramite/session-data', function () {
     return response()->json([
@@ -99,7 +100,8 @@ Route::get('/instanciaTramite/session-data', function () {
         'correo' => session('INSTANCIA_MULTINOTA')->correo,
     ]);
 });
-
+/* Etapa 2: Datos del Representante */
+Route::get('/instanciaTramite/buscarContribuyente/{cuit}', [InstanciaMultinotaController::class, 'buscarContribuyente'])->name('instanciaTramite.buscarContribuyente');
 
 //Categorías
 Route::get('/categorias', [CategoriaController::class, 'index'])->name('categorias.index');

@@ -1,9 +1,15 @@
 @if ($formulario->puedeCompletar())
     @foreach ($formulario->pasosFormulario as $paso)
         @if ($formulario->muestro($paso['orden']))
-            <div>
-                @include($paso['ruta'])
-            </div>
+            @if($paso['ruta'] === 'partials.etapas-tramite.solicitante')
+                <div id="paso-solicitante">
+                    @include($paso['ruta'], ['representante' => $representante ?? null])
+                </div>
+            @else
+                <div>
+                    @include($paso['ruta'])
+                </div>
+            @endif
             @break
         @endif
     @endforeach
@@ -20,7 +26,28 @@
         padding: 5px;
     }
 </style>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    $(document).ready(function() {
+        $(document).on('click', '#boton-buscar-contribuyente', function(event) {
+            event.preventDefault();
+            const cuit = document.getElementById('documentoSolicitante').value;
+            console.log('cuit: ', cuit)
+
+            if (cuit === '') {
+                Swal.fire('Error!', 'CUITTT', 'error');
+            } else {
+                fetch(`/instanciaTramite/buscarContribuyente/${cuit}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById("paso-solicitante").innerHTML = data.htmlVista;
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        });
+    });
+
     function guardarDatosDelSolicitante() {
         const cuentaUsuario = document.querySelector('#cuentasUsuario').value;
         const cuentaInput = document.querySelector('#cuentaGeneralSinCuentas').value;

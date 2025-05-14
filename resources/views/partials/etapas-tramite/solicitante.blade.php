@@ -10,13 +10,11 @@
                 <div style="display: flex;">
                     <div class="col-xs-10" style="margin-right: 10px;">
                         <input id="documentoSolicitante" name="documentoSolicitante" 
-                               type="text" class="form-control" 
-                               value="{{ old('documentoSolicitante', $solicitante->documento->numero ?? '') }}"
-                               v-mask="'{{ $solicitante->documento->tipoDocumento->mascara ?? '' }}'">
+                            type="text" class="form-control"
+                            value="{{ $representante ? $representante->getDocumento()->getNumero() : '' }}">
                     </div>
                     <div class="col-xs-2 no-padding">
-                        <button type="button" class="btn btn-secondary" style="background-color: #27ace3;">
-                            {{-- @click="buscarContribuyente" --}}
+                        <button id="boton-buscar-contribuyente" type="button" class="btn btn-secondary" style="background-color: #27ace3;">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" viewBox="0 0 512 512">
                                 <path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/>
                             </svg>
@@ -33,7 +31,7 @@
                 <input id="nombreSolicitante" name="nombreSolicitante" type="text"
                        class="form-control"
                        {{-- :disabled="!esCuitRegistrado" --}}
-                       v-model="solicitante.nombre">
+                       value="{{ $representante ? $representante->getNombre() : '' }}">
             </div>
         </div>
 
@@ -44,7 +42,7 @@
                 <input id="apellidoSolicitante" name="apellidoSolicitante" type="text"
                        class="form-control"
                        {{-- :disabled="!esCuitRegistrado" --}}
-                       v-model="solicitante.apellido">
+                       value="{{ $representante ? $representante->getApellido() : '' }}">
             </div>
         </div>
 
@@ -54,11 +52,10 @@
                 <label for="codarea">Cod. Área *</label>
                 <select id="codarea" name="codarea" class="form-control"
                         {{-- :disabled="!esCuitRegistrado" --}}
-                        v-model="solicitante.codigoArea"
                         {{-- @change="actualizarTelefono" --}}>
                     <option value="">SELECCIONE</option>
-                    <option v-for="cod in listaCodigoArea" {{-- :value="cod" --}}>
-                        {{-- {{ cod.codigo }} --}}1
+                    <option value="{{ $representante ? $representante->getCodigoArea()->getCodigo() : '' }}" {{-- :value="cod" --}}>
+                        {{-- {{ cod.codigo }} --}}
                     </option>
                 </select>
             </div>
@@ -69,10 +66,10 @@
             <div class="form-group requerido">
                 <label for="telefonoSolicitante">Teléfono *</label>
                 <input id="telefonoSolicitante" name="telefonoSolicitante" type="text" 
-                       class="form-control"
-                       {{-- :disabled="!esCuitRegistrado" --}}
-                       v-model="solicitante.telefono"
-                       v-mask="obtenerMascara()">
+                    class="form-control"
+                    {{-- :disabled="!esCuitRegistrado" --}}
+                    value="{{ $representante ? $representante->getTelefono() : '' }}"
+                    {{-- v-mask="obtenerMascara()" --}}>
             </div>
         </div>
 
@@ -82,10 +79,10 @@
                 <label for="tipoCaracterSolicitante">Caracter *</label>
                 <select id="tipoCaracterSolicitante" name="tipoCaracterSolicitante" class="form-control"
                         {{-- :disabled="!esCuitRegistrado" --}}
-                        v-model="solicitante.tipoCaracter">
+                        {{-- v-model="solicitante.tipoCaracter" --}}>
                     <option value="">SELECCIONE</option>
-                    <option v-for="caracter in listaTiposCaracter" {{-- :value="caracter" --}}>
-                        {{-- {{ caracter.nombre }} --}}2
+                    <option value="{{ $representante ? $representante->getTipoCaracter()->getNombre() : '' }}" {{-- :value="caracter" --}}>
+                        {{-- {{ caracter.nombre }} --}}
                     </option>
                 </select>
             </div>
@@ -97,7 +94,7 @@
                 <label for="correoSolicitante">Correo electrónico *</label>
                 <input id="correoSolicitante" name="correoSolicitante" type="text" class="form-control"
                        {{-- :disabled="!esCuitRegistrado" --}}
-                       {{-- v-model="solicitante.correo" --}}
+                       value="{{ $representante ? $representante->getCorreo() : '' }}"
                        pattern="[a-z0-9_\.-@]+">
             </div>
         </div>
@@ -108,7 +105,6 @@
                 <label for="correoSolicitanteRepetido">Repetir correo electrónico *</label>
                 <input id="correoSolicitanteRepetido" name="correoSolicitanteRepetido" type="text" class="form-control"
                        {{-- :disabled="!esCuitRegistrado" --}}
-                       {{-- v-model="solicitante.correoRepetido" --}}
                        pattern="[a-z0-9_\.-@]+">
             </div>
         </div>
