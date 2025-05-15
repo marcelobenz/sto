@@ -1,4 +1,4 @@
-<div style="display: grid; width: 90%; margin-left: auto; margin-right: auto;">
+<div style="display: grid; width: 90%; margin-left: auto; margin-right: auto; margin-bottom: 20px;">
     <div>
         <h3>
             FORMULARIO: {{ $formulario->nombre }} ({{ $formulario->categoria }})
@@ -35,8 +35,25 @@
             }
         }
 
+        function inicializarMascaraTelefono() {
+            const telefonoInput = document.querySelector('#telefonoSolicitante');
+            if (telefonoInput) {
+                if (telefonoInput.cleaveInstance) {
+                    telefonoInput.cleaveInstance.destroy();
+                }
+                telefonoInput.cleaveInstance = new Cleave(telefonoInput, {
+                    delimiter: '-',
+                    blocks: [4, 4],
+                });
+            }
+        }
+
         $(document).ready(function () {
-            async function validarDatosSeccion() {
+            let seAvanzoPaso = false;
+            let ordenActual = @json($getOrdenActual);
+            const persona = @json($persona);
+
+            async function validarDatosSeccionInicio() {
                 const response = await fetch('/instanciaTramite/session-data');
                 const data = await response.json();
 
@@ -74,9 +91,28 @@
                 }
             }
 
+            function validarDatosSeccionSolicitante() {
+                console.log('se re valida todo');
+            }
+
             $(document).on('click', '#boton-avanzar-paso', async function () {
                 try {
-                    await validarDatosSeccion();
+                    if(seAvanzoPaso) {
+                        ordenActual += 1;
+                    }
+
+                    switch(ordenActual) {
+                        case 1:
+                            await validarDatosSeccionInicio();
+                            break;
+                        case 2:
+                            if(persona === 'Juridica') {
+                                validarDatosSeccionSolicitante();
+                            }
+                            break;
+                        default:
+                            break;
+                    }
 
                     fetch('/instanciaTramite/avanzarPaso')
                     .then(response => response.json())
@@ -85,6 +121,8 @@
                         document.getElementById('ruta-paso-tramite').innerHTML = data.htmlRuta;
                         document.getElementById("botones-avance-tramite").innerHTML = data.htmlBotones;
                         inicializarMascaraCuit();
+                        inicializarMascaraTelefono();
+                        seAvanzoPaso = true;
                     })
                     .catch(error => console.error('Error:', error));
                 } catch (error) {
@@ -100,6 +138,7 @@
                         document.getElementById('ruta-paso-tramite').innerHTML = data.htmlRuta;
                         document.getElementById("botones-avance-tramite").innerHTML = data.htmlBotones;
                         inicializarMascaraCuit();
+                        inicializarMascaraTelefono();
                     })
                     .catch(error => console.error('Error:', error));
             });

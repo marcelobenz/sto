@@ -214,6 +214,8 @@ class InstanciaMultinotaController extends Controller {
 
         return view('multinota-interno', [
             'formulario' => $formulario,
+            'getOrdenActual' => $formulario->getOrdenActual(),
+            'persona' => $persona,
             'multinota' => $multinota,
             'instanciaMultinota' => $instanciaMultinota
         ]);
@@ -240,7 +242,7 @@ class InstanciaMultinotaController extends Controller {
         return response()->json([
             'htmlPasos' => $htmlPasos,
             'htmlRuta' => $htmlRuta,
-            'htmlBotones' => $htmlBotones,
+            'htmlBotones' => $htmlBotones
         ]);
     }
 

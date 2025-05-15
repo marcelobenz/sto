@@ -68,6 +68,7 @@
                         }
                         document.getElementById("paso-solicitante").innerHTML = data.htmlVista;
                         inicializarMascaraCuit();
+                        inicializarMascaraTelefono();
                     })
                     .catch(error => {
                         console.error('Error:', error);
