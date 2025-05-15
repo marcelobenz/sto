@@ -49,8 +49,8 @@
         }
 
         $(document).ready(function () {
-            let seAvanzoPaso = false;
             let ordenActual = @json($getOrdenActual);
+            ordenActual -= 1;
             const persona = @json($persona);
 
             async function validarDatosSeccionInicio() {
@@ -97,9 +97,7 @@
 
             $(document).on('click', '#boton-avanzar-paso', async function () {
                 try {
-                    if(seAvanzoPaso) {
-                        ordenActual += 1;
-                    }
+                    ordenActual += 1;
 
                     switch(ordenActual) {
                         case 1:
@@ -122,7 +120,6 @@
                         document.getElementById("botones-avance-tramite").innerHTML = data.htmlBotones;
                         inicializarMascaraCuit();
                         inicializarMascaraTelefono();
-                        seAvanzoPaso = true;
                     })
                     .catch(error => console.error('Error:', error));
                 } catch (error) {
@@ -131,6 +128,8 @@
             });
 
             $(document).on('click', '#boton-retroceder-paso', function () {
+                ordenActual -= 1;
+
                 fetch('/instanciaTramite/retrocederPaso')
                     .then(response => response.json())
                     .then(data => {

@@ -267,7 +267,7 @@ class InstanciaMultinotaController extends Controller {
         return response()->json([
             'htmlPasos' => $htmlPasos,
             'htmlRuta' => $htmlRuta,
-            'htmlBotones' => $htmlBotones,
+            'htmlBotones' => $htmlBotones
         ]);
     }
 
