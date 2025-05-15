@@ -281,6 +281,8 @@ class InstanciaMultinotaController extends Controller {
 
     // Etapa "Datos del Representante" (solo personas jurídicas)
     public function buscarContribuyente($cuit) {
+        $cuit = str_replace('-', '', $cuit);
+
         // Validar CUIT
 
         // Buscar Representante (sin máscara)

@@ -20,7 +20,21 @@
 </div>
 @section('scripting')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cleave.js@1/dist/cleave.min.js"></script>
     <script>
+        function inicializarMascaraCuit() {
+            const cuitInput = document.querySelector('#documentoSolicitante');
+            if (cuitInput) {
+                if (cuitInput.cleaveInstance) {
+                    cuitInput.cleaveInstance.destroy();
+                }
+                cuitInput.cleaveInstance = new Cleave(cuitInput, {
+                    delimiter: '-',
+                    blocks: [2, 8, 1],
+                });
+            }
+        }
+
         $(document).ready(function () {
             async function validarDatosSeccion() {
                 const response = await fetch('/instanciaTramite/session-data');
@@ -28,9 +42,6 @@
 
                 const cuenta = data.cuenta;
                 const correo = data.correo;
-
-                console.log(`Cuenta: ${cuenta}`)
-                console.log(`Correo: ${correo}`)
 
                 const input = document.querySelector('#correo');
                 const pattern = new RegExp(input.getAttribute('pattern'));
@@ -73,6 +84,7 @@
                         document.getElementById("pasos-container").innerHTML = data.htmlPasos;
                         document.getElementById('ruta-paso-tramite').innerHTML = data.htmlRuta;
                         document.getElementById("botones-avance-tramite").innerHTML = data.htmlBotones;
+                        inicializarMascaraCuit();
                     })
                     .catch(error => console.error('Error:', error));
                 } catch (error) {
@@ -87,6 +99,7 @@
                         document.getElementById("pasos-container").innerHTML = data.htmlPasos;
                         document.getElementById('ruta-paso-tramite').innerHTML = data.htmlRuta;
                         document.getElementById("botones-avance-tramite").innerHTML = data.htmlBotones;
+                        inicializarMascaraCuit();
                     })
                     .catch(error => console.error('Error:', error));
             });

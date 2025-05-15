@@ -67,6 +67,7 @@
                             });
                         }
                         document.getElementById("paso-solicitante").innerHTML = data.htmlVista;
+                        inicializarMascaraCuit();
                     })
                     .catch(error => {
                         console.error('Error:', error);
