@@ -3,7 +3,7 @@
         <div class="form-group requerido">
             <label>Calle *</label>
             <input type="text" id="nombreCalleLoc" name="calle"
-                class="form-control input-geo margen-abajo-10 uppercase"
+                class="form-control input-geo margen-abajo-10 uppercase" required
                 value="{{ $representante->getDomicilio()->getCalle() }}">
         </div>
     </div>
@@ -11,7 +11,7 @@
         <div class="form-group requerido">
             <label>Número *</label>
             <input type="text" id="numeroCalleLoc" name="numero"
-                class="form-control input-geo uppercase"
+                class="form-control input-geo uppercase" required
                 value="{{ $representante->getDomicilio()->getNumero() }}">
         </div>
     </div>
@@ -35,7 +35,7 @@
         <div class="form-group requerido">
             <label>Provincia *</label>
             <input type="text" id="ciudadLoc" name="provincia"
-                class="form-control input-geo uppercase"
+                class="form-control input-geo uppercase" required
                 value="{{ $representante->getDomicilio()->getProvincia() }}">
         </div>
     </div>
@@ -43,7 +43,7 @@
         <div class="form-group">
             <label>Localidad *</label>
             <input type="text" id="localidadLoc" name="localidad"
-                class="form-control input-geo uppercase"
+                class="form-control input-geo uppercase" required
                 value="{{ $representante->getDomicilio()->getLocalidad() }}">
         </div>
     </div>
@@ -51,7 +51,7 @@
         <div class="form-group requerido">
             <label>Código Postal *</label>
             <input type="text" id="codigoPostalLoc" name="codigo_postal"
-                class="form-control input-geo uppercase"
+                class="form-control input-geo uppercase" required
                 value="{{ $representante->getDomicilio()->getCodigoPostal() }}">
         </div>
     </div>
@@ -59,7 +59,7 @@
         <div class="form-group requerido">
             <label>País *</label>
             <input type="text" id="paisLoc" name="pais"
-                class="form-control input-geo uppercase"
+                class="form-control input-geo uppercase" required
                 value="{{ $representante->getDomicilio()->getPais() }}">
         </div>
     </div>

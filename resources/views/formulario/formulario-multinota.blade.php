@@ -92,7 +92,53 @@
             }
 
             function validarDatosSeccionSolicitante() {
-                console.log('se re valida todo');
+                const inputs = [
+                    document.getElementById('documentoSolicitante'), 
+                    document.getElementById('nombreSolicitante'), 
+                    document.getElementById('apellidoSolicitante'),
+                    document.getElementById('codarea'),
+                    document.getElementById('telefonoSolicitante'),
+                    document.getElementById('tipoCaracterSolicitante'),
+                    document.getElementById('correoSolicitante'),
+                    document.getElementById('correoSolicitanteRepetido'),
+                    document.getElementById('nombreCalleLoc'),
+                    document.getElementById('numeroCalleLoc'),
+                    document.getElementById('ciudadLoc'),
+                    document.getElementById('localidadLoc'),
+                    document.getElementById('codigoPostalLoc'),
+                    document.getElementById('paisLoc'),
+                ];
+
+                let isValid = true;
+
+                for (const input of inputs) {
+                    if (!input.checkValidity()) {
+                        input.focus();
+                        input.reportValidity();
+                        isValid = false;
+                        break;
+                    }
+
+                    if (input.id === 'correoSolicitanteRepetido') {
+                        const correo = document.getElementById('correoSolicitante').value;
+                        const correoRepetido = document.getElementById('correoSolicitanteRepetido');
+
+                        if (correo !== correoRepetido.value) {
+                            correoRepetido.setCustomValidity('Los correos no coinciden');
+                            correoRepetido.focus();
+                            correoRepetido.reportValidity();
+                            
+                            correoRepetido.addEventListener('input', () => {
+                                correoRepetido.setCustomValidity('');
+                            }, { once: true });
+                            throw new Error('Correos no coinciden');
+                        }
+                    }
+                }
+
+                if (!isValid) {
+                    throw new Error('Hay errores');
+                }
             }
 
             $(document).on('click', '#boton-avanzar-paso', async function () {

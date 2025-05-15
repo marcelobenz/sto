@@ -10,7 +10,7 @@
                 <div style="display: flex;">
                     <div class="col-xs-10" style="margin-right: 10px;">
                         <input id="documentoSolicitante" name="documentoSolicitante" 
-                            type="text" class="form-control"
+                            type="text" class="form-control" required
                             @if($representante)
                                 value="{{ $representante->getDocumento()->getNumero() }}"
                             @endif>
@@ -31,7 +31,7 @@
             <div class="form-group requerido">
                 <label for="nombreSolicitante">Nombre *</label>
                 <input id="nombreSolicitante" name="nombreSolicitante" type="text"
-                    class="form-control uppercase"
+                    class="form-control uppercase" required
                     @if($representante)
                         value="{{ $representante->getNombre() }}"
                     @else
@@ -45,7 +45,7 @@
             <div class="form-group requerido">
                 <label for="apellidoSolicitante">Apellido *</label>
                 <input id="apellidoSolicitante" name="apellidoSolicitante" type="text"
-                    class="form-control uppercase"
+                    class="form-control uppercase" required
                     @if($representante)
                         value="{{ $representante->getApellido() }}"
                     @else
@@ -58,7 +58,7 @@
         <div class="col-lg-2 col-md-3 col-xs-12">
             <div class="form-group requerido">
                 <label for="codarea">Cod. Área *</label>
-                <select id="codarea" name="codarea" class="form-control" @if(!$representante) disabled @endif {{-- @change="actualizarTelefono" --}}>
+                <select id="codarea" name="codarea" class="form-control" required @if(!$representante) disabled @endif {{-- @change="actualizarTelefono" --}}>
                     <option value="">SELECCIONE</option>
                     @if($codigosArea)
                         @foreach($codigosArea as $c)
@@ -82,7 +82,7 @@
             <div class="form-group requerido">
                 <label for="telefonoSolicitante">Teléfono *</label>
                 <input id="telefonoSolicitante" name="telefonoSolicitante" type="text" 
-                    class="form-control uppercase"
+                    class="form-control uppercase" required
                     @if($representante)
                         value="{{ $representante->getTelefono() }}"
                     @else
@@ -96,7 +96,7 @@
         <div class="col-lg-4 col-md-6 col-xs-12">
             <div class="form-group requerido">
                 <label for="tipoCaracterSolicitante">Caracter *</label>
-                <select id="tipoCaracterSolicitante" name="tipoCaracterSolicitante" class="form-control" @if(!$representante) disabled @endif>
+                <select id="tipoCaracterSolicitante" name="tipoCaracterSolicitante" class="form-control" required @if(!$representante) disabled @endif>
                     <option value="">SELECCIONE</option>
                     @if($caracteres)
                         @foreach($caracteres as $c)
@@ -119,7 +119,7 @@
         <div class="col-lg-4 col-md-6 col-xs-12">
             <div class="form-group requerido">
                 <label for="correoSolicitante">Correo electrónico *</label>
-                <input id="correoSolicitante" name="correoSolicitante" type="text" class="form-control uppercase"
+                <input id="correoSolicitante" name="correoSolicitante" type="email" class="form-control uppercase" required
                     @if($representante)
                         value="{{ $representante->getCorreo() }}"
                     @else
@@ -133,7 +133,7 @@
         <div class="col-lg-4 col-md-6 col-xs-12">
             <div class="form-group requerido">
                 <label for="correoSolicitanteRepetido">Repetir correo electrónico *</label>
-                <input id="correoSolicitanteRepetido" name="correoSolicitanteRepetido" type="text" class="form-control uppercase"
+                <input id="correoSolicitanteRepetido" name="correoSolicitanteRepetido" type="email" class="form-control uppercase" onpaste="return false;" required
                     @if(!$representante)
                         disabled
                     @endif
