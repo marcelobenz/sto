@@ -320,10 +320,10 @@ class InstanciaMultinotaController extends Controller {
                 $domicilio->provincia,
                 $domicilio->codigo_postal,
                 $domicilio->pais,
-                $domicilio->latitud,
-                $domicilio->longitud,
-                $domicilio->piso,
-                $domicilio->departamento);
+                $domicilio->latitud ?? '',
+                $domicilio->longitud ?? '',
+                $domicilio->piso ?? '',
+                $domicilio->departamento ?? '');
 
             $representante = new RepresentanteDTO(
                 $tipoCaracterDTO,
