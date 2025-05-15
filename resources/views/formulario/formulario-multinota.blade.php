@@ -123,6 +123,7 @@
                     })
                     .catch(error => console.error('Error:', error));
                 } catch (error) {
+                    ordenActual -= 1;
                     console.log(error.message);
                 }
             });
