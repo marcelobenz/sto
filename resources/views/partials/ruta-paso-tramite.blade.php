@@ -56,16 +56,15 @@
                 fetch(`/instanciaTramite/buscarContribuyente/${cuit}`)
                     .then(response => response.json())
                     .then(data => {
-                        if (!data.success) {
+                        if (data.mensaje) {
                             Swal.fire({
                                 position: "top-end",
                                 icon: "warning",
-                                title: 'No se encontraron resultados',
+                                title: data.mensaje,
                                 showConfirmButton: false,
                                 timer: 5000,
                                 timerProgressBar: true
                             });
-                            return;
                         }
                         document.getElementById("paso-solicitante").innerHTML = data.htmlVista;
                     })
@@ -74,7 +73,7 @@
                         Swal.fire({
                             position: "top-end",
                             icon: "error",
-                            title: 'No se encontraron resultados',
+                            title: 'Hubo un problema al procesar la solicitud.',
                             showConfirmButton: false,
                             timer: 5000,
                             timerProgressBar: true

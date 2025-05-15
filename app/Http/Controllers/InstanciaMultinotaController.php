@@ -288,6 +288,17 @@ class InstanciaMultinotaController extends Controller {
         ->orderByRaw('1 desc')
         ->first();
 
+        // Obtener todos los códigos de área y todos los caractéres
+        $codigosArea = CodigoArea::select('codigo')
+        ->distinct()
+        ->orderBy('codigo', 'asc')
+        ->get();
+
+        $caracteres = array_map(
+            fn($case) => $case->descripcion(),
+            TipoCaracterEnum::cases()
+        );
+
         if(!is_null($solicitante)) {
             // Buscar cuenta caracter del representante
             $cuentaCaracter = SolicitanteCuentaCaracter::where('id_solicitante', $solicitante->id_solicitante)
@@ -340,30 +351,35 @@ class InstanciaMultinotaController extends Controller {
             $representante->setCodigoArea($codigoAreaDTO);
             $representante->setTelefono($telefonoSinMascara);
 
-            // Obtener todos los códigos de área y todos los caractéres
-            $codigosArea = CodigoArea::select('codigo')
-            ->distinct()
-            ->orderBy('codigo', 'asc')
-            ->get();
-            $caracteres = array_map(
-                fn($case) => $case->descripcion(),
-                TipoCaracterEnum::cases()
-            );
-
             $htmlVista = view('partials.etapas-tramite.solicitante', compact('representante', 'codigosArea', 'caracteres'))->render();
 
             return response()->json([
-                'success' => true,
+                'mensaje' => null,
                 'htmlVista' => $htmlVista,
             ]);
         } else {
             // Instanciar RepresentanteDTO sin el caracter
+            $reflection = new \ReflectionClass(RepresentanteDTO::class);
+            $representante = $reflection->newInstanceWithoutConstructor();
+            $representante->setTipoCaracter(new TipoCaracterDTO(0, ''));
+            $representante->setNombre('');
+            $representante->setApellido('');
+            $representante->setDocumento(new DocumentoDTO('CUIT', $cuit));
+            $representante->setCodigoArea(new CodigoAreaDTO(0, '', '', ''));
+            $representante->setTelefono('');
+            $representante->setCorreo('');
+            $representante->setCorreoRepetido('');
+            $representante->setDomicilio(new DomicilioDTO(
+                '', '', '', '', '', '', '', '', '', ''
+            ));
+            $representante->setEsCuitRegistrado(true);
 
+            $htmlVista = view('partials.etapas-tramite.solicitante', compact('representante', 'codigosArea', 'caracteres'))->render();
 
             // Mostrar toast alert de "No se encontraron resultados"
             return response()->json([
-                'success' => false,
-                'message' => 'No se encontraron resultados.'
+                'mensaje' => 'No se encontraron resultados.',
+                'htmlVista' => $htmlVista
             ]);
         }
             
