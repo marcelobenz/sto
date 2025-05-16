@@ -124,8 +124,7 @@
                         value="{{ $representante->getCorreo() }}"
                     @else
                         disabled
-                    @endif
-                    pattern="[a-z0-9_\.-@]+">
+                    @endif>
             </div>
         </div>
 
@@ -136,8 +135,7 @@
                 <input id="correoSolicitanteRepetido" name="correoSolicitanteRepetido" type="email" class="form-control uppercase" onpaste="return false;" required
                     @if(!$representante)
                         disabled
-                    @endif
-                    pattern="[a-z0-9_\.-@]+">
+                    @endif>
             </div>
         </div>
 
