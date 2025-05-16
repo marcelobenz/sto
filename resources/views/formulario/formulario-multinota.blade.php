@@ -44,6 +44,7 @@
                 telefonoInput.cleaveInstance = new Cleave(telefonoInput, {
                     delimiter: '-',
                     blocks: [4, 4],
+                    numericOnly: true
                 });
             }
         }
