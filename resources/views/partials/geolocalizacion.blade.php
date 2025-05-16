@@ -10,7 +10,7 @@
     <div class="col-md-4 col-sm-6 col-xs-12 margen-abajo-10">
         <div class="form-group requerido">
             <label>Número *</label>
-            <input type="text" id="numeroCalleLoc" name="numero"
+            <input type="number" id="numeroCalleLoc" name="numero"
                 class="form-control input-geo uppercase" required
                 value="{{ $representante->getDomicilio()->getNumero() }}">
         </div>
