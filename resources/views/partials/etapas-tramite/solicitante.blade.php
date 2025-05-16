@@ -58,7 +58,7 @@
         <div class="col-lg-2 col-md-3 col-xs-12">
             <div class="form-group requerido">
                 <label for="codarea">Cod. Área *</label>
-                <select id="codarea" name="codarea" class="form-control" required @if(!$representante) disabled @endif {{-- @change="actualizarTelefono" --}}>
+                <select id="codarea" name="codarea" class="form-control" required @if(!$representante) disabled @endif>
                     <option value="">SELECCIONE</option>
                     @if($codigosArea)
                         @foreach($codigosArea as $c)
@@ -134,7 +134,9 @@
             <div class="form-group requerido">
                 <label for="correoSolicitanteRepetido">Repetir correo electrónico *</label>
                 <input id="correoSolicitanteRepetido" name="correoSolicitanteRepetido" type="email" class="form-control uppercase" onpaste="return false;" required
-                    @if(!$representante)
+                    @if($representante)
+                        value="{{ $representante->getCorreoRepetido() }}"
+                    @else
                         disabled
                     @endif>
             </div>

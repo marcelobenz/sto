@@ -7,11 +7,11 @@ class DocumentoDTO {
     private string $numero;
 
     public function __construct(
-        string $tipo,
-        string $numero
+        string $numero,
+        string $tipo = 'CUIT'
     ) {
-        $this->tipo = $tipo;
         $this->numero = $numero;
+        $this->tipo = $tipo;
     }
 
     public function getTipo(): string {

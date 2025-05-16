@@ -212,6 +212,9 @@ class InstanciaMultinotaController extends Controller {
         Session::put('MULTINOTA', $multinota);
         Session::put('INSTANCIA_MULTINOTA', $instanciaMultinota);
 
+        // Se eliminan variables en sesión que deben estar nulas al inicio de un tramite
+        session()->forget(['REPRESENTANTE', 'CODIGOS_AREA', 'CARACTERES']);
+
         return view('multinota-interno', [
             'formulario' => $formulario,
             'getOrdenActual' => $formulario->getOrdenActual(),
@@ -236,7 +239,22 @@ class InstanciaMultinotaController extends Controller {
         unset($paso);
         Session::put('FORMULARIO', $formulario);
         $htmlPasos = view('partials.pasos-container', compact('formulario'))->render();
-        $htmlRuta = view('partials.ruta-paso-tramite', compact('formulario', 'instanciaMultinota'))->render();
+    
+        if(Session::get('REPRESENTANTE') !== null) {
+            $representante = Session::get('REPRESENTANTE');
+            $codigosArea = Session::get('CODIGOS_AREA');
+            $caracteres = Session::get('CARACTERES');
+
+            $htmlRuta = view('partials.ruta-paso-tramite', compact(
+                'formulario',
+                'representante',
+                'codigosArea',
+                'caracteres',
+                'instanciaMultinota'))->render();
+        } else {
+            $htmlRuta = view('partials.ruta-paso-tramite', compact('formulario', 'instanciaMultinota'))->render();
+        }
+
         $htmlBotones = view('partials.botones-avance-tramite', compact('formulario'))->render();
 
         return response()->json([
@@ -261,7 +279,22 @@ class InstanciaMultinotaController extends Controller {
         unset($paso);
         Session::put('FORMULARIO', $formulario);
         $htmlPasos = view('partials.pasos-container', compact('formulario'))->render();
-        $htmlRuta = view('partials.ruta-paso-tramite', compact('formulario', 'instanciaMultinota'))->render();
+        
+        if(Session::get('REPRESENTANTE') !== null) {
+            $representante = Session::get('REPRESENTANTE');
+            $codigosArea = Session::get('CODIGOS_AREA');
+            $caracteres = Session::get('CARACTERES');
+
+            $htmlRuta = view('partials.ruta-paso-tramite', compact(
+                'formulario',
+                'representante',
+                'codigosArea',
+                'caracteres',
+                'instanciaMultinota'))->render();
+        } else {
+            $htmlRuta = view('partials.ruta-paso-tramite', compact('formulario', 'instanciaMultinota'))->render();
+        }
+
         $htmlBotones = view('partials.botones-avance-tramite', compact('formulario'))->render();
 
         return response()->json([
@@ -314,7 +347,7 @@ class InstanciaMultinotaController extends Controller {
 
             // Instanciar RepresentanteDTO
             $tipoCaracterDTO = new TipoCaracterDTO($caracterEnum->value, $caracterEnum->name);
-            $documentoDTO = new DocumentoDTO('CUIT', $solicitante->documento);
+            $documentoDTO = new DocumentoDTO(numero: $solicitante->documento);
             $domicilio = Direccion::where('id_direccion', $solicitante->id_direccion)->first();
 
             $domicilioDTO = new DomicilioDTO(
@@ -355,6 +388,11 @@ class InstanciaMultinotaController extends Controller {
             $representante->setCodigoArea($codigoAreaDTO);
             $representante->setTelefono($telefonoSinMascara);
 
+            // Se setean objetos representante, códigos de área y caractéres en sesión
+            Session::put('REPRESENTANTE', $representante);
+            Session::put('CODIGOS_AREA', $codigosArea);
+            Session::put('CARACTERES', $caracteres);
+
             $htmlVista = view('partials.etapas-tramite.solicitante', compact('representante', 'codigosArea', 'caracteres'))->render();
 
             return response()->json([
@@ -368,7 +406,7 @@ class InstanciaMultinotaController extends Controller {
             $representante->setTipoCaracter(new TipoCaracterDTO(0, ''));
             $representante->setNombre('');
             $representante->setApellido('');
-            $representante->setDocumento(new DocumentoDTO('CUIT', $cuit));
+            $representante->setDocumento(new DocumentoDTO(numero: $cuit));
             $representante->setCodigoArea(new CodigoAreaDTO(0, '', '', ''));
             $representante->setTelefono('');
             $representante->setCorreo('');
@@ -377,6 +415,11 @@ class InstanciaMultinotaController extends Controller {
                 '', '', '', '', '', '', '', '', '', ''
             ));
             $representante->setEsCuitRegistrado(true);
+
+            // Se setean objetos representante, códigos de área y caractéres en sesión
+            Session::put('REPRESENTANTE', $representante);
+            Session::put('CODIGOS_AREA', $codigosArea);
+            Session::put('CARACTERES', $caracteres);
 
             $htmlVista = view('partials.etapas-tramite.solicitante', compact('representante', 'codigosArea', 'caracteres'))->render();
 
@@ -392,5 +435,28 @@ class InstanciaMultinotaController extends Controller {
         // Setear direccion
         // Cargar geolocalizacion
         // Setear esCuitRegistrado = true
+    }
+
+    public function guardarDatosDelRepresentante(Request $request) {
+        $data = $request->all();
+
+        // Se obtiene ID del tipo caracter
+        $caracterEnum = TipoCaracterEnum::fromDescripcion($data['tipoCaracter']);
+        $data['tipoCaracterID'] = $caracterEnum->value;
+
+        // Se obtienen datos del código de área
+        $codigoAreaObject = CodigoArea::where('codigo', $data['codArea'])->first();
+        $codigoAreaDTO = new CodigoAreaDTO(
+        $codigoAreaObject->id_codigo_area,
+        $codigoAreaObject->provincia,
+        $codigoAreaObject->localidad,
+        $codigoAreaObject->codigo);
+        
+        $representanteNew = RepresentanteDTO::fromRequest($data);
+
+        // Se setea código de área
+        $representanteNew->setCodigoArea($codigoAreaDTO);
+
+        Session::put('REPRESENTANTE', $representanteNew);
     }
 }

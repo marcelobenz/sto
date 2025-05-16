@@ -41,6 +41,37 @@ class RepresentanteDTO {
         $this->esCuitRegistrado = $esCuitRegistrado;
     }
 
+    public static function fromRequest(array $data): self {
+        $tipoCaracter = new TipoCaracterDTO($data['tipoCaracterID'], $data['tipoCaracter']);
+
+        $documento = new DocumentoDTO(numero: $data['documento']);
+
+        $domicilio = new DomicilioDTO(
+            $data['nombreCalle'],
+            $data['numeroCalle'],
+            $data['localidad'],
+            $data['provincia'],
+            $data['codigoPostal'],
+            $data['pais'],
+            $data['latitud'] ?? '',
+            $data['longitud'] ?? '',
+            $data['piso'] ?? '',
+            $data['dpto'] ?? ''
+        );
+
+        return new self(
+            $tipoCaracter,
+            $data['nombre'],
+            $data['apellido'],
+            $documento,
+            $data['telefono'],
+            $data['correo'],
+            $data['correo'],
+            $domicilio,
+            true
+        );
+    }
+
     public function getTipoCaracter(): TipoCaracterDTO {
         return $this->tipoCaracter;
     }

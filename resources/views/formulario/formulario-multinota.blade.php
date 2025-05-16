@@ -100,7 +100,7 @@
                     document.getElementById('correoSolicitanteRepetido'),
                     document.getElementById('nombreCalleLoc'),
                     document.getElementById('numeroCalleLoc'),
-                    document.getElementById('ciudadLoc'),
+                    document.getElementById('provinciaLoc'),
                     document.getElementById('localidadLoc'),
                     document.getElementById('codigoPostalLoc'),
                     document.getElementById('paisLoc'),
@@ -142,6 +142,57 @@
                 }
             }
 
+            function guardarDatosDelRepresentante() {
+                const documento = document.getElementById('documentoSolicitante').value;
+                const nombre = document.getElementById('nombreSolicitante').value;
+                const apellido = document.getElementById('apellidoSolicitante').value;
+                const codArea = document.getElementById('codarea').value;
+                const telefono = document.getElementById('telefonoSolicitante').value;
+                const tipoCaracter = document.getElementById('tipoCaracterSolicitante').value;
+                const correo = document.getElementById('correoSolicitante').value;
+                const nombreCalle = document.getElementById('nombreCalleLoc').value;
+                const numeroCalle = document.getElementById('numeroCalleLoc').value;
+                const provincia = document.getElementById('provinciaLoc').value;
+                const localidad = document.getElementById('localidadLoc').value;
+                const codigoPostal = document.getElementById('codigoPostalLoc').value;
+                const pais = document.getElementById('paisLoc').value;
+                const piso = document.getElementById('piso')?.value;
+                const dpto = document.getElementById('dpto')?.value;
+                const latitud = document.getElementById('latitudLoc')?.value;
+                const longitud = document.getElementById('longitudLoc')?.value;
+
+                fetch('{{ route('instanciaTramite.guardarDatosDelRepresentante') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        documento, 
+                        nombre,
+                        apellido,
+                        codArea,
+                        telefono,
+                        tipoCaracter,
+                        correo,
+                        nombreCalle,
+                        numeroCalle,
+                        provincia,
+                        localidad,
+                        codigoPostal,
+                        pais,
+                        piso,
+                        dpto,
+                        latitud,
+                        longitud
+                    }),
+                }).then(res => {
+                    if (!res.ok) {
+                        console.error('Error al guardar datos del representante');
+                    }
+                });
+            }
+
             $(document).on('click', '#boton-avanzar-paso', async function () {
                 try {
                     ordenActual += 1;
@@ -152,7 +203,8 @@
                             break;
                         case 2:
                             if(persona === 'Juridica') {
-                                validarDatosSeccionSolicitante();
+                                const inputs = validarDatosSeccionSolicitante();
+                                guardarDatosDelRepresentante();
                             }
                             break;
                         default:

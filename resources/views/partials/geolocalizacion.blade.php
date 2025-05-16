@@ -34,7 +34,7 @@
     <div class="col-md-4 col-sm-6 col-xs-12 margen-abajo-10">
         <div class="form-group requerido">
             <label>Provincia *</label>
-            <input type="text" id="ciudadLoc" name="provincia"
+            <input type="text" id="provinciaLoc" name="provincia"
                 class="form-control input-geo uppercase" required
                 value="{{ $representante->getDomicilio()->getProvincia() }}">
         </div>

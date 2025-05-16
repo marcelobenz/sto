@@ -23,10 +23,10 @@ class DomicilioDTO {
         string $provincia,
         string $codigoPostal,
         string $pais,
-        string $latitud,
-        string $longitud,
-        string $piso,
-        string $departamento
+        string $latitud = '',
+        string $longitud = '',
+        string $piso = '',
+        string $departamento = ''
     ) {
         $this->calle = $calle;
         $this->numero = $numero;
