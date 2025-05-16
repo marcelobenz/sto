@@ -36,9 +36,9 @@
                 <div class="col-md-4 col-xs-12" id="outputPanelCuenta">
                     <div class="col-xs-12 no-padding">
                         <div class="form-group requerido">
-                            <label for="cuentaGeneral">Dominio *</label>
-                            <input type="text" id="cuentaGeneral" class="form-control uppercase"
-                                name="cuentaGeneral" value="{{ $instanciaMultinota->cuenta ?? '' }}" onblur="guardarDatosDelSolicitante()">
+                            <label for="cuentaGeneralSinCuentas">Dominio *</label>
+                            <input required type="text" id="cuentaGeneralSinCuentas" class="form-control uppercase"
+                                name="cuentaGeneralSinCuentas" value="{{ $instanciaMultinota->cuenta ?? '' }}" onblur="guardarDatosDelSolicitante()">
                         </div>
                     </div>
                 </div>
@@ -47,7 +47,7 @@
                 <div class="col-xs-12 no-padding">
                     <div class="form-group requerido">
                         <label for="cuentaGeneralSinCuentas">Dominio *</label>
-                        <input type="text" id="cuentaGeneralSinCuentas" class="form-control uppercase"
+                        <input required type="text" id="cuentaGeneralSinCuentas" class="form-control uppercase"
                             name="cuentaGeneralSinCuentas" value="{{ $instanciaMultinota->cuenta ?? '' }}" onblur="guardarDatosDelSolicitante()">
                     </div>
                 </div>
@@ -56,9 +56,9 @@
                 <div class="col-xs-12 no-padding">
                     <div class="form-group requerido">
                         <label for="correo">Correo *</label>
-                        <input type="text" id="correo" class="form-control uppercase"
+                        <input required type="email" id="correo" class="form-control uppercase"
                             name="correo" value="{{ $instanciaMultinota->correo ?? '' }}"
-                            pattern="^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$" onblur="guardarDatosDelSolicitante()">
+                            onblur="guardarDatosDelSolicitante()">
                     </div>
                 </div>
             </div>

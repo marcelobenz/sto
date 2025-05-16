@@ -49,6 +49,10 @@
             }
         }
 
+        function isVisible(input) {
+            return input.offsetParent !== null;
+        }
+
         $(document).ready(function () {
             let ordenActual = @json($getOrdenActual);
             ordenActual -= 1;
@@ -61,34 +65,26 @@
                 const cuenta = data.cuenta;
                 const correo = data.correo;
 
-                const input = document.querySelector('#correo');
-                const pattern = new RegExp(input.getAttribute('pattern'));
+                const inputs = [
+                    document.getElementById('cuentaGeneralSinCuentas'),
+                    document.getElementById('correo')
+                ];
 
-                const mensajeErrorCorreo = 'El correo electrónico ingresado no es correcto.';
-                const mensajeErrorCuenta = 'Debe ingresar una cuenta.';
+                let isValid = true;
 
-                if (!pattern.test(correo)) {
-                    Swal.fire({
-                        position: "top-end",
-                        icon: "warning",
-                        title: `${mensajeErrorCorreo}`,
-                        showConfirmButton: false,
-                        timer: 5000,
-                        timerProgressBar: true
-                    });
-                    throw new Error(`${mensajeErrorCorreo}`);
+                for (const input of inputs) {
+                    if(isVisible(input)) {
+                        if (!input.checkValidity()) {
+                            input.focus();
+                            input.reportValidity();
+                            isValid = false;
+                            break;
+                        }
+                    }
                 }
 
-                if(cuenta === '') {
-                    Swal.fire({
-                        position: "top-end",
-                        icon: "warning",
-                        title: `${mensajeErrorCuenta}`,
-                        showConfirmButton: false,
-                        timer: 5000,
-                        timerProgressBar: true
-                    });
-                    throw new Error(`${mensajeErrorCuenta}`);
+                if (!isValid) {
+                    throw new Error('Hay errores');
                 }
             }
 
