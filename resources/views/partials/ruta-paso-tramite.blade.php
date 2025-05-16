@@ -103,7 +103,7 @@
             body: JSON.stringify({ cuenta, correo }),
         }).then(res => {
             if (!res.ok) {
-                console.error('Error al guardar datos');
+                console.error('Error al guardar datos del solicitante');
             }
         });
     }

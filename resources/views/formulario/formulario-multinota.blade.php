@@ -117,8 +117,12 @@
                     }
 
                     if (input.id === 'correoSolicitanteRepetido') {
-                        const correo = document.getElementById('correoSolicitante').value;
-                        const correoRepetido = document.getElementById('correoSolicitanteRepetido');
+                        let correo = document.getElementById('correoSolicitante').value;
+                        let correoRepetido = document.getElementById('correoSolicitanteRepetido');
+
+                        // Evitar problemas de case
+                        correo = correo.trim().toLowerCase();
+                        correoRepetido.value = correoRepetido.value.trim().toLowerCase();
 
                         if (correo !== correoRepetido.value) {
                             correoRepetido.setCustomValidity('Los correos no coinciden');
