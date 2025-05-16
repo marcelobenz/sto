@@ -84,7 +84,7 @@
                 }
 
                 if (!isValid) {
-                    throw new Error('Hay errores');
+                    throw new Error('Debe completar todos los datos obligatorios correctamente');
                 }
             }
 
@@ -138,7 +138,10 @@
                 }
 
                 if (!isValid) {
-                    throw new Error('Hay errores');
+                    const error = new Error('Debe completar todos los datos obligatorios correctamente');
+                    error.tipo = 'validacion';
+
+                    throw error;
                 }
             }
 
@@ -220,10 +223,32 @@
                         inicializarMascaraCuit();
                         inicializarMascaraTelefono();
                     })
-                    .catch(error => console.error('Error:', error));
+                    .catch(error => {
+                        console.error('Error:', error);
+
+                        Swal.fire({
+                            position: "top-end",
+                            icon: "error",
+                            title: `${error.message}`,
+                            showConfirmButton: false,
+                            timer: 5000,
+                            timerProgressBar: true
+                        });
+                    })
                 } catch (error) {
                     ordenActual -= 1;
-                    console.log(error.message);
+                    console.error(error.message);
+
+                    if(!error.tipo === 'validacion') {
+                        Swal.fire({
+                            position: "top-end",
+                            icon: "error",
+                            title: `${error.message}`,
+                            showConfirmButton: false,
+                            timer: 5000,
+                            timerProgressBar: true
+                        });
+                    }
                 }
             });
 
@@ -239,7 +264,18 @@
                         inicializarMascaraCuit();
                         inicializarMascaraTelefono();
                     })
-                    .catch(error => console.error('Error:', error));
+                    .catch(error => {
+                        console.error('Error:', error);
+
+                        Swal.fire({
+                            position: "top-end",
+                            icon: "error",
+                            title: `${error.message}`,
+                            showConfirmButton: false,
+                            timer: 5000,
+                            timerProgressBar: true
+                        });
+                    })
             });
         });
     </script>
