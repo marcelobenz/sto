@@ -36,7 +36,7 @@
                 <div class="col-md-4 col-xs-12" id="outputPanelCuenta">
                     <div class="col-xs-12 no-padding">
                         <div class="form-group requerido">
-                            <label for="cuentaGeneralSinCuentas">Dominio *</label>
+                            <label for="cuentaGeneralSinCuentas">Cuenta *</label>
                             <input required type="text" id="cuentaGeneralSinCuentas" class="form-control uppercase"
                                 name="cuentaGeneralSinCuentas" value="{{ $instanciaMultinota->cuenta ?? '' }}" onblur="guardarDatosDelSolicitante()">
                         </div>
@@ -46,7 +46,7 @@
             <div class="col-md-4 col-xs-12" id="outputPanel" style="display: {{ ($instanciaMultinota->cuenta !== '' && $otraSeleccionada) ? 'block' : 'none' }};">
                 <div class="col-xs-12 no-padding">
                     <div class="form-group requerido">
-                        <label for="cuentaGeneralSinCuentas">Dominio *</label>
+                        <label for="cuentaGeneralSinCuentas">Cuenta *</label>
                         <input required type="text" id="cuentaGeneralSinCuentas" class="form-control uppercase"
                             name="cuentaGeneralSinCuentas" value="{{ $instanciaMultinota->cuenta ?? '' }}" onblur="guardarDatosDelSolicitante()">
                     </div>
