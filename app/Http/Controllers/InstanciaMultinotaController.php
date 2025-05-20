@@ -12,6 +12,7 @@ use App\Models\MultinotaServicio;
 use App\Models\ContribuyenteMultinota;
 use App\Models\TipoTramiteMultinota;
 use App\Models\SeccionMultinota;
+use App\Models\Campo;
 use App\Models\MensajeInicial;
 use App\Models\Solicitante;
 use App\Models\SolicitanteCuentaCaracter;
@@ -172,6 +173,23 @@ class InstanciaMultinotaController extends Controller {
         ->orderBy('multinota_seccion.orden')
         ->get();
 
+        // Get campos de cada seccion
+        foreach ($secciones as $s) {
+            $campos = Campo::where('id_seccion', $s->id_seccion)
+            ->orderBy('orden')
+            ->get();
+
+            $campos = collect($campos)
+            ->map(function ($c) {
+                $c->gridSpan = $c->dimension;
+                $c->isSelect = in_array($c->tipo, ['LISTA']);
+                $c->isCajasSeleccion = in_array($c->tipo, ['CAJAS_SELECCION']);
+                return $c;
+            });
+
+            $s->campos = $campos;
+        }
+
         // Get mensaje inicial
         $mensajeInicial = MensajeInicial::join('tipo_tramite_mensaje_inicial', 'mensaje_inicial.id_mensaje_inicial', '=', 'tipo_tramite_mensaje_inicial.id_mensaje_inicial')
         ->where('tipo_tramite_mensaje_inicial.id_tipo_tramite_multinota', $multinota->id_tipo_tramite_multinota)
@@ -228,6 +246,9 @@ class InstanciaMultinotaController extends Controller {
         $formulario = Session::get('FORMULARIO');
         $multinota = Session::get('MULTINOTA');
         $instanciaMultinota = Session::get('INSTANCIA_MULTINOTA');
+        $representante = Session::get('REPRESENTANTE');
+        $codigosArea = Session::get('CODIGOS_AREA');
+        $caracteres = Session::get('CARACTERES');
         
         foreach ($formulario->pasosFormulario as &$paso) {
             if ($paso['completado'] === false) {
@@ -240,20 +261,12 @@ class InstanciaMultinotaController extends Controller {
         Session::put('FORMULARIO', $formulario);
         $htmlPasos = view('partials.pasos-container', compact('formulario'))->render();
     
-        if(Session::get('REPRESENTANTE') !== null) {
-            $representante = Session::get('REPRESENTANTE');
-            $codigosArea = Session::get('CODIGOS_AREA');
-            $caracteres = Session::get('CARACTERES');
-
-            $htmlRuta = view('partials.ruta-paso-tramite', compact(
-                'formulario',
-                'representante',
-                'codigosArea',
-                'caracteres',
-                'instanciaMultinota'))->render();
-        } else {
-            $htmlRuta = view('partials.ruta-paso-tramite', compact('formulario', 'instanciaMultinota'))->render();
-        }
+        $htmlRuta = view('partials.ruta-paso-tramite', compact(
+            'formulario',
+            'representante',
+            'codigosArea',
+            'caracteres',
+            'instanciaMultinota'))->render();
 
         $htmlBotones = view('partials.botones-avance-tramite', compact('formulario'))->render();
 
@@ -268,6 +281,9 @@ class InstanciaMultinotaController extends Controller {
         $formulario = Session::get('FORMULARIO');
         $multinota = Session::get('MULTINOTA');
         $instanciaMultinota = Session::get('INSTANCIA_MULTINOTA');
+        $representante = Session::get('REPRESENTANTE');
+        $codigosArea = Session::get('CODIGOS_AREA');
+        $caracteres = Session::get('CARACTERES');
         
         foreach ($formulario->pasosFormulario as $i => &$paso) {
             if ($paso['completado'] === false) {
@@ -280,20 +296,13 @@ class InstanciaMultinotaController extends Controller {
         Session::put('FORMULARIO', $formulario);
         $htmlPasos = view('partials.pasos-container', compact('formulario'))->render();
         
-        if(Session::get('REPRESENTANTE') !== null) {
-            $representante = Session::get('REPRESENTANTE');
-            $codigosArea = Session::get('CODIGOS_AREA');
-            $caracteres = Session::get('CARACTERES');
-
-            $htmlRuta = view('partials.ruta-paso-tramite', compact(
-                'formulario',
-                'representante',
-                'codigosArea',
-                'caracteres',
-                'instanciaMultinota'))->render();
-        } else {
-            $htmlRuta = view('partials.ruta-paso-tramite', compact('formulario', 'instanciaMultinota'))->render();
-        }
+        $htmlRuta = view('partials.ruta-paso-tramite', compact(
+            'formulario',
+            'representante',
+            'codigosArea',
+            'caracteres',
+            'instanciaMultinota'))->render();
+        
 
         $htmlBotones = view('partials.botones-avance-tramite', compact('formulario'))->render();
 

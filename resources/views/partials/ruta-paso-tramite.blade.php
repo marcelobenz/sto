@@ -12,7 +12,8 @@
             @else
                 <div>
                     @include($paso['ruta'], [
-                        'instanciaMultinota' => $instanciaMultinota
+                        'instanciaMultinota' => $instanciaMultinota,
+                        'formulario' => $formulario
                     ])
                 </div>
             @endif
