@@ -187,6 +187,8 @@ class InstanciaMultinotaController extends Controller {
                 $c->isInteger = in_array($c->tipo, ['INTEGER']);
                 $c->isSelect = in_array($c->tipo, ['LISTA']);
                 $c->isCajasSeleccion = in_array($c->tipo, ['CAJAS_SELECCION']);
+                $c->isTextarea = in_array($c->tipo, ['TEXTAREA_FIJO']);
+                $c->isDate = in_array($c->tipo, ['DATE']);
 
                 //Si el campo es LISTA o CAJAS_SELECCION, se le cargan las opciones
                 $c->opciones = OpcionCampo::where('id_campo', $c->id_campo)

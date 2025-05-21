@@ -27,6 +27,19 @@
                     <option value={{ $opc->id_opcion_campo }}>{{ $opc->opcion }}</option>
                 @endforeach
             </select>
+        @elseif ($c->isTextarea)
+            <textarea 
+                class="form-control"
+                rows="5"
+                cols="10"
+                maxlength="500"
+            ></textarea>
+        @elseif ($c->isDate)
+            <input 
+                class="form-control mascara-input"
+                style="{{ $inputStyle }}"
+                data-mascara="99/99/9999" 
+            />
         @elseif ($c->isString)
             @if ($c->mascara)
                 <input 
