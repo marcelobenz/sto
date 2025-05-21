@@ -183,6 +183,8 @@ class InstanciaMultinotaController extends Controller {
             $campos = collect($campos)
             ->map(function ($c) {
                 $c->gridSpan = $c->dimension;
+                $c->isString = in_array($c->tipo, ['STRING']);
+                $c->isInteger = in_array($c->tipo, ['INTEGER']);
                 $c->isSelect = in_array($c->tipo, ['LISTA']);
                 $c->isCajasSeleccion = in_array($c->tipo, ['CAJAS_SELECCION']);
 
