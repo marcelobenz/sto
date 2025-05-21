@@ -43,8 +43,7 @@
     </div>
 @endsection
 
-@section('scripting')
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+@push('scripts')
     <script>
         $(document).ready(function() {
             $('#rolesTable').DataTable({
@@ -57,4 +56,4 @@
             });
         });
     </script>
-@endsection
+@endpush

@@ -68,7 +68,7 @@
 @endsection
 
 
-@section('scripting')
+@push('scripts')
 <script>
     let preguntas = [];
     let contador = 1;
@@ -145,4 +145,4 @@
         this.appendChild(inputPreguntas);
     });
 </script>
-@endsection
+@endpush

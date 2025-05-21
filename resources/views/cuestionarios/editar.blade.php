@@ -91,7 +91,7 @@
 </div>
 @endsection
 
-@section('scripting')
+@push('scripts')
 <script>
     let contador = {{ $cuestionario->preguntas->count() + 1 }}; 
 
@@ -138,4 +138,4 @@
         fila.remove();
     }
 </script>
-@endsection
+@endpush

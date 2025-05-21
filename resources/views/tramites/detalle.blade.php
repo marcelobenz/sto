@@ -234,7 +234,7 @@
 </div>
 @endsection
 
-@section('scripting')
+@push('scripts')
 <script>
     $(document).ready(function () {
         setTimeout(function () {
@@ -280,4 +280,4 @@
         }
     }
 </script>
-@endsection
+@endpush

@@ -136,8 +136,7 @@
     @include('partials.modal-confirmacion-salir', ['path' => '/secciones-multinota'])
 @endsection
 
-@section('scripting')
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+@push('scripts')
 <script>
     (function () {
       var salirButton = document.getElementById("salir-editar-seccion-multinota");
@@ -334,7 +333,6 @@
 
     document.querySelector('#tabla-opciones-campo').addEventListener('dragover', handleDragEnterOpcionesCampo);
 </script>
-
 <style>
     .fila-campo, .fila-opcion-campo {
         background-color: #ededed;
@@ -358,4 +356,4 @@
         background-color: #b9b7b7;
     }
 </style>
-@endsection
+@endpush

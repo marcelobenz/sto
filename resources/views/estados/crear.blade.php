@@ -110,7 +110,7 @@
     </div>
 @endsection
 
-@section('scripting')
+@push('scripts')
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         // Secciones
@@ -144,4 +144,4 @@
         });
     });
 </script>
-@endsection
+@endpush

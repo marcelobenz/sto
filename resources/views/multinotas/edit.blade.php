@@ -146,8 +146,7 @@
     @include('partials.modal-confirmacion-salir', ['path' => '/multinotas'])
 @endsection
 
-@section('scripting')
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+@push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     var codigos = @json($codigos);
@@ -512,4 +511,5 @@
         display: none;
     }
 </style>
-@endsection
+
+@endpush
