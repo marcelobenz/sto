@@ -18,10 +18,20 @@
         @include('partials.botones-avance-tramite', ['formulario' => $formulario])
     </div>
 </div>
-@section('scripting')
+@push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/cleave.js@1/dist/cleave.min.js"></script>
     <script>
+        function inicializarMascarasSeccionesMultinota() {
+            $('.mascara-input').each(function() {
+                var $input = $(this);
+                var mask = $input.data('mascara');
+                if (mask) {
+                    $input.inputmask(mask);
+                }
+            });
+        }
+
         function inicializarMascaraCuit() {
             const cuitInput = document.querySelector('#documentoSolicitante');
             if (cuitInput) {
@@ -222,6 +232,7 @@
                         document.getElementById("botones-avance-tramite").innerHTML = data.htmlBotones;
                         inicializarMascaraCuit();
                         inicializarMascaraTelefono();
+                        inicializarMascarasSeccionesMultinota();
                     })
                     .catch(error => {
                         console.error('Error:', error);
@@ -263,6 +274,7 @@
                         document.getElementById("botones-avance-tramite").innerHTML = data.htmlBotones;
                         inicializarMascaraCuit();
                         inicializarMascaraTelefono();
+                        inicializarMascarasSeccionesMultinota();
                     })
                     .catch(error => {
                         console.error('Error:', error);
@@ -367,4 +379,4 @@
             margin-top: 4px;
         }
     </style>
-@endsection
+@endpush

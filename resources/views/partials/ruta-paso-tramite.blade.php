@@ -37,8 +37,7 @@
         text-transform: uppercase;
     }
 </style>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@push('scripts')
 <script>
     $(document).ready(function() {
         $(document).on('click', '#boton-buscar-contribuyente', function(event) {
@@ -109,3 +108,4 @@
         });
     }
 </script>
+@endpush
