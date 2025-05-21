@@ -13,6 +13,7 @@ use App\Models\ContribuyenteMultinota;
 use App\Models\TipoTramiteMultinota;
 use App\Models\SeccionMultinota;
 use App\Models\Campo;
+use App\Models\OpcionCampo;
 use App\Models\MensajeInicial;
 use App\Models\Solicitante;
 use App\Models\SolicitanteCuentaCaracter;
@@ -184,6 +185,12 @@ class InstanciaMultinotaController extends Controller {
                 $c->gridSpan = $c->dimension;
                 $c->isSelect = in_array($c->tipo, ['LISTA']);
                 $c->isCajasSeleccion = in_array($c->tipo, ['CAJAS_SELECCION']);
+
+                //Si el campo es LISTA o CAJAS_SELECCION, se le cargan las opciones
+                $c->opciones = OpcionCampo::where('id_campo', $c->id_campo)
+                ->orderBy('orden', 'asc')
+                ->get();
+
                 return $c;
             });
 

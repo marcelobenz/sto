@@ -32,6 +32,20 @@
             });
         }
 
+        function inicializarInputsCajaSeleccionMultiple() {
+            document.querySelectorAll('.choices-multiselect').forEach(function (element) {
+                new Choices(element, {
+                    removeItemButton: true,
+                    placeholderValue: 'Seleccionar...',
+                    searchEnabled: false,
+                    shouldSort: false,
+                    noChoicesText: '',
+                    noResultsText: '',
+                    itemSelectText: '',
+                });
+            });
+        }
+
         function inicializarMascaraCuit() {
             const cuitInput = document.querySelector('#documentoSolicitante');
             if (cuitInput) {
@@ -233,6 +247,7 @@
                         inicializarMascaraCuit();
                         inicializarMascaraTelefono();
                         inicializarMascarasSeccionesMultinota();
+                        inicializarInputsCajaSeleccionMultiple();
                     })
                     .catch(error => {
                         console.error('Error:', error);
@@ -275,6 +290,7 @@
                         inicializarMascaraCuit();
                         inicializarMascaraTelefono();
                         inicializarMascarasSeccionesMultinota();
+                        inicializarInputsCajaSeleccionMultiple();
                     })
                     .catch(error => {
                         console.error('Error:', error);
