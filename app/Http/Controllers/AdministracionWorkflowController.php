@@ -69,13 +69,13 @@ public function guardar(Request $request, $id)
 {
     $configuraciones = $request->input('configuraciones');
 
+
     if (!$configuraciones || !is_array($configuraciones)) {
         return response()->json(['success' => false, 'message' => 'Datos inválidos']);
     }
 
     DB::beginTransaction();
     try {
-        // 1. Crear todos los estados (evitar duplicados)
         $nombresEstados = [];
 
         foreach ($configuraciones as $conf) {
@@ -87,46 +87,66 @@ public function guardar(Request $request, $id)
 
         $nombresEstados = array_unique($nombresEstados);
 
-        // Ver qué estados ya existen
-        $estadosExistentes = DB::table('estado_tramite')
-            ->whereIn('nombre', $nombresEstados)
-            ->pluck('id_estado_tramite', 'nombre');
 
         $mapaEstados = [];
 
         foreach ($nombresEstados as $nombre) {
-            if (isset($estadosExistentes[$nombre])) {
-                $mapaEstados[$nombre] = $estadosExistentes[$nombre];
-            } else {
-                // Insertar nuevo estado y guardar su ID
-                $idNuevo = DB::table('estado_tramite')->insertGetId([
+           
+                \Log::info('Insertando estado:', [
                     'nombre' => $nombre,
-                    'fecha_sistema' => now(),
-                    'activo' => 1,
+                    'tipo' => $confEstado['tipo'] ?? strtoupper(str_replace(' ', '_', $nombre)),
+                    'puede_rechazar' => $confEstado['puede_rechazar'] ?? 0,
+                    'puede_pedir_documentacion' => $confEstado['puede_pedir_documentacion'] ?? 0,
+                    'estado_tiene_expediente' => $confEstado['estado_tiene_expediente'] ?? 0,
                 ]);
+                
+
+                $idNuevo = DB::table('estado_tramite')->insertGetId([
+                    'fecha_sistema' => now(),
+                    'nombre' => $nombre,
+                    'tipo' => $confEstado['tipo'] ?? strtoupper(str_replace(' ', '_', $nombre)),
+                    'puede_rechazar' => $confEstado['puede_rechazar'] ?? 0,
+                    'puede_pedir_documentacion' => $confEstado['puede_pedir_documentacion'] ?? 0,
+                    'puede_elegir_camino' =>  0,
+                    'estado_tiene_expediente' => $confEstado['estado_tiene_expediente'] ?? 0,
+                ]);
+
+                
+
                 $mapaEstados[$nombre] = $idNuevo;
             }
-        }
 
-        // 2. Insertar relaciones en configuracion_estado_tramite
         $version = uniqid();
 
         foreach ($configuraciones as $conf) {
             $idEstadoActual = $mapaEstados[$conf['estado_actual']];
-            foreach ($conf['posteriores'] as $post) {
-                $idPosterior = $mapaEstados[$post['nombre']];
-
+        
+            if (empty($conf['posteriores'])) {
                 DB::table('configuracion_estado_tramite')->insert([
                     'fecha_sistema' => now(),
                     'id_estado_tramite' => $idEstadoActual,
-                    'id_proximo_estado' => $idPosterior,
+                    'id_proximo_estado' => null,
                     'version' => $version,
                     'publico' => 1,
                     'id_tipo_tramite_multinota' => $id,
                     'activo' => 1
                 ]);
+            } else {
+                foreach ($conf['posteriores'] as $post) {
+                    $idPosterior = $mapaEstados[$post['nombre']];
+                    DB::table('configuracion_estado_tramite')->insert([
+                        'fecha_sistema' => now(),
+                        'id_estado_tramite' => $idEstadoActual,
+                        'id_proximo_estado' => $idPosterior,
+                        'version' => $version,
+                        'publico' => 1,
+                        'id_tipo_tramite_multinota' => $id,
+                        'activo' => 1
+                    ]);
+                }
             }
         }
+        
 
         DB::commit();
         return response()->json(['success' => true, 'message' => 'Workflow guardado correctamente.']);

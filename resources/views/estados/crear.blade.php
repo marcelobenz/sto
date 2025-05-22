@@ -14,7 +14,6 @@
         <br/>
         <h2 class="mt-3">Crear Workflow de Estados - {{ $tipoTramite->nombre_tipo_tramite }}</h2>
 
-<!-- Botón Guardar -->
 <div class="mt-3 text-right">
     <button id="btn-guardar-configuracion" class="btn btn-success">
         <i class="fas fa-save"></i> Guardar Configuración
@@ -23,7 +22,6 @@
 
 
         <div class="row">
-            <!-- Sección de Estados -->
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-header">
@@ -57,44 +55,35 @@
                 </div>
             </div>
 
-            <!-- Sección de Relaciones -->
             <div class="col-md-8">
                 <div id="seccion-relaciones" class="card" style="display: none;">
                     <div class="card-header">
                         <h5>Relaciones</h5>
                     </div>
                     <div class="card-body">
-                        <label><input type="radio" name="relacion" value="anterior"> Anterior</label>
-                        <label><input type="radio" name="relacion" value="posterior" checked> Posterior</label>
+                        <label><input type="hidden" name="relacion" value="posterior"> </label>
                         <select id="select-estado" class="form-control mt-2">
-                            <option>Seleccionar...</option>
-                            @foreach($estados as $estado)
-                                <option value="{{ $estado['actual'] }}">{{ $estado['nuevo'] }}</option>
-                            @endforeach
+                        <option>Seleccionar...</option>
                         </select>
                         <button id="btn-agregar" class="btn btn-primary mt-2">Agregar</button>
                         <div class="mt-3">
-                            <h6>Anteriores</h6>
-                            <ul id="lista-anteriores" class="list-group"></ul>
                             <h6>Posteriores</h6>
                             <ul id="lista-posteriores" class="list-group"></ul>
                         </div>
                     </div>
                 </div>
 
-                <!-- Sección de Restricciones -->
                 <div id="seccion-restricciones" class="card mt-3" style="display: none;">
                     <div class="card-header">
                         <h5>Restricciones</h5>
                     </div>
                     <div class="card-body">
-                        <label><input type="checkbox"> Puede rechazar</label><br>
-                        <label><input type="checkbox" checked> Puede pedir documentación</label><br>
-                        <label><input type="checkbox"> Tiene Expediente</label>
+                        <input type="checkbox" id="puede-rechazar"> Puede rechazar<br>
+                        <input type="checkbox" id="puede-doc" checked> Puede pedir documentación<br>
+                        <input type="checkbox" id="tiene-expediente"> Tiene Expediente
                     </div>
                 </div>
 
-                <!-- Sección de Responsables -->
                 <div id="seccion-responsables" class="card mt-3" style="display: none;">
                     <div class="card-header">
                         <h5>Responsables</h5>
@@ -114,91 +103,87 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-    // Secciones
     let seccionRelaciones = document.getElementById("seccion-relaciones");
     let seccionRestricciones = document.getElementById("seccion-restricciones");
     let seccionResponsables = document.getElementById("seccion-responsables");
 
-    // Asegurarse de que todas las secciones estén ocultas al inicio
     seccionRelaciones.style.display = "none";
     seccionRestricciones.style.display = "none";
     seccionResponsables.style.display = "none";
 
-    // Objeto para almacenar las configuraciones de cada estado
     let configuraciones = {};
 
-    // Variable para almacenar el estado actual seleccionado
     let estadoActualSeleccionado = null;
 
-    // Cuando se haga clic en los botones de estado
     let botonesEstado = document.querySelectorAll(".estado-btn");
 
     botonesEstado.forEach(button => {
-        button.addEventListener("click", function () {
-            // Obtener el estado actual seleccionado
-            estadoActualSeleccionado = this.getAttribute("data-estado");
+    button.addEventListener("click", function () {
+        estadoActualSeleccionado = this.getAttribute("data-estado");
 
-            // Mostrar las secciones de Relaciones y Responsables cuando se haga clic en un estado
-            seccionRelaciones.style.display = "block";
-            seccionResponsables.style.display = "block";
-
-            // Mostrar u ocultar la sección de Restricciones dependiendo del estado
-            if (estadoActualSeleccionado === "En Creación") {
-                seccionRestricciones.style.display = "none";
-            } else {
-                seccionRestricciones.style.display = "block";
-            }
-
-            // Restablecer las listas de Anteriores y Posteriores
-            document.getElementById("lista-anteriores").innerHTML = "";
-            document.getElementById("lista-posteriores").innerHTML = "";
-
-            // Cargar la configuración del estado seleccionado (si existe)
-            if (configuraciones[estadoActualSeleccionado]) {
-                configuraciones[estadoActualSeleccionado].anteriores.forEach(item => {
-                    let nuevoItem = document.createElement("li");
-                    nuevoItem.className = "list-group-item";
-                    nuevoItem.textContent = item;
-                    document.getElementById("lista-anteriores").appendChild(nuevoItem);
-                });
-
-                configuraciones[estadoActualSeleccionado].posteriores.forEach(item => {
-                    let nuevoItem = document.createElement("li");
-                    nuevoItem.className = "list-group-item";
-                    nuevoItem.textContent = item;
-                    document.getElementById("lista-posteriores").appendChild(nuevoItem);
-                });
-            }
-        });
-    });
-
-    // Lógica para agregar estados a las listas de Anteriores o Posteriores
-    document.getElementById("btn-agregar").addEventListener("click", function () {
         let selectEstado = document.getElementById("select-estado");
-        let estadoSeleccionado = selectEstado.options[selectEstado.selectedIndex].text;
-        let relacion = document.querySelector('input[name="relacion"]:checked').value;
+        selectEstado.innerHTML = '<option>Seleccionar...</option>';
 
-        if (estadoSeleccionado !== "Seleccionar..." && estadoActualSeleccionado) {
-            let lista = relacion === "anterior" ? document.getElementById("lista-anteriores") : document.getElementById("lista-posteriores");
-            let nuevoItem = document.createElement("li");
-            nuevoItem.className = "list-group-item";
-            nuevoItem.textContent = estadoSeleccionado;
-            lista.appendChild(nuevoItem);
+        @foreach($estados as $estado)
+        if ("{{ $estado['actual'] }}" !== "En Creación" && "{{ $estado['actual'] }}" !== estadoActualSeleccionado) {
+            let option = document.createElement("option");
+            option.value = "{{ $estado['actual'] }}";
+            option.text = "{{ $estado['nuevo'] }}";
+            selectEstado.appendChild(option);
+        }
+        @endforeach
 
-            // Guardar la configuración en el objeto configuraciones
-            if (!configuraciones[estadoActualSeleccionado]) {
-                configuraciones[estadoActualSeleccionado] = { anteriores: [], posteriores: [] };
-            }
+        seccionRelaciones.style.display = "block";
+        seccionResponsables.style.display = "block";
 
-            if (relacion === "anterior") {
-                configuraciones[estadoActualSeleccionado].anteriores.push(estadoSeleccionado);
-            } else {
-                configuraciones[estadoActualSeleccionado].posteriores.push(estadoSeleccionado);
-            }
+        seccionRestricciones.style.display = (estadoActualSeleccionado === "En Creación") ? "none" : "block";
+
+        document.getElementById("lista-posteriores").innerHTML = "";
+
+        if (configuraciones[estadoActualSeleccionado]) {
+            configuraciones[estadoActualSeleccionado].posteriores.forEach(item => {
+                let nuevoItem = document.createElement("li");
+                nuevoItem.className = "list-group-item";
+                nuevoItem.textContent = item;
+                document.getElementById("lista-posteriores").appendChild(nuevoItem);
+            });
         }
     });
+});
 
-    document.getElementById("btn-guardar-configuracion").addEventListener("click", function () {
+
+document.getElementById("btn-agregar").addEventListener("click", function () {
+    let selectEstado = document.getElementById("select-estado");
+    let estadoSeleccionado = selectEstado.options[selectEstado.selectedIndex].text;
+
+    if (estadoSeleccionado !== "Seleccionar..." && estadoActualSeleccionado) {
+        // Guardar también la configuración completa del estado actual
+        configuraciones[estadoActualSeleccionado] = configuraciones[estadoActualSeleccionado] || {
+            posteriores: [],
+            nombre: estadoActualSeleccionado,
+            tipo: estadoActualSeleccionado.toUpperCase().replace(" ", "_"),
+            puede_rechazar: document.querySelector('#puede-rechazar')?.checked ? 1 : 0,
+            puede_pedir_documentacion: document.querySelector('#puede-doc')?.checked ? 1 : 0,
+            tiene_expediente: document.querySelector('#tiene-expediente')?.checked ? 1 : 0,
+        };
+
+        let lista = document.getElementById("lista-posteriores");
+
+        let yaExiste = Array.from(lista.children).some(item => item.textContent === estadoSeleccionado);
+        if (yaExiste) return;
+
+        let nuevoItem = document.createElement("li");
+        nuevoItem.className = "list-group-item";
+        nuevoItem.textContent = estadoSeleccionado;
+        lista.appendChild(nuevoItem);
+
+        configuraciones[estadoActualSeleccionado].posteriores.push(estadoSeleccionado);
+    }
+});
+
+
+
+document.getElementById("btn-guardar-configuracion").addEventListener("click", function () {
     if (!Object.keys(configuraciones).length) {
         Swal.fire("Error", "No se ha configurado ningún estado.", "error");
         return;
@@ -206,11 +191,28 @@
 
     const payload = [];
 
+    // Agregamos todos los estados ya configurados
     Object.entries(configuraciones).forEach(([estadoActual, config]) => {
         payload.push({
             estado_actual: estadoActual,
             posteriores: config.posteriores.map(nombre => ({ nombre }))
         });
+    });
+
+    // Detectar si algún estado no fue usado como "actual" pero sí es final
+    const todosLosEstados = @json(array_column($estados, 'actual'));
+    todosLosEstados.forEach(nombreEstado => {
+        const yaEsActual = payload.some(conf => conf.estado_actual === nombreEstado);
+        const esPosteriorDeAlguien = payload.some(conf =>
+            conf.posteriores.some(p => p.nombre === nombreEstado)
+        );
+
+        if (!yaEsActual && esPosteriorDeAlguien) {
+            payload.push({
+                estado_actual: nombreEstado,
+                posteriores: []  // Estado final
+            });
+        }
     });
 
     fetch("{{ route('workflow.guardar', ['id' => $tipoTramite->id_tipo_tramite_multinota]) }}", {
@@ -240,8 +242,8 @@
     .catch(error => {
         console.error(error);
         Swal.fire("Error", "No se pudo guardar la configuración.", "error");
-     });
     });
+});
 });
 </script>
 @endsection
