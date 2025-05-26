@@ -27,7 +27,15 @@
                 var $input = $(this);
                 var mask = $input.data('mascara');
                 if (mask) {
-                    $input.inputmask(mask);
+                    $input.inputmask({
+                        mask: mask,
+                        oncomplete: function() {
+                            $input.get(0).setCustomValidity('');
+                        },
+                        onincomplete: function() {
+                            $input.get(0).setCustomValidity('Formato inválido');
+                        }
+                    });
                 }
             });
         }
@@ -36,7 +44,7 @@
             document.querySelectorAll('.choices-multiselect').forEach(function (element) {
                 new Choices(element, {
                     removeItemButton: true,
-                    placeholderValue: 'Seleccionar...',
+                    placeholderValue: 'Seleccione...',
                     searchEnabled: false,
                     shouldSort: false,
                     noChoicesText: '',
@@ -77,7 +85,43 @@
             return input.offsetParent !== null;
         }
 
+        function showCustomTooltip(targetElement, message) {
+            removeCustomTooltip();
+
+            const tooltip = document.createElement('div');
+            tooltip.className = 'custom-tooltip';
+
+            // Icon + text
+            tooltip.innerHTML = `
+                <div class="custom-tooltip-icon">!</div>
+                <div>${message}</div>
+            `;
+
+            document.body.appendChild(tooltip);
+
+            const rect = targetElement.getBoundingClientRect();
+            const tooltipRect = tooltip.getBoundingClientRect();
+
+            // Position above the element
+            tooltip.style.top = `${window.scrollY + rect.top - tooltipRect.height - 12}px`;
+            tooltip.style.left = `${window.scrollX + rect.left}px`;
+
+            // Remove on user interaction
+            ['click', 'keydown', 'change'].forEach(event =>
+                targetElement.addEventListener(event, removeCustomTooltip, { once: true })
+            );
+        }
+
+        function removeCustomTooltip() {
+            const existing = document.querySelector('.custom-tooltip');
+            if (existing) existing.remove();
+        }
+
         $(document).ready(function () {
+            //Secciones
+            const formulario = @json($formulario);
+            const secciones = formulario.secciones;
+
             let ordenActual = @json($getOrdenActual);
             ordenActual -= 1;
             const persona = @json($persona);
@@ -220,6 +264,65 @@
                 });
             }
 
+            function validarDatosSeccionDatosACompletar() {
+                const campos = [];
+                
+                for (const s of secciones) {
+                    for(const c of s.campos) {
+                        campos.push(c);
+                    }
+                }
+
+                const inputs = campos.map(c => document.getElementById(`${c.id_campo}`));
+
+                let isValid = true;
+
+                // 1. Se validan inputs normales
+                for (const input of inputs) {
+                    // Skip selects múltiples
+                    if (input.classList.contains('choices-multiselect')) continue;
+
+                    if (!input.checkValidity()) {
+                        input.focus();
+                        input.reportValidity();
+                        isValid = false;
+                        break;
+                    }
+                }
+
+                // 2. Se validan selects múltiples
+                if (isValid) {
+                    const selects = document.querySelectorAll('.choices-multiselect');
+
+                    for (const select of selects) {
+                        const selectedOptions = select.querySelectorAll('option:checked');
+
+                        if (selectedOptions.length === 0) {
+                            select.setCustomValidity('Debe seleccionar al menos una opción');
+
+                            const choicesInner = select.closest('.choices')?.querySelector('.choices__inner');
+                            if (choicesInner) {
+                                showCustomTooltip(choicesInner, 'Debe seleccionar al menos una opción');
+                                choicesInner.focus();
+                            }
+
+                            isValid = false;
+                            break;
+                        } else {
+                            select.setCustomValidity('');
+                            removeCustomTooltip();
+                        }
+                    }
+                }
+
+                if (!isValid) {
+                    const error = new Error('Debe completar todos los datos obligatorios correctamente');
+                    error.tipo = 'validacion';
+
+                    throw error;
+                }
+            }
+
             $(document).on('click', '#boton-avanzar-paso', async function () {
                 try {
                     ordenActual += 1;
@@ -230,8 +333,20 @@
                             break;
                         case 2:
                             if(persona === 'Juridica') {
-                                const inputs = validarDatosSeccionSolicitante();
+                                // Seccion 'Datos del Representante'
+                                validarDatosSeccionSolicitante();
                                 guardarDatosDelRepresentante();
+                            } else {
+                                // Seccion 'Datos a Completar'
+                                //validarDatosSeccionDatosACompletar();
+                            }
+                            break;
+                        case 3:
+                            if(persona === 'Juridica') {
+                                // Seccion 'Datos del Completar'
+                                validarDatosSeccionDatosACompletar();
+                            } else {
+                                // Seccion 'Información Adicional'
                             }
                             break;
                         default:
@@ -393,6 +508,51 @@
         .f1-steps p {
             margin-bottom: 0;
             margin-top: 4px;
+        }
+
+        .custom-tooltip {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            padding: 10px 12px;
+            font-size: 0.9rem;
+            color: #000;
+            max-width: 260px;
+            z-index: 1000;
+        }
+
+        .custom-tooltip::before {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 20px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid white;
+            filter: drop-shadow(0 -1px 1px rgba(0,0,0,0.1));
+        }
+
+        .custom-tooltip-icon {
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            background-color: #FF8C00;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 1.2rem;
+            font-family: sans-serif;
         }
     </style>
 @endpush

@@ -12,9 +12,13 @@
             @endif
         </label>
         @if ($c->isSelect)
-            <select 
+            <select
+                id={{ $c->id_campo }}
                 class="form-control" 
                 style="{{ $selectStyle }}"
+                @if($c->obligatorio === 1)
+                    required
+                @endif
             >
                 <option value="" selected>Seleccione...</option>
                 @foreach ($c->opciones as $opc)
@@ -22,64 +26,96 @@
                 @endforeach
             </select>
         @elseif ($c->isCajasSeleccion)
-            <select class="choices-multiselect" multiple>
+            <select 
+                id={{ $c->id_campo }}
+                class="choices-multiselect"
+                multiple
+            >
                 @foreach ($c->opciones as $opc)
                     <option value={{ $opc->id_opcion_campo }}>{{ $opc->opcion }}</option>
                 @endforeach
             </select>
         @elseif ($c->isTextarea)
             <textarea 
+                id={{ $c->id_campo }}
                 class="form-control"
                 rows="5"
                 cols="10"
                 maxlength="500"
+                @if($c->obligatorio === 1)
+                    required
+                @endif
             ></textarea>
         @elseif ($c->isDate)
             <input 
+                id={{ $c->id_campo }}
                 class="form-control mascara-input"
                 style="{{ $inputStyle }}"
                 data-mascara="99/99/9999" 
+                @if($c->obligatorio === 1)
+                    required
+                @endif
             />
         @elseif ($c->isString)
             @if ($c->mascara)
                 <input 
+                    id={{ $c->id_campo }}
                     class="form-control mascara-input"
                     style="{{ $inputStyle }}"
-                    data-mascara="{{ $c->mascara }}" 
+                    data-mascara="{{ $c->mascara }}"
+                    @if($c->obligatorio === 1)
+                        required
+                    @endif
                 />
             @else
                 @if ($c->limite_minimo && $c->limite_maximo)
                     <input 
+                        id={{ $c->id_campo }}
                         class="form-control" 
                         minlength="{{ $c->limite_minimo }}"
                         maxlength="{{ $c->limite_maximo }}"
                         style="{{ $inputStyle }}"
+                        @if($c->obligatorio === 1)
+                            required
+                        @endif
                     />
                     <label style="font-size: 14px; color: darkslategray;">
                         Límite caracteres: Min {{ $c->limite_minimo }} / Max {{ $c->limite_maximo }}
                     </label>
                 @else
                     <input 
+                        id={{ $c->id_campo }}
                         class="form-control" 
                         style="{{ $inputStyle }}"
+                        @if($c->obligatorio === 1)
+                            required
+                        @endif
                     />
                 @endif
             @endif
         @elseif ($c->isInteger)
             @if ($c->mascara)
                 <input 
+                    id={{ $c->id_campo }}
                     class="form-control mascara-input"
                     style="{{ $inputStyle }}"
                     data-mascara="{{ $c->mascara }}" 
+                    @if($c->obligatorio === 1)
+                        required
+                    @endif
                 />
             @else
                 @if ($c->limite_minimo && $c->limite_maximo)
                     <input
+                        id={{ $c->id_campo }}
                         type="text"
                         class="form-control" 
                         pattern="\d{{ '{' . $c->limite_minimo . ',' . $c->limite_maximo . '}' }}"
                         title="Debe tener entre {{ $c->limite_minimo }} y {{ $c->limite_maximo }} dígitos"
                         style="{{ $inputStyle }}"
+                        @if($c->obligatorio === 1)
+                            required
+                        @endif
                     />
                     <label style="font-size: 14px; color: darkslategray;">
                         Límite caracteres: Min {{ $c->limite_minimo }}
@@ -89,9 +125,13 @@
                     </label>
                 @else
                     <input 
+                        id={{ $c->id_campo }}
                         type="number"
                         class="form-control" 
                         style="{{ $inputStyle }}"
+                        @if($c->obligatorio === 1)
+                            required
+                        @endif
                     />
                 @endif
             @endif

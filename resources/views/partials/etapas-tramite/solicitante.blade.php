@@ -82,14 +82,13 @@
             <div class="form-group requerido">
                 <label for="telefonoSolicitante">Teléfono *</label>
                 <input id="telefonoSolicitante" name="telefonoSolicitante" type="text" 
-                    pattern="^\d{4}-\d{4}$" title="Debe ingresar 8 dígitos en formato XXXX-XXXX"
+                    pattern="^\d{4}-\d{4}$" title="Formato inválido"
                     class="form-control uppercase" required
                     @if($representante)
                         value="{{ $representante->getTelefono() }}"
                     @else
                         disabled
-                    @endif
-                    {{-- v-mask="obtenerMascara()" --}}>
+                    @endif>
             </div>
         </div>
 

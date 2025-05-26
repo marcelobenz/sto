@@ -43,7 +43,6 @@
         $(document).on('click', '#boton-buscar-contribuyente', function(event) {
             event.preventDefault();
             const cuit = document.getElementById('documentoSolicitante').value;
-            console.log('cuit: ', cuit)
 
             if (cuit === '' /* || No cumple formato del CUIT */) {
                 Swal.fire({
