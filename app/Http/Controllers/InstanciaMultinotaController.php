@@ -242,7 +242,7 @@ class InstanciaMultinotaController extends Controller {
         Session::put('INSTANCIA_MULTINOTA', $instanciaMultinota);
 
         // Se eliminan variables en sesión que deben estar nulas al inicio de un tramite
-        session()->forget(['REPRESENTANTE', 'CODIGOS_AREA', 'CARACTERES']);
+        session()->forget(['REPRESENTANTE', 'CODIGOS_AREA', 'CARACTERES', 'CAMPOS_SECCIONES']);
 
         return view('multinota-interno', [
             'formulario' => $formulario,
@@ -260,6 +260,7 @@ class InstanciaMultinotaController extends Controller {
         $representante = Session::get('REPRESENTANTE');
         $codigosArea = Session::get('CODIGOS_AREA');
         $caracteres = Session::get('CARACTERES');
+        $camposSecciones = Session::get('CAMPOS_SECCIONES');
         
         foreach ($formulario->pasosFormulario as &$paso) {
             if ($paso['completado'] === false) {
@@ -277,6 +278,7 @@ class InstanciaMultinotaController extends Controller {
             'representante',
             'codigosArea',
             'caracteres',
+            'camposSecciones',
             'instanciaMultinota'))->render();
 
         $htmlBotones = view('partials.botones-avance-tramite', compact('formulario'))->render();
@@ -295,6 +297,7 @@ class InstanciaMultinotaController extends Controller {
         $representante = Session::get('REPRESENTANTE');
         $codigosArea = Session::get('CODIGOS_AREA');
         $caracteres = Session::get('CARACTERES');
+        $camposSecciones = Session::get('CAMPOS_SECCIONES');
         
         foreach ($formulario->pasosFormulario as $i => &$paso) {
             if ($paso['completado'] === false) {
@@ -312,6 +315,7 @@ class InstanciaMultinotaController extends Controller {
             'representante',
             'codigosArea',
             'caracteres',
+            'camposSecciones',
             'instanciaMultinota'))->render();
         
 
@@ -457,7 +461,7 @@ class InstanciaMultinotaController extends Controller {
         // Setear esCuitRegistrado = true
     }
 
-    public function guardarDatosDelRepresentante(Request $request) {
+    public function guardarDatosSeccionSolicitante(Request $request) {
         $data = $request->all();
 
         // Se obtiene ID del tipo caracter
@@ -478,5 +482,11 @@ class InstanciaMultinotaController extends Controller {
         $representanteNew->setCodigoArea($codigoAreaDTO);
 
         Session::put('REPRESENTANTE', $representanteNew);
+    }
+
+    public function guardarDatosSeccionDatosACompletar(Request $request) {
+        $data = $request->all();
+
+        Session::put('CAMPOS_SECCIONES', $data);
     }
 }

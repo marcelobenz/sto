@@ -118,10 +118,19 @@
         }
 
         $(document).ready(function () {
-            //Secciones
             const formulario = @json($formulario);
+            
+            // Se recorren y guardan en un array los campos de las secciones asociadas
             const secciones = formulario.secciones;
+            const campos = [];
+            for (const s of secciones) {
+                for(const c of s.campos) {
+                    campos.push(c);
+                }
+            }
+            let inputsSecciones = [];
 
+            // Se obtiene el orden actual de etapas del formulario
             let ordenActual = @json($getOrdenActual);
             ordenActual -= 1;
             const persona = @json($persona);
@@ -213,7 +222,7 @@
                 }
             }
 
-            function guardarDatosDelRepresentante() {
+            function guardarDatosSeccionSolicitante() {
                 const documento = document.getElementById('documentoSolicitante').value;
                 const nombre = document.getElementById('nombreSolicitante').value;
                 const apellido = document.getElementById('apellidoSolicitante').value;
@@ -232,7 +241,7 @@
                 const latitud = document.getElementById('latitudLoc')?.value;
                 const longitud = document.getElementById('longitudLoc')?.value;
 
-                fetch('{{ route('instanciaTramite.guardarDatosDelRepresentante') }}', {
+                fetch('{{ route('instanciaTramite.guardarDatosSeccionSolicitante') }}', {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -265,20 +274,12 @@
             }
 
             function validarDatosSeccionDatosACompletar() {
-                const campos = [];
-                
-                for (const s of secciones) {
-                    for(const c of s.campos) {
-                        campos.push(c);
-                    }
-                }
-
-                const inputs = campos.map(c => document.getElementById(`${c.id_campo}`));
+                inputsSecciones = campos.map(c => document.getElementById(`${c.id_campo}`));
 
                 let isValid = true;
 
                 // 1. Se validan inputs normales
-                for (const input of inputs) {
+                for (const input of inputsSecciones) {
                     // Skip selects múltiples
                     if (input.classList.contains('choices-multiselect')) continue;
 
@@ -323,6 +324,43 @@
                 }
             }
 
+            function guardarDatosSeccionDatosACompletar() {
+                const arrayCampos = []
+
+                for (const input of inputsSecciones) {
+                    let campo = campos.find(c => c.id_campo === Number(input.id));
+
+                    let valor;
+
+                    if (input.multiple) {
+                        // Campos de selección múltiple
+                        valor = Array.from(input.selectedOptions).map(opt => opt.value);
+                    } else {
+                        // Campos comunes
+                        valor = input.value;
+                    }
+
+                    arrayCampos.push({
+                        id_campo: campo.id_campo,
+                        nombre: campo.nombre,
+                        valor: valor
+                    });
+                }
+
+                fetch('{{ route('instanciaTramite.guardarDatosSeccionDatosACompletar') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(arrayCampos),
+                }).then(res => {
+                    if (!res.ok) {
+                        console.error('Error al guardar datos de las secciones asociadas');
+                    }
+                });
+            }
+
             $(document).on('click', '#boton-avanzar-paso', async function () {
                 try {
                     ordenActual += 1;
@@ -335,7 +373,7 @@
                             if(persona === 'Juridica') {
                                 // Seccion 'Datos del Representante'
                                 validarDatosSeccionSolicitante();
-                                guardarDatosDelRepresentante();
+                                guardarDatosSeccionSolicitante();
                             } else {
                                 // Seccion 'Datos a Completar'
                                 //validarDatosSeccionDatosACompletar();
@@ -345,6 +383,7 @@
                             if(persona === 'Juridica') {
                                 // Seccion 'Datos del Completar'
                                 validarDatosSeccionDatosACompletar();
+                                guardarDatosSeccionDatosACompletar();
                             } else {
                                 // Seccion 'Información Adicional'
                             }

@@ -4,6 +4,16 @@
 @endphp
 
 @foreach ($campos as $c)
+    @php
+        $valorCampo = null;
+        if (!empty($camposSecciones)) {
+            $match = collect($camposSecciones)->firstWhere('id_campo', $c->id_campo);
+            if ($match) {
+                $valorCampo = $match['valor'];
+            }
+        }
+    @endphp
+
     <div style="grid-column: span {{ $c->gridSpan }} / span {{ $c->gridSpan }};">
         <label>
             {{ $c->nombre }}
@@ -22,7 +32,12 @@
             >
                 <option value="" selected>Seleccione...</option>
                 @foreach ($c->opciones as $opc)
-                    <option value={{ $opc->id_opcion_campo }}>{{ $opc->opcion }}</option>
+                    <option 
+                        value={{ $opc->id_opcion_campo }}
+                        @if($valorCampo == $opc->id_opcion_campo) selected @endif
+                    >
+                        {{ $opc->opcion }}
+                    </option>
                 @endforeach
             </select>
         @elseif ($c->isCajasSeleccion)
@@ -32,7 +47,12 @@
                 multiple
             >
                 @foreach ($c->opciones as $opc)
-                    <option value={{ $opc->id_opcion_campo }}>{{ $opc->opcion }}</option>
+                    <option 
+                        value={{ $opc->id_opcion_campo }}
+                        @if(is_array($valorCampo) && in_array($opc->id_opcion_campo, $valorCampo)) selected @endif
+                    >
+                        {{ $opc->opcion }}
+                    </option>
                 @endforeach
             </select>
         @elseif ($c->isTextarea)
@@ -45,7 +65,7 @@
                 @if($c->obligatorio === 1)
                     required
                 @endif
-            ></textarea>
+            >{{ $valorCampo }}</textarea>
         @elseif ($c->isDate)
             <input 
                 id={{ $c->id_campo }}
@@ -55,6 +75,7 @@
                 @if($c->obligatorio === 1)
                     required
                 @endif
+                value="{{ $valorCampo }}"
             />
         @elseif ($c->isString)
             @if ($c->mascara)
@@ -66,6 +87,7 @@
                     @if($c->obligatorio === 1)
                         required
                     @endif
+                    value="{{ $valorCampo }}"
                 />
             @else
                 @if ($c->limite_minimo && $c->limite_maximo)
@@ -78,6 +100,7 @@
                         @if($c->obligatorio === 1)
                             required
                         @endif
+                        value="{{ $valorCampo }}"
                     />
                     <label style="font-size: 14px; color: darkslategray;">
                         Límite caracteres: Min {{ $c->limite_minimo }} / Max {{ $c->limite_maximo }}
@@ -90,6 +113,7 @@
                         @if($c->obligatorio === 1)
                             required
                         @endif
+                        value="{{ $valorCampo }}"
                     />
                 @endif
             @endif
@@ -103,6 +127,7 @@
                     @if($c->obligatorio === 1)
                         required
                     @endif
+                    value="{{ $valorCampo }}"
                 />
             @else
                 @if ($c->limite_minimo && $c->limite_maximo)
@@ -116,6 +141,7 @@
                         @if($c->obligatorio === 1)
                             required
                         @endif
+                        value="{{ $valorCampo }}"
                     />
                     <label style="font-size: 14px; color: darkslategray;">
                         Límite caracteres: Min {{ $c->limite_minimo }}
@@ -132,6 +158,7 @@
                         @if($c->obligatorio === 1)
                             required
                         @endif
+                        value="{{ $valorCampo }}"
                     />
                 @endif
             @endif
