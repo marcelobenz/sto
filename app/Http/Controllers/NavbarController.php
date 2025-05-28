@@ -37,7 +37,7 @@ class NavbarController extends Controller
         foreach ($distinctIdPadres as $d) {
             $categorias = Categoria::where('flag_activo', 1)
             ->where('id_padre', $d)
-            ->orderBy('nombre')
+            ->orderBy('nombre', 'asc')
             ->get();
 
             // Busco la categoria padre para tener el nombre
@@ -56,6 +56,7 @@ class NavbarController extends Controller
                 $multinotasActivas = TipoTramiteMultinota::where('id_categoria', $c->id_categoria)
                 ->where('baja_logica', 0)
                 ->where('publico', 1)
+                ->orderBy('nombre', 'asc')
                 ->get();
 
                 $subcategoriasMultinotasMap->put($c->id_categoria, $multinotasActivas);
