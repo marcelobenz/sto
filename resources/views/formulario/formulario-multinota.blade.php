@@ -82,10 +82,15 @@
         }
 
         function actualizarCharCount(textarea) {
-            const maxLength = textarea.getAttribute("maxlength");
-            const currentLength = textarea.value.length;
-            const remaining = maxLength - currentLength;
-            document.getElementById("charCountInfo").textContent = `quedan ${remaining} caracteres`;
+            if(textarea) {
+                const maxLength = textarea.getAttribute("maxlength");
+                const currentLength = textarea.value.length;
+                const remaining = maxLength - currentLength;
+                const charCountInfoElement = document.getElementById(`charCountInfo-${textarea.id}`);
+                if(charCountInfoElement) {
+                    charCountInfoElement.textContent = `quedan ${remaining} caracteres`;
+                }
+            }
         }
 
         function isVisible(input) {
@@ -368,6 +373,25 @@
                 });
             }
 
+            function guardarDatosSeccionInformacionAdicional() {
+                const informacionAdicional = document.getElementById('informacionAdicional')?.value;
+
+                fetch('{{ route('instanciaTramite.guardarDatosSeccionInformacionAdicional') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        informacionAdicional
+                    }),
+                }).then(res => {
+                    if (!res.ok) {
+                        console.error('Error al guardar información adicional');
+                    }
+                });
+            }
+
             $(document).on('click', '#boton-avanzar-paso', async function () {
                 try {
                     ordenActual += 1;
@@ -383,7 +407,9 @@
                                 guardarDatosSeccionSolicitante();
                             } else {
                                 // Seccion 'Datos a Completar'
+                                
                                 //validarDatosSeccionDatosACompletar();
+                                //guardarDatosSeccionSolicitante();
                             }
                             break;
                         case 3:
@@ -393,6 +419,16 @@
                                 guardarDatosSeccionDatosACompletar();
                             } else {
                                 // Seccion 'Información Adicional'
+
+                                //guardarDatosSeccionInformacionAdicional();
+                            }
+                            break;
+                        case 4:
+                            if(persona === 'Juridica') {
+                                // Seccion 'Información Adicional'
+                                guardarDatosSeccionInformacionAdicional();
+                            } else {
+                                // Seccion 'Adjuntar Documentación'
                             }
                             break;
                         default:
@@ -409,6 +445,12 @@
                         inicializarMascaraTelefono();
                         inicializarMascarasSeccionesMultinota();
                         inicializarInputsCajaSeleccionMultiple();
+                        actualizarCharCount(document.getElementById("informacionAdicional"));
+                        for (const input of inputsSecciones) {
+                            if (input.tagName === 'TEXTAREA') {
+                                actualizarCharCount(input);
+                            }
+                        }
                     })
                     .catch(error => {
                         console.error('Error:', error);
@@ -452,6 +494,12 @@
                         inicializarMascaraTelefono();
                         inicializarMascarasSeccionesMultinota();
                         inicializarInputsCajaSeleccionMultiple();
+                        actualizarCharCount(document.getElementById("informacionAdicional"));
+                        for (const input of inputsSecciones) {
+                            if (input.tagName === 'TEXTAREA') {
+                                actualizarCharCount(input);
+                            }
+                        }
                     })
                     .catch(error => {
                         console.error('Error:', error);

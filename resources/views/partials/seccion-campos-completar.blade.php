@@ -68,7 +68,7 @@
                     required
                 @endif
             >{{ $valorCampo }}</textarea>
-            <label id="charCountInfo" style="font-size: 14px; color: darkslategray;">
+            <label id="charCountInfo-{{ $c->id_campo }}" style="font-size: 14px; color: darkslategray;">
                 quedan 500 caracteres
             </label>
         @elseif ($c->isDate)

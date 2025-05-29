@@ -11,8 +11,8 @@
       cols="10"
       maxlength="500"
       oninput="actualizarCharCount(this)"
-    >{{-- {{ $valorCampo }} --}}</textarea>
-    <label id="charCountInfo" style="font-size: 14px; color: darkslategray;">
+    >{{ $informacionAdicional }}</textarea>
+    <label id="charCountInfo-informacionAdicional" style="font-size: 14px; color: darkslategray;">
       quedan 500 caracteres
     </label>
   </div>

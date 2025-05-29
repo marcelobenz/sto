@@ -103,7 +103,12 @@ Route::get('/instanciaTramite/session-data', function () {
 /* Etapa 2: Datos del Representante */
 Route::get('/instanciaTramite/buscarContribuyente/{cuit}', [InstanciaMultinotaController::class, 'buscarContribuyente'])->name('instanciaTramite.buscarContribuyente');
 Route::post('/instanciaTramite/guardarDatosSeccionSolicitante', [InstanciaMultinotaController::class, 'guardarDatosSeccionSolicitante'])->name('instanciaTramite.guardarDatosSeccionSolicitante');
+
+/* Etapa 3: Datos a Completar */
 Route::post('/instanciaTramite/guardarDatosSeccionDatosACompletar', [InstanciaMultinotaController::class, 'guardarDatosSeccionDatosACompletar'])->name('instanciaTramite.guardarDatosSeccionDatosACompletar');
+
+/* Etapa 4: Información Adicional */
+Route::post('/instanciaTramite/guardarDatosSeccionInformacionAdicional', [InstanciaMultinotaController::class, 'guardarDatosSeccionInformacionAdicional'])->name('instanciaTramite.guardarDatosSeccionInformacionAdicional');
 
 //Categorías
 Route::get('/categorias', [CategoriaController::class, 'index'])->name('categorias.index');

@@ -242,7 +242,13 @@ class InstanciaMultinotaController extends Controller {
         Session::put('INSTANCIA_MULTINOTA', $instanciaMultinota);
 
         // Se eliminan variables en sesión que deben estar nulas al inicio de un tramite
-        session()->forget(['REPRESENTANTE', 'CODIGOS_AREA', 'CARACTERES', 'CAMPOS_SECCIONES']);
+        session()->forget([
+            'REPRESENTANTE', 
+            'CODIGOS_AREA', 
+            'CARACTERES', 
+            'CAMPOS_SECCIONES',
+            'INFORMACION_ADICIONAL'
+        ]);
 
         return view('multinota-interno', [
             'formulario' => $formulario,
@@ -261,6 +267,7 @@ class InstanciaMultinotaController extends Controller {
         $codigosArea = Session::get('CODIGOS_AREA');
         $caracteres = Session::get('CARACTERES');
         $camposSecciones = Session::get('CAMPOS_SECCIONES');
+        $informacionAdicional = Session::get('INFORMACION_ADICIONAL');
         
         foreach ($formulario->pasosFormulario as &$paso) {
             if ($paso['completado'] === false) {
@@ -279,6 +286,7 @@ class InstanciaMultinotaController extends Controller {
             'codigosArea',
             'caracteres',
             'camposSecciones',
+            'informacionAdicional',
             'instanciaMultinota'))->render();
 
         $htmlBotones = view('partials.botones-avance-tramite', compact('formulario'))->render();
@@ -298,6 +306,7 @@ class InstanciaMultinotaController extends Controller {
         $codigosArea = Session::get('CODIGOS_AREA');
         $caracteres = Session::get('CARACTERES');
         $camposSecciones = Session::get('CAMPOS_SECCIONES');
+        $informacionAdicional = Session::get('INFORMACION_ADICIONAL');
         
         foreach ($formulario->pasosFormulario as $i => &$paso) {
             if ($paso['completado'] === false) {
@@ -316,6 +325,7 @@ class InstanciaMultinotaController extends Controller {
             'codigosArea',
             'caracteres',
             'camposSecciones',
+            'informacionAdicional',
             'instanciaMultinota'))->render();
         
 
@@ -488,5 +498,11 @@ class InstanciaMultinotaController extends Controller {
         $data = $request->all();
 
         Session::put('CAMPOS_SECCIONES', $data);
+    }
+
+    public function guardarDatosSeccionInformacionAdicional(Request $request) {
+        $data = $request->all();
+
+        Session::put('INFORMACION_ADICIONAL', $data['informacionAdicional']);
     }
 }
