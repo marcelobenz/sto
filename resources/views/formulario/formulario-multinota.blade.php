@@ -81,6 +81,13 @@
             }
         }
 
+        function actualizarCharCount(textarea) {
+            const maxLength = textarea.getAttribute("maxlength");
+            const currentLength = textarea.value.length;
+            const remaining = maxLength - currentLength;
+            document.getElementById("charCountInfo").textContent = `quedan ${remaining} caracteres`;
+        }
+
         function isVisible(input) {
             return input.offsetParent !== null;
         }

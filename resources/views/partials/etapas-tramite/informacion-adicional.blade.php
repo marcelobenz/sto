@@ -1,4 +1,3 @@
-
 <div>
   <div class="titulo-seccion-tramite">
     <h3>Información Adicional</h3>
@@ -11,6 +10,8 @@
       rows="5"
       cols="10"
       maxlength="500"
+      oninput="actualizarCharCount(this)"
     >{{-- {{ $valorCampo }} --}}</textarea>
+    <small id="charCountInfo">quedan 500 caracteres</small>
   </div>
 </div>
