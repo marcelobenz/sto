@@ -14,3 +14,6 @@
         </div>
     @endforeach
 @endif
+<div class="col-xs-12" style="padding-left: 5px;">
+    <h6>Los campos marcados con * son obligatorios</h6>
+</div>
