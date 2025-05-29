@@ -329,11 +329,10 @@ class SeccionesMultinotaController extends Controller
         return view('partials.seccion-opciones-campo', compact('opcionesCampo'));
     }
 
-    public function getOpcionesFormTipoCampo($nombreCampo, $tipo) {
+    public function getOpcionesFormTipoCampo($tipo) {
         //TO-DO - Cambiar estructura de array a objeto ya que el campo seleccionado es 1 solo
         $campoSelected = Session::get('CAMPO_SELECTED');
 
-        $campoSelected->nombre = $nombreCampo;
         $campoSelected->setTipo($tipo);
 
         $tipos = Session::get('TIPOS');
