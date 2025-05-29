@@ -59,6 +59,7 @@
             <textarea 
                 id={{ $c->id_campo }}
                 class="form-control"
+                style="resize: none;"
                 rows="5"
                 cols="10"
                 maxlength="500"
