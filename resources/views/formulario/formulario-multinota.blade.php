@@ -92,8 +92,8 @@
             return input.offsetParent !== null;
         }
 
-        function showCustomTooltip(targetElement, message) {
-            removeCustomTooltip();
+        function mostrarCustomTooltip(targetElement, message) {
+            eliminarCustomTooltip();
 
             const tooltip = document.createElement('div');
             tooltip.className = 'custom-tooltip';
@@ -109,17 +109,17 @@
             const rect = targetElement.getBoundingClientRect();
             const tooltipRect = tooltip.getBoundingClientRect();
 
-            // Position above the element
+            // Se posiciona arriba del elemento
             tooltip.style.top = `${window.scrollY + rect.top - tooltipRect.height - 12}px`;
             tooltip.style.left = `${window.scrollX + rect.left}px`;
 
-            // Remove on user interaction
+            // Desaparece con la interacción del usuario
             ['click', 'keydown', 'change'].forEach(event =>
-                targetElement.addEventListener(event, removeCustomTooltip, { once: true })
+                targetElement.addEventListener(event, eliminarCustomTooltip, { once: true })
             );
         }
 
-        function removeCustomTooltip() {
+        function eliminarCustomTooltip() {
             const existing = document.querySelector('.custom-tooltip');
             if (existing) existing.remove();
         }
@@ -310,7 +310,7 @@
 
                             const choicesInner = select.closest('.choices')?.querySelector('.choices__inner');
                             if (choicesInner) {
-                                showCustomTooltip(choicesInner, 'Debe seleccionar al menos una opción');
+                                mostrarCustomTooltip(choicesInner, 'Debe seleccionar al menos una opción');
                                 choicesInner.focus();
                             }
 
@@ -318,7 +318,7 @@
                             break;
                         } else {
                             select.setCustomValidity('');
-                            removeCustomTooltip();
+                            eliminarCustomTooltip();
                         }
                     }
                 }
