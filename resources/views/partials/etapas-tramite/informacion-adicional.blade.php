@@ -12,6 +12,8 @@
       maxlength="500"
       oninput="actualizarCharCount(this)"
     >{{-- {{ $valorCampo }} --}}</textarea>
-    <small id="charCountInfo">quedan 500 caracteres</small>
+    <label id="charCountInfo" style="font-size: 14px; color: darkslategray;">
+      quedan 500 caracteres
+    </label>
   </div>
 </div>

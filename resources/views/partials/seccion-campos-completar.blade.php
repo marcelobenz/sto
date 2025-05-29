@@ -63,10 +63,14 @@
                 rows="5"
                 cols="10"
                 maxlength="500"
+                oninput="actualizarCharCount(this)"
                 @if($c->obligatorio === 1)
                     required
                 @endif
             >{{ $valorCampo }}</textarea>
+            <label id="charCountInfo" style="font-size: 14px; color: darkslategray;">
+                quedan 500 caracteres
+            </label>
         @elseif ($c->isDate)
             <input 
                 id={{ $c->id_campo }}
