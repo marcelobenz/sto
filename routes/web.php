@@ -71,6 +71,7 @@ Route::get('/reporte/constancia/{idTramite}', [ReporteController::class, 'genera
 
 //Archivos
 Route::post('/archivo/subir', [ArchivoController::class, 'subirArchivo'])->name('archivo.subir');
+Route::post('/archivo/subirTemporal', [ArchivoController::class, 'subirArchivoTemporal'])->name('archivo.subirTemporal');
 Route::get('/archivo/descargar/{id}', [ArchivoController::class, 'descargar'])->name('archivo.descargar');
 
 //Comtentarios

@@ -88,4 +88,28 @@ class ArchivoController extends Controller
             return back()->with('error', 'Error al subir el archivo: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Permite subir un archivo adjunto previamente a tener el trámite creado (durante la instanciación).
+     */
+    public function subirArchivoTemporal(Request $request) {
+        $file = $request->file('archivo');
+
+        // Guardar temporalmente
+        $path = $file->store('temp'); // Guarda en storage/app/temp
+
+        // Guarda la metadata en sesión
+        $archivos = session()->get('archivos', []);
+        $archivos[] = [
+            'nombre' => $file->getClientOriginalName(),
+            'tipoContenido' => $file->getMimeType(),
+            'pathArchivo' => $path,
+            'peso' => $file->getSize(),
+            'fechaCarga' => now(),
+            'comentario' => '', // Opcional
+        ];
+        session(['archivos' => $archivos]);
+
+        return back()->with('success', 'Archivo cargado temporalmente.');
+    }
 }
