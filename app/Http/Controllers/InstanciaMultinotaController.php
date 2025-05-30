@@ -218,7 +218,7 @@ class InstanciaMultinotaController extends Controller {
                 ['orden' => 1, 'titulo' => 'Datos del Solicitante', 'iconoPaso' => 'fa-plus', 'ruta' => 'partials.etapas-tramite.inicio-tramite-general', 'completado' => false],
                 ['orden' => 2, 'titulo' => 'Datos a Completar', 'iconoPaso' => 'fa-pen-to-square', 'ruta' => 'partials.etapas-tramite.seccion-valor-multinota', 'completado' => false],
                 ['orden' => 3, 'titulo' => 'Información Adicional', 'iconoPaso' => 'fa-info', 'ruta' => 'partials.etapas-tramite.informacion-adicional', 'completado' => false],
-                ['orden' => 4, 'titulo' => 'Adjuntar Documentación', 'iconoPaso' => 'fa-upload', 'ruta' => 'partials.etapas-tramite.adjunta-documentacion', 'completado' => false],
+                ['orden' => 4, 'titulo' => 'Adjuntar Documentación', 'iconoPaso' => 'fa-upload', 'ruta' => 'partials.etapas-tramite.adjuntar-documentacion', 'completado' => false],
                 ['orden' => 5, 'titulo' => 'Resúmen', 'iconoPaso' => 'fa-file-lines', 'ruta' => 'partials.etapas-tramite.resumen-multinota', 'completado' => false],
             ];
         } else {
@@ -227,7 +227,7 @@ class InstanciaMultinotaController extends Controller {
                 ['orden' => 2, 'titulo' => 'Datos del Representante', 'iconoPaso' => 'fa-street-view', 'ruta' => 'partials.etapas-tramite.solicitante', 'completado' => false],
                 ['orden' => 3, 'titulo' => 'Datos a Completar', 'iconoPaso' => 'fa-pen-to-square', 'ruta' => 'partials.etapas-tramite.seccion-valor-multinota', 'completado' => false],
                 ['orden' => 4, 'titulo' => 'Información Adicional', 'iconoPaso' => 'fa-info', 'ruta' => 'partials.etapas-tramite.informacion-adicional', 'completado' => false],
-                ['orden' => 5, 'titulo' => 'Adjuntar Documentación', 'iconoPaso' => 'fa-upload', 'ruta' => 'partials.etapas-tramite.adjunta-documentacion', 'completado' => false],
+                ['orden' => 5, 'titulo' => 'Adjuntar Documentación', 'iconoPaso' => 'fa-upload', 'ruta' => 'partials.etapas-tramite.adjuntar-documentacion', 'completado' => false],
                 ['orden' => 6, 'titulo' => 'Resúmen', 'iconoPaso' => 'fa-file-lines', 'ruta' => 'partials.etapas-tramite.resumen-multinota', 'completado' => false],
             ]; 
         }
@@ -247,7 +247,8 @@ class InstanciaMultinotaController extends Controller {
             'CODIGOS_AREA', 
             'CARACTERES', 
             'CAMPOS_SECCIONES',
-            'INFORMACION_ADICIONAL'
+            'INFORMACION_ADICIONAL',
+            'ARCHIVOS'
         ]);
 
         return view('multinota-interno', [
@@ -268,6 +269,7 @@ class InstanciaMultinotaController extends Controller {
         $caracteres = Session::get('CARACTERES');
         $camposSecciones = Session::get('CAMPOS_SECCIONES');
         $informacionAdicional = Session::get('INFORMACION_ADICIONAL');
+        $archivos = Session::get('ARCHIVOS');
         
         foreach ($formulario->pasosFormulario as &$paso) {
             if ($paso['completado'] === false) {
@@ -287,6 +289,7 @@ class InstanciaMultinotaController extends Controller {
             'caracteres',
             'camposSecciones',
             'informacionAdicional',
+            'archivos',
             'instanciaMultinota'))->render();
 
         $htmlBotones = view('partials.botones-avance-tramite', compact('formulario'))->render();
@@ -307,6 +310,7 @@ class InstanciaMultinotaController extends Controller {
         $caracteres = Session::get('CARACTERES');
         $camposSecciones = Session::get('CAMPOS_SECCIONES');
         $informacionAdicional = Session::get('INFORMACION_ADICIONAL');
+        $archivos = Session::get('ARCHIVOS');
         
         foreach ($formulario->pasosFormulario as $i => &$paso) {
             if ($paso['completado'] === false) {
@@ -326,6 +330,7 @@ class InstanciaMultinotaController extends Controller {
             'caracteres',
             'camposSecciones',
             'informacionAdicional',
+            'archivos',
             'instanciaMultinota'))->render();
         
 
@@ -504,5 +509,11 @@ class InstanciaMultinotaController extends Controller {
         $data = $request->all();
 
         Session::put('INFORMACION_ADICIONAL', $data['informacionAdicional']);
+    }
+
+    public function guardarDatosSeccionAdjuntarDocumentacion(Request $request) {
+        $data = $request->all();
+
+        Session::put('ARCHIVOS', $data['archivos']);
     }
 }
