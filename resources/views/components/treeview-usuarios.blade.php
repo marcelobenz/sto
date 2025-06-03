@@ -16,11 +16,14 @@
                 <ul class="usuarios-list pl-4" style="display: none;">
                     @foreach ($grupo->usuarios as $usuario)
                         <li class="usuario-item">
-                            <input type="checkbox" class="usuario-checkbox" id="usuario-{{ $usuario->id_usuario_interno }}" 
-                                   data-nombre="{{ $usuario->nombre }}" 
-                                   data-apellido="{{ $usuario->apellido }}" 
-                                   data-legajo="{{ $usuario->legajo }}" 
-                                   value="{{ $usuario->id_usuario_interno }}">
+                           <input type="checkbox" class="usuario-checkbox"
+                                  id="usuario-{{ $usuario->id_usuario_interno }}"
+                                  data-usuario-id="{{ $usuario->id_usuario_interno }}"
+                                  data-grupo-id="{{ $grupo->id_grupo_interno }}"
+                                  data-nombre="{{ $usuario->nombre }}"
+                                  data-apellido="{{ $usuario->apellido }}"
+                                  data-legajo="{{ $usuario->legajo }}">
+
                             <label for="usuario-{{ $usuario->id_usuario_interno }}">{{ $usuario->nombre }} {{ $usuario->apellido }} (Legajo: {{ $usuario->legajo }})</label>
                         </li>
                     @endforeach
@@ -30,7 +33,7 @@
     </ul>
 </div>
 
-<!-- Script directamente en el componente -->
+
 <script>
    $(document).ready(function() {
     console.log("DOM completamente cargado con jQuery"); 

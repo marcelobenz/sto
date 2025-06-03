@@ -59,7 +59,7 @@
                     } else {
                         return `
                             <button class="btn btn-sm btn-warning fa fa-edit" 
-                            onclick="window.location.href='/workflow/edit/${row.id_tipo_tramite_multinota}'" 
+                            onclick="window.location.href='/workflow/editar/${row.id_tipo_tramite_multinota}'" 
                             title="Editar"></button>
                         `;
                     }

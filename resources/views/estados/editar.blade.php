@@ -32,18 +32,16 @@
                             <thead>
                                 <tr>
                                     <th>Actuales</th>
-                                    <th>Nuevos</th>
                                     <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($estados as $estado)
                                     <tr>
-                                        <td>{{ $estado['actual'] }}</td>
-                                        <td>{{ $estado['nuevo'] }}</td>
+                                        <td>{{ $estado['estado_actual'] }}</td>
                                         <td>
                                             <button class="estado-btn btn btn-sm btn-info fa fa-search" 
-                                                    data-estado="{{ $estado['actual'] }}">
+                                                    data-estado="{{ $estado['estado_actual'] }}">
                                             </button>
                                         </td>
                                     </tr>
@@ -56,7 +54,7 @@
             </div>
 
             <div class="col-md-8">
-                <div id="seccion-relaciones" class="card" style="display: none;">
+                <div id="seccion-relaciones" class="card">
                     <div class="card-header">
                         <h5>Relaciones</h5>
                     </div>
@@ -73,7 +71,7 @@
                     </div>
                 </div>
 
-                <div id="seccion-restricciones" class="card mt-3" style="display: none;">
+                <div id="seccion-restricciones" class="card mt-3" >
                     <div class="card-header">
                         <h5>Restricciones</h5>
                     </div>
@@ -101,7 +99,16 @@
 @section('scripting')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+     document.addEventListener("DOMContentLoaded", function () {
+    let configuraciones = {};
+    configuraciones = @json($estados);
+    configuraciones = configuraciones.reduce((acc, estado) => {
+    acc[estado.estado_actual] = estado;
+    return acc;
+    }, {});
+
+    console.log("Configuraciones iniciales:", configuraciones);
+
     let seccionRelaciones = document.getElementById("seccion-relaciones");
     let seccionRestricciones = document.getElementById("seccion-restricciones");
     let seccionResponsables = document.getElementById("seccion-responsables");
@@ -110,8 +117,6 @@
     seccionRestricciones.style.display = "none";
     seccionResponsables.style.display = "none";
 
-    let configuraciones = {};
-
     let estadoActualSeleccionado = null;
 
     let botonesEstado = document.querySelectorAll(".estado-btn");
@@ -119,69 +124,62 @@
 botonesEstado.forEach(button => {
     button.addEventListener("click", function () {
         if (estadoActualSeleccionado) {
-             actualizarRestricciones(estadoActualSeleccionado);
-           const usuarios = Array.from(document.querySelectorAll('.usuario-checkbox'))
-            .filter(cb => cb.checked)
-            .map(cb => ({
-            id_usuario_interno: cb.dataset.usuarioId,
-            id_grupo_interno: cb.dataset.grupoId
-        }));
+            actualizarRestricciones(estadoActualSeleccionado);
 
+            const usuarios = Array.from(document.querySelectorAll('.usuario-checkbox'))
+                .filter(cb => cb.checked)
+                .map(cb => ({
+                    id_usuario_interno: cb.dataset.usuarioId,
+                    id_grupo_interno: cb.dataset.grupoId
+                }));
 
             configuraciones[estadoActualSeleccionado] = configuraciones[estadoActualSeleccionado] || {};
             configuraciones[estadoActualSeleccionado].asignaciones = usuarios;
-
-            console.log("Guardando asignaciones para estado:", estadoActualSeleccionado, usuarios);
         }
 
         estadoActualSeleccionado = this.getAttribute("data-estado");
-
-        let selectEstado = document.getElementById("select-estado");
-        selectEstado.innerHTML = '<option>Seleccionar...</option>';
-
-        @foreach($estados as $estado)
-        if ("{{ $estado['actual'] }}" !== "En Creación" && "{{ $estado['actual'] }}" !== estadoActualSeleccionado) {
-            let option = document.createElement("option");
-            option.value = "{{ $estado['actual'] }}";
-            option.text = "{{ $estado['nuevo'] }}";
-            selectEstado.appendChild(option);
-        }
-        @endforeach
 
         seccionRelaciones.style.display = "block";
         seccionResponsables.style.display = "block";
         seccionRestricciones.style.display = (estadoActualSeleccionado === "En Creación") ? "none" : "block";
 
+        let selectEstado = document.getElementById("select-estado");
+        selectEstado.innerHTML = '<option>Seleccionar...</option>';
+
+        @foreach($estados as $estado)
+        if ("{{ $estado['estado_actual'] }}" !== "En Creación" && "{{ $estado['estado_actual'] }}" !== estadoActualSeleccionado) {
+            let option = document.createElement("option");
+            option.value = "{{ $estado['estado_actual'] }}";
+            option.textContent = "{{ $estado['estado_actual'] }}";
+            selectEstado.appendChild(option);
+        }
+        @endforeach
+
         document.getElementById("lista-posteriores").innerHTML = "";
-        if (configuraciones[estadoActualSeleccionado]) {
-            configuraciones[estadoActualSeleccionado].posteriores.forEach(item => {
+        const config = configuraciones[estadoActualSeleccionado] || {};
+            document.getElementById("lista-posteriores").innerHTML = "";
+            (config.posteriores || []).forEach(item => {
+            let nombrePosterior = typeof item === 'string' ? item : item.nombre;
+            if (nombrePosterior) {
                 let nuevoItem = document.createElement("li");
                 nuevoItem.className = "list-group-item";
-                nuevoItem.textContent = item;
+                nuevoItem.textContent = nombrePosterior;
                 document.getElementById("lista-posteriores").appendChild(nuevoItem);
+                }
             });
-        }
 
-        const config = configuraciones[estadoActualSeleccionado] || {};
+
         document.getElementById("puede-rechazar").checked = config.puede_rechazar === 1;
         document.getElementById("puede-doc").checked = config.puede_pedir_documentacion === 1;
         document.getElementById("tiene-expediente").checked = config.tiene_expediente === 1;
 
-       
-            document.querySelectorAll('.usuario-checkbox').forEach(cb => {
-                cb.checked = false;
-            });
-
-
-            console.log("Asignaciones para estado seleccionado:", estadoActualSeleccionado, config.asignaciones);
-
-        if (config.asignaciones) {
-            config.asignaciones.forEach(({ id_usuario_interno, id_grupo_interno }) => {
-               const selector = `.usuario-checkbox[data-usuario-id="${id_usuario_interno}"][data-grupo-id="${id_grupo_interno}"]`;
-               const checkbox = document.querySelector(selector);
-                if (checkbox) checkbox.checked = true;
-            });
-        }
+     
+        document.querySelectorAll('.usuario-checkbox').forEach(cb => cb.checked = false);
+        (config.asignaciones || []).forEach(({ id_usuario_interno, id_grupo_interno }) => {
+            const selector = `.usuario-checkbox[data-usuario-id="${id_usuario_interno}"][data-grupo-id="${id_grupo_interno}"]`;
+            const checkbox = document.querySelector(selector);
+            if (checkbox) checkbox.checked = true;
+        });
     });
 });
 
@@ -254,7 +252,11 @@ document.getElementById("btn-guardar-configuracion").addEventListener("click", f
         });
     });
 
-    const todosLosEstados = @json(array_column($estados, 'actual'));
+    const todosLosEstados = @json(
+    $estados->map(fn($e) => $e['estado_actual'] ?? null)->filter()->values()
+    );
+
+
     todosLosEstados.forEach(nombreEstado => {
         const yaEsActual = payload.some(conf => conf.estado_actual === nombreEstado);
         const esPosteriorDeAlguien = payload.some(conf =>
@@ -269,7 +271,7 @@ document.getElementById("btn-guardar-configuracion").addEventListener("click", f
         }
     });
 
-    fetch("{{ route('workflow.guardar', ['id' => $tipoTramite->id_tipo_tramite_multinota]) }}", {
+    fetch("{{ route('workflow.guardarEdicion', ['id' => $tipoTramite->id_tipo_tramite_multinota]) }}", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -281,14 +283,15 @@ document.getElementById("btn-guardar-configuracion").addEventListener("click", f
     .then(data => {
         if (data.success) {
             Swal.fire({
-                title: "Éxito",
-                text: data.message,
-                icon: "success",
-                timer: 2000,
-                showConfirmButton: false
-            }).then(() => {
-                window.location.href = "/estados";
+            title: "Éxito",
+            text: data.message,
+            icon: "success",
+            timer: 2000,
+            showConfirmButton: false
             });
+            setTimeout(() => {
+            window.location.href = "/estados";
+            }, 2000);
         } else {
             Swal.fire("Error", data.message || "Ocurrió un error", "error");
         }
@@ -301,3 +304,4 @@ document.getElementById("btn-guardar-configuracion").addEventListener("click", f
 });
 </script>
 @endsection
+

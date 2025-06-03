@@ -78,6 +78,8 @@ Route::post('/cambiar-clave', [ContribuyenteMultinotaController::class, 'changeP
 Route::get('/estados', [AdministracionWorkflowController::class, 'index'])->name('estados.index');
 Route::get('/workflow/{id}', [AdministracionWorkflowController::class, 'crear'])->name('workflow.crear');
 Route::post('/workflow/guardar/{id}', [AdministracionWorkflowController::class, 'guardar'])->name('workflow.guardar');
+Route::get('/workflow/editar/{id}', [AdministracionWorkflowController::class, 'editar'])->name('workflow.editar');
+Route::post('/workflow/editar/guardarEdicion/{id}', [AdministracionWorkflowController::class, 'guardarEdicion'])->name('workflow.guardarEdicion');
 
 
 Route::get('/set-usuario-interno', [UsuarioController::class, 'setUsuarioInterno']);
