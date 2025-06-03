@@ -45,6 +45,8 @@
 </style>
 @push('scripts')
 <script>
+    let archivos = @json($archivos);
+    
     $(document).ready(function() {
         $(document).on('click', '#boton-buscar-contribuyente', function(event) {
             event.preventDefault();
@@ -117,6 +119,7 @@
             .then(response => response.json())
             .then(data => {
                 document.getElementById("paso-adjuntar-documentacion").innerHTML = data.htmlVista;
+                archivos = data.archivos;
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -164,6 +167,7 @@
             .then(response => response.json())
             .then(data => {
                 document.getElementById("paso-adjuntar-documentacion").innerHTML = data.htmlVista;
+                archivos = data.archivos;
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -198,6 +202,14 @@
                 console.error('Error al guardar datos del solicitante');
             }
         });
+    }
+
+    function validarDatosSeccionAdjuntarDocumentacion() {
+        if(archivos.length === 0) {
+            return false;
+        } else {
+            return true;
+        }
     }
 </script>
 @endpush

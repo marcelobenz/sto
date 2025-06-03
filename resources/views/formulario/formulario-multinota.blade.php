@@ -228,7 +228,7 @@
 
                 if (!isValid) {
                     const error = new Error('Debe completar todos los datos obligatorios correctamente');
-                    error.tipo = 'validacion';
+                    error.mostrar = false;
 
                     throw error;
                 }
@@ -330,7 +330,7 @@
 
                 if (!isValid) {
                     const error = new Error('Debe completar todos los datos obligatorios correctamente');
-                    error.tipo = 'validacion';
+                    error.mostrar = false;
 
                     throw error;
                 }
@@ -430,8 +430,23 @@
                             } else {
                                 // Seccion 'Adjuntar Documentación'
 
-                                //validar
+                                //validarDatosSeccionAdjuntarDocumentacion(); //Esta en ruta-paso-tramite
                                 //guardar -> se hace en ruta-paso-tramite con los handlers de comentario, archivo, subir archivo y eliminar archivo
+                            }
+                            break;
+                        case 5:
+                            if(persona === 'Juridica') {
+                                // Seccion 'Adjuntar Documentación'
+                                const result = validarDatosSeccionAdjuntarDocumentacion(); //Esta en ruta-paso-tramite
+                                if(!result) {
+                                    const error = new Error('Debe adjuntar la documentación solicitada');
+                                    error.mostrar = true;
+
+                                    throw error;
+                                }
+                                //guardar -> se hace en ruta-paso-tramite con los handlers de comentario, archivo, subir archivo y eliminar archivo
+                            } else {
+                                
                             }
                             break;
                         default:
@@ -471,7 +486,7 @@
                     ordenActual -= 1;
                     console.error(error.message);
 
-                    if(!error.tipo === 'validacion') {
+                    if(error.mostrar) {
                         Swal.fire({
                             position: "top-end",
                             icon: "error",

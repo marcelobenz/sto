@@ -115,6 +115,7 @@ class ArchivoController extends Controller
 
         return response()->json([
             'htmlVista' => $htmlVista,
+            'archivos' => $archivos
         ]);
     }
 
@@ -157,6 +158,7 @@ class ArchivoController extends Controller
 
         return response()->json([
             'htmlVista' => $htmlVista,
+            'archivos' => $archivos
         ]);
     }
 }

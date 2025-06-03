@@ -12,6 +12,7 @@
     </div>
 
     @include('formulario.formulario-multinota', [
-        'formulario' => $formulario
+        'formulario' => $formulario,
+        'instanciaMultinota' => $instanciaMultinota
     ])
 @endsection
