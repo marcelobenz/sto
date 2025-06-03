@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\TramiteArchivo;
@@ -99,17 +100,63 @@ class ArchivoController extends Controller
         $path = $file->store('temp'); // Guarda en storage/app/temp
 
         // Guarda la metadata en sesión
-        $archivos = session()->get('archivos', []);
+        $archivos = Session::get('ARCHIVOS', []);
         $archivos[] = [
             'nombre' => $file->getClientOriginalName(),
             'tipoContenido' => $file->getMimeType(),
             'pathArchivo' => $path,
             'peso' => $file->getSize(),
-            'fechaCarga' => now(),
+            'fechaCarga' => now()->format('Y-m-d H:i:s'),
             'comentario' => '', // Opcional
         ];
-        session(['archivos' => $archivos]);
+        Session::put('ARCHIVOS', $archivos);
 
-        return back()->with('success', 'Archivo cargado temporalmente.');
+        $htmlVista = view('partials.etapas-tramite.adjuntar-documentacion', compact('archivos'))->render();
+
+        return response()->json([
+            'htmlVista' => $htmlVista,
+        ]);
+    }
+
+    /**
+     * Permite cargar un comentario a un archivo dado correspondiente a la fecha de carga obtenida como parámetro
+     */
+    public function cargarComentario(Request $request) {
+        $comentario = $request->post('comentario');
+        $fechaCarga = $request->post('fechaCarga');
+        $archivos = Session::get('ARCHIVOS', []);
+
+        foreach ($archivos as &$a) {
+            if ($a['fechaCarga'] === $fechaCarga) {
+                $a['comentario'] = $comentario;
+            }
+        }
+        unset($a);
+
+        Session::put('ARCHIVOS', $archivos);
+    }
+
+    /**
+     * Permite eliminar un archivo adjunto previamente a tener el trámite creado (durante la instanciación).
+     */
+    public function eliminarArchivoTemporal(Request $request) {
+        $fechaCarga = $request->post('fechaCarga');
+        $archivos = Session::get('ARCHIVOS', []);
+    
+        // Se elimina el archivo con la fecha de carga correspondiente
+        $archivos = array_filter($archivos, function ($archivo) use ($fechaCarga) {
+            return $archivo['fechaCarga'] !== $fechaCarga;
+        });
+
+        // Reseteo de índices
+        $archivos = array_values($archivos);
+
+        Session::put('ARCHIVOS', $archivos);
+
+        $htmlVista = view('partials.etapas-tramite.adjuntar-documentacion', compact('archivos'))->render();
+
+        return response()->json([
+            'htmlVista' => $htmlVista,
+        ]);
     }
 }

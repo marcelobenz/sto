@@ -9,6 +9,12 @@
                         'caracteres' => $caracteres ?? null
                     ])
                 </div>
+            @elseif($paso['ruta'] === 'partials.etapas-tramite.adjuntar-documentacion')
+                <div id="paso-adjuntar-documentacion">
+                    @include($paso['ruta'], [
+                        'archivos' => $archivos ?? null
+                    ])
+                </div>
             @else
                 <div>
                     @include($paso['ruta'], [
@@ -83,6 +89,93 @@
                         });
                     });
             }
+        });
+
+        $(document).on('click', '#boton-subir-archivo', function () {
+            $('#archivo').click();
+        });
+
+        $(document).on('change', '#archivo', function () {
+            const input = document.getElementById('archivo');
+            const archivo = input.files[0];
+
+            if (!archivo) {
+                alert('Selecciona un archivo.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('archivo', archivo);
+
+            fetch('{{ route('archivo.subirTemporal') }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("paso-adjuntar-documentacion").innerHTML = data.htmlVista;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    position: "top-end",
+                    icon: "error",
+                    title: 'Hubo un problema al subir el archivo.',
+                    showConfirmButton: false,
+                    timer: 5000,
+                    timerProgressBar: true
+                });
+            });
+        });
+
+        $(document).on('change', '.comentario', function () {
+            const comentario = $(this).val();
+            const fechaCarga = $(this).data('fecha');
+
+            fetch('{{ route('archivo.cargarComentario') }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    comentario,
+                    fechaCarga
+                }),
+            })
+        });
+
+        $(document).on('click', '.boton-eliminar-archivo', function(event) {
+            const fechaCarga = $(this).data('fecha');
+
+            fetch('{{ route('archivo.eliminarTemporal') }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    fechaCarga
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("paso-adjuntar-documentacion").innerHTML = data.htmlVista;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    position: "top-end",
+                    icon: "error",
+                    title: 'Hubo un problema al eliminar el archivo.',
+                    showConfirmButton: false,
+                    timer: 5000,
+                    timerProgressBar: true
+                });
+            });
         });
     });
 

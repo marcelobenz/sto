@@ -429,6 +429,9 @@
                                 guardarDatosSeccionInformacionAdicional();
                             } else {
                                 // Seccion 'Adjuntar Documentación'
+
+                                //validar
+                                //guardar -> se hace en ruta-paso-tramite con los handlers de comentario, archivo, subir archivo y eliminar archivo
                             }
                             break;
                         default:
