@@ -99,8 +99,8 @@ Route::get('/instanciaTramite/retrocederPaso', [InstanciaMultinotaController::cl
 Route::post('/instanciaTramite/guardarDatosDelSolicitante', [InstanciaMultinotaController::class, 'guardarDatosDelSolicitante'])->name('instanciaTramite.guardarDatosDelSolicitante');
 Route::get('/instanciaTramite/session-data', function () {
     return response()->json([
-        'cuenta' => session('INSTANCIA_MULTINOTA')->cuenta,
-        'correo' => session('INSTANCIA_MULTINOTA')->correo,
+        'cuenta' => session('SOLICITANTE')->cuenta,
+        'correo' => session('SOLICITANTE')->correo,
     ]);
 });
 /* Etapa 2: Datos del Representante */

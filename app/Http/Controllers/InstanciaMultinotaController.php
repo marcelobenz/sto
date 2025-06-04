@@ -25,7 +25,7 @@ use App\DTOs\PersonaJuridicaDTO;
 use App\DTOs\TramiteMultinotaDTO;
 use App\DTOs\CuentaDTO;
 use App\DTOs\FormularioMultinotaDTO;
-use App\DTOs\InstanciaMultinotaDTO;
+use App\DTOs\SolicitanteDTO;
 use App\DTOs\RepresentanteDTO;
 use App\DTOs\CodigoAreaDTO;
 use App\DTOs\DocumentoDTO;
@@ -110,10 +110,15 @@ class InstanciaMultinotaController extends Controller {
                     new DateTime($model->fecha_activacion)
                 );
 
+                // Obtengo dirección del solicitante por ID
+                $direccion = Direccion::select('calle', 'numero')->where('id_direccion', $model->id_direccion)->first();
+                $direccionCompleta = $direccion->calle . ' ' . $direccion->numero;
+
                 $personaFisica = new PersonaFisicaDTO();
-                $personaFisica->setCuilCuit($contribuyente->getCuit());
+                $personaFisica->setCuit($contribuyente->getCuit());
                 $personaFisica->setNombre($contribuyente->getNombre());
                 $personaFisica->setApellido($contribuyente->getApellido());
+                $personaFisica->setDireccion($direccionCompleta);
 
                 $contribuyenteTransformed = (new PersonaFisicaTransformer())
                 ->personaFisica($personaFisica)
@@ -144,9 +149,14 @@ class InstanciaMultinotaController extends Controller {
                     new DateTime($model->fecha_activacion)
                 );
 
+                // Obtengo dirección del solicitante por ID
+                $direccion = Direccion::select('calle', 'numero')->where('id_direccion', $model->id_direccion)->first();
+                $direccionCompleta = $direccion->calle . ' ' . $direccion->numero;
+
                 $personaJuridica = new PersonaJuridicaDTO();
                 $personaJuridica->setCuit($contribuyente->getCuit());
                 $personaJuridica->setRazonSocial($contribuyente->getApellido());
+                $personaJuridica->setDireccion($direccionCompleta);
 
                 $contribuyenteTransformed = (new PersonaJuridicaTransformer())
                 ->personaJuridica($personaJuridica)
@@ -234,12 +244,22 @@ class InstanciaMultinotaController extends Controller {
 
         $formulario = new FormularioMultinotaDTO($multinota, $secciones, $contribuyente['cuentas'], $pasos, $llevaMensaje);
 
-        /* $instanciaMultinota = new InstanciaMultinotaDTO(str_replace(' ', '', $contribuyente['cuentas'][0]->getCodigo()), ''); */
-        $instanciaMultinota = new InstanciaMultinotaDTO();
+        /* $solicitante = new SolicitanteDTO(str_replace(' ', '', $contribuyente['cuentas'][0]->getCodigo()), ''); */
+        $solicitante = new SolicitanteDTO();
+        
+        // Se guardan datos que se mostrarán en el resumen final del trámite
+        $solicitante->setCuit($contribuyente['persona']->getCuit());
+        $solicitante->setDireccion($contribuyente['persona']->getDireccion());
+        if($persona === 'Fisica') {
+            $solicitante->setApellido($contribuyente['persona']->getApellido());
+        } else {
+            $solicitante->setApellido($contribuyente['persona']->getRazonSocial());
+        }
 
         Session::put('FORMULARIO', $formulario);
         Session::put('MULTINOTA', $multinota);
-        Session::put('INSTANCIA_MULTINOTA', $instanciaMultinota);
+        Session::put('SOLICITANTE', $solicitante);
+        Session::put('PERSONA', $persona);
 
         // Se eliminan variables en sesión que deben estar nulas al inicio de un tramite
         session()->forget([
@@ -248,7 +268,7 @@ class InstanciaMultinotaController extends Controller {
             'CARACTERES', 
             'CAMPOS_SECCIONES',
             'INFORMACION_ADICIONAL',
-            'ARCHIVOS'
+            'ARCHIVOS',
         ]);
 
         // Se insertan objetos/arrays vacíos que posteriormente guardarán datos de las distintas etapas
@@ -259,7 +279,7 @@ class InstanciaMultinotaController extends Controller {
             'getOrdenActual' => $formulario->getOrdenActual(),
             'persona' => $persona,
             'multinota' => $multinota,
-            'instanciaMultinota' => $instanciaMultinota,
+            'solicitante' => $solicitante,
             'archivos' => $archivos
         ]);
     }
@@ -267,13 +287,14 @@ class InstanciaMultinotaController extends Controller {
     public function avanzarPaso() {
         $formulario = Session::get('FORMULARIO');
         $multinota = Session::get('MULTINOTA');
-        $instanciaMultinota = Session::get('INSTANCIA_MULTINOTA');
+        $solicitante = Session::get('SOLICITANTE');
         $representante = Session::get('REPRESENTANTE');
         $codigosArea = Session::get('CODIGOS_AREA');
         $caracteres = Session::get('CARACTERES');
         $camposSecciones = Session::get('CAMPOS_SECCIONES');
         $informacionAdicional = Session::get('INFORMACION_ADICIONAL');
         $archivos = Session::get('ARCHIVOS');
+        $persona = Session::get('PERSONA');
         
         foreach ($formulario->pasosFormulario as &$paso) {
             if ($paso['completado'] === false) {
@@ -294,7 +315,8 @@ class InstanciaMultinotaController extends Controller {
             'camposSecciones',
             'informacionAdicional',
             'archivos',
-            'instanciaMultinota'))->render();
+            'solicitante',
+            'persona'))->render();
 
         $htmlBotones = view('partials.botones-avance-tramite', compact('formulario'))->render();
 
@@ -308,13 +330,14 @@ class InstanciaMultinotaController extends Controller {
     public function retrocederPaso() {
         $formulario = Session::get('FORMULARIO');
         $multinota = Session::get('MULTINOTA');
-        $instanciaMultinota = Session::get('INSTANCIA_MULTINOTA');
+        $solicitante = Session::get('SOLICITANTE');
         $representante = Session::get('REPRESENTANTE');
         $codigosArea = Session::get('CODIGOS_AREA');
         $caracteres = Session::get('CARACTERES');
         $camposSecciones = Session::get('CAMPOS_SECCIONES');
         $informacionAdicional = Session::get('INFORMACION_ADICIONAL');
         $archivos = Session::get('ARCHIVOS');
+        $persona = Session::get('PERSONA');
         
         foreach ($formulario->pasosFormulario as $i => &$paso) {
             if ($paso['completado'] === false) {
@@ -335,7 +358,8 @@ class InstanciaMultinotaController extends Controller {
             'camposSecciones',
             'informacionAdicional',
             'archivos',
-            'instanciaMultinota'))->render();
+            'solicitante',
+            'persona'))->render();
         
 
         $htmlBotones = view('partials.botones-avance-tramite', compact('formulario'))->render();
@@ -351,10 +375,10 @@ class InstanciaMultinotaController extends Controller {
 
     // Etapa "Datos del Solicitante"
     public function guardarDatosDelSolicitante(Request $request) {
-        $instanciaMultinota = Session::get('INSTANCIA_MULTINOTA');
-        $instanciaMultinota->setCuenta($request->post('cuenta'));
-        $instanciaMultinota->setCorreo($request->post('correo'));
-        Session::put('INSTANCIA_MULTINOTA', $instanciaMultinota);
+        $solicitante = Session::get('SOLICITANTE');
+        $solicitante->setCuenta($request->post('cuenta'));
+        $solicitante->setCorreo($request->post('correo'));
+        Session::put('SOLICITANTE', $solicitante);
     }
 
     // Etapa "Datos del Representante" (solo personas jurídicas)

@@ -2,7 +2,7 @@
     $cuentasCodigos = array_map(function($c) {
         return str_replace(' ', '', $c->getCodigo());
     }, $formulario->cuentas);
-    $otraSeleccionada = !in_array($instanciaMultinota->cuenta, $cuentasCodigos);
+    $otraSeleccionada = !in_array($solicitante->cuenta, $cuentasCodigos);
 @endphp
 
 <div>
@@ -21,12 +21,12 @@
                                     $cuenta = str_replace(' ', '', $cuenta->getCodigo());
                                 @endphp
                                 <option value="{{ $cuenta }}"
-                                    {{ $cuenta == $instanciaMultinota->cuenta ?? '' ? 'selected' : '' }}>
+                                    {{ $cuenta == $solicitante->cuenta ?? '' ? 'selected' : '' }}>
                                     {{ $cuenta }}
                                 </option>
                             @endforeach
                             <option value="Otra" 
-                                {{ ($instanciaMultinota->cuenta !== '' && $otraSeleccionada) ? 'selected' : '' }}>
+                                {{ ($solicitante->cuenta !== '' && $otraSeleccionada) ? 'selected' : '' }}>
                                 Otra
                             </option>
                         </select>
@@ -38,17 +38,17 @@
                         <div class="form-group requerido">
                             <label for="cuentaGeneralSinCuentas">Cuenta *</label>
                             <input required type="text" id="cuentaGeneralSinCuentas" class="form-control uppercase"
-                                name="cuentaGeneralSinCuentas" value="{{ $instanciaMultinota->cuenta ?? '' }}" onblur="guardarDatosDelSolicitante()">
+                                name="cuentaGeneralSinCuentas" value="{{ $solicitante->cuenta ?? '' }}" onblur="guardarDatosDelSolicitante()">
                         </div>
                     </div>
                 </div>
             @endif
-            <div class="col-md-4 col-xs-12" id="outputPanel" style="display: {{ ($instanciaMultinota->cuenta !== '' && $otraSeleccionada) ? 'block' : 'none' }};">
+            <div class="col-md-4 col-xs-12" id="outputPanel" style="display: {{ ($solicitante->cuenta !== '' && $otraSeleccionada) ? 'block' : 'none' }};">
                 <div class="col-xs-12 no-padding">
                     <div class="form-group requerido">
                         <label for="cuentaGeneralSinCuentas">Cuenta *</label>
                         <input required type="text" id="cuentaGeneralSinCuentas" class="form-control uppercase"
-                            name="cuentaGeneralSinCuentas" value="{{ $instanciaMultinota->cuenta ?? '' }}" onblur="guardarDatosDelSolicitante()">
+                            name="cuentaGeneralSinCuentas" value="{{ $solicitante->cuenta ?? '' }}" onblur="guardarDatosDelSolicitante()">
                     </div>
                 </div>
             </div>
@@ -57,7 +57,7 @@
                     <div class="form-group requerido">
                         <label for="correo">Correo *</label>
                         <input required type="email" id="correo" class="form-control uppercase"
-                            name="correo" value="{{ $instanciaMultinota->correo ?? '' }}"
+                            name="correo" value="{{ $solicitante->correo ?? '' }}"
                             onblur="guardarDatosDelSolicitante()">
                     </div>
                 </div>

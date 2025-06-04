@@ -12,7 +12,7 @@
         @include('partials.pasos-container', ['formulario' => $formulario])
     </div>
     <div id="ruta-paso-tramite" style="border: 2px solid gray; margin-bottom: 0.5rem;">
-        @include('partials.ruta-paso-tramite', ['formulario' => $formulario, 'instanciaMultinota' => $instanciaMultinota])
+        @include('partials.ruta-paso-tramite', ['formulario' => $formulario, 'solicitante' => $solicitante])
     </div>
     <div id="botones-avance-tramite">
         @include('partials.botones-avance-tramite', ['formulario' => $formulario])

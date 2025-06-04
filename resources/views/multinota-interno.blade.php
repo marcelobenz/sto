@@ -13,6 +13,6 @@
 
     @include('formulario.formulario-multinota', [
         'formulario' => $formulario,
-        'instanciaMultinota' => $instanciaMultinota
+        'solicitante' => $solicitante
     ])
 @endsection

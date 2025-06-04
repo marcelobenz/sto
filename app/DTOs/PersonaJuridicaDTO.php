@@ -2,13 +2,12 @@
 
 namespace App\DTOs;
 
-use App\DTOs\DomicilioDTO;
-
 class PersonaJuridicaDTO {
     private string $cuit;
     private string $razonSocial;
     private string $tipoSociedad;
-    private DomicilioDTO $domicilio;
+    private string $correo;
+    private string $direccion;
     
     public function __construct(
         private bool $debeCargarRepresentante = true,
@@ -45,12 +44,20 @@ class PersonaJuridicaDTO {
         $this->tipoSociedad = $tipoSociedad;
     }
 
-    public function getDomicilio(): DomicilioDTO {
-        return $this->domicilio;
+    public function getCorreo(): string {
+        return $this->correo;
     }
 
-    public function setDomicilio(DomicilioDTO $domicilio): void {
-        $this->domicilio = $domicilio;
+    public function setCorreo(string $correo): void {
+        $this->correo = $correo;
+    }
+
+    public function getDireccion(): string {
+        return $this->direccion;
+    }
+
+    public function setDireccion(string $direccion): void {
+        $this->direccion = $direccion;
     }
 
     public function getDebeCargarRepresentante(): bool {

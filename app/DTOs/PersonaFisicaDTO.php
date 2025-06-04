@@ -2,10 +2,8 @@
 
 namespace App\DTOs;
 
-use App\DTOs\DomicilioDTO;
-
 class PersonaFisicaDTO {
-    private string $cuilCuit;
+    private string $cuit;
     private string $dni;
     private string $nombre;
     private string $apellido;
@@ -16,7 +14,7 @@ class PersonaFisicaDTO {
     private string $correo;
     private string $telefono;
     private string $celular;
-    private DomicilioDTO $domicilio;
+    private string $direccion;
     
     public function __construct(
         private bool $debeCargarRepresentante = false,
@@ -29,12 +27,12 @@ class PersonaFisicaDTO {
         return ($this->apellido . ', ' . $this->nombre);
     } 
 
-    public function getCuilCuit(): string {
-        return $this->cuilCuit;
+    public function getCuit(): string {
+        return $this->cuit;
     }
 
-    public function setCuilCuit(string $cuilCuit): void {
-        $this->cuilCuit = $cuilCuit;
+    public function setCuit(string $cuit): void {
+        $this->cuit = $cuit;
     }
 
     public function getDni(): string {
@@ -117,12 +115,12 @@ class PersonaFisicaDTO {
         $this->celular = $celular;
     }
 
-    public function getDomicilio(): DomicilioDTO {
-        return $this->domicilio;
+    public function getDireccion(): string {
+        return $this->direccion;
     }
 
-    public function setDomicilio(DomicilioDTO $domicilio): void {
-        $this->domicilio = $domicilio;
+    public function setDireccion(string $direccion): void {
+        $this->direccion = $direccion;
     }
 
     public function getDebeCargarRepresentante(): bool {
