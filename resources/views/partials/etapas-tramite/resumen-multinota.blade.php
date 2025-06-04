@@ -1,0 +1,1 @@
+@include('partials.etapas-tramite-resumen.seccion-valor-multinota-resumen', ['formulario' => $formulario])
