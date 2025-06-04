@@ -106,7 +106,7 @@ class ArchivoController extends Controller
             'tipoContenido' => $file->getMimeType(),
             'pathArchivo' => $path,
             'peso' => $file->getSize(),
-            'fechaCarga' => now()->format('Y-m-d H:i:s'),
+            'fechaCarga' => now()->format('d-m-Y H:i:s'),
             'comentario' => '', // Opcional
         ];
         Session::put('ARCHIVOS', $archivos);
