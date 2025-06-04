@@ -7,7 +7,7 @@
 
 <div>
     <div class="titulo-seccion-tramite">
-        <h3>Iniciar Trámite</h3>
+        <h3>INICIAR TRÁMITE</h3>
     </div>
     <div class="cuerpo-seccion-tramite">
         <div style="display: flex;">

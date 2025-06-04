@@ -1,7 +1,7 @@
 @foreach ($formulario->secciones as $seccion)
     <div style="margin: 20px; border: 2px solid gray;">
         <div class="titulo-seccion-tramite">
-            <h3>{{ $seccion->titulo }}</h3>
+            <h3 style="text-transform: uppercase;">{{ $seccion->titulo }}</h3>
         </div>
         <div class="cuerpo-seccion-tramite">
             <div style="width: 100%;">

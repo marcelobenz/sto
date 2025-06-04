@@ -1,6 +1,6 @@
 <div>
     <div class="titulo-seccion-tramite">
-        <h3>Datos del Representante</h3>
+        <h3>DATOS DEL REPRESENTANTE</h3>
     </div>
     <div class="cuerpo-seccion-tramite" style="display: flex; flex-wrap: wrap;">
         <!-- CUIT + Buscar -->

@@ -1,6 +1,6 @@
 <div>
   <div class="titulo-seccion-tramite">
-    <h3>Adjuntar Documentación</h3>
+    <h3>ADJUNTAR DOCUMENTACIÓN</h3>
   </div>
   <div class="cuerpo-seccion-tramite" style="padding: 15px;">
     <div style="display: flex; justify-content: center; margin-bottom: 10px;">

@@ -1,6 +1,6 @@
 <div>
   <div class="titulo-seccion-tramite">
-    <h3>Información Adicional</h3>
+    <h3>INFORMACIÓN ADICIONAL</h3>
   </div>
   <div class="cuerpo-seccion-tramite" style="padding: 15px;">
     <textarea 
