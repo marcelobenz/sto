@@ -13,6 +13,7 @@
 
     @include('formulario.formulario-multinota', [
         'formulario' => $formulario,
-        'solicitante' => $solicitante
+        'solicitante' => $solicitante,
+        'confirmarDeclaracionChecked' => $confirmarDeclaracionChecked
     ])
 @endsection

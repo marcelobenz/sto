@@ -15,7 +15,7 @@
         @include('partials.ruta-paso-tramite', ['formulario' => $formulario, 'solicitante' => $solicitante])
     </div>
     <div id="botones-avance-tramite">
-        @include('partials.botones-avance-tramite', ['formulario' => $formulario])
+        @include('partials.botones-avance-tramite', ['formulario' => $formulario, 'confirmarDeclaracionChecked' => $confirmarDeclaracionChecked])
     </div>
 </div>
 @push('scripts')
@@ -127,6 +127,40 @@
         function eliminarCustomTooltip() {
             const existing = document.querySelector('.custom-tooltip');
             if (existing) existing.remove();
+        }
+
+        // Handler para el checkbox de la etapa final "Resumen" que refiere a la confirmación de la declaración jurada
+        function handleCheckConfirmarDeclaracion(checkbox) {
+            const checked = checkbox.checked;
+            refreshBotonesTrasCheckboxDeclaracion(checked);
+        }
+
+        function refreshBotonesTrasCheckboxDeclaracion(checked) {
+            fetch('{{ route('instanciaTramite.handleCheckConfirmarDeclaracion') }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    checked
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("botones-avance-tramite").innerHTML = data.htmlVista;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    position: "top-end",
+                    icon: "error",
+                    title: 'Hubo un error al confirmar la declaración.',
+                    showConfirmButton: false,
+                    timer: 5000,
+                    timerProgressBar: true
+                });
+            });
         }
 
         $(document).ready(function () {

@@ -280,7 +280,8 @@ class InstanciaMultinotaController extends Controller {
             'persona' => $persona,
             'multinota' => $multinota,
             'solicitante' => $solicitante,
-            'archivos' => $archivos
+            'archivos' => $archivos,
+            'confirmarDeclaracionChecked' => false
         ]);
     }
     
@@ -295,6 +296,7 @@ class InstanciaMultinotaController extends Controller {
         $informacionAdicional = Session::get('INFORMACION_ADICIONAL');
         $archivos = Session::get('ARCHIVOS');
         $persona = Session::get('PERSONA');
+        $confirmarDeclaracionChecked = false;
         
         foreach ($formulario->pasosFormulario as &$paso) {
             if ($paso['completado'] === false) {
@@ -318,7 +320,7 @@ class InstanciaMultinotaController extends Controller {
             'solicitante',
             'persona'))->render();
 
-        $htmlBotones = view('partials.botones-avance-tramite', compact('formulario'))->render();
+        $htmlBotones = view('partials.botones-avance-tramite', compact('formulario', 'confirmarDeclaracionChecked'))->render();
 
         return response()->json([
             'htmlPasos' => $htmlPasos,
@@ -338,6 +340,7 @@ class InstanciaMultinotaController extends Controller {
         $informacionAdicional = Session::get('INFORMACION_ADICIONAL');
         $archivos = Session::get('ARCHIVOS');
         $persona = Session::get('PERSONA');
+        $confirmarDeclaracionChecked = false;
         
         foreach ($formulario->pasosFormulario as $i => &$paso) {
             if ($paso['completado'] === false) {
@@ -362,7 +365,7 @@ class InstanciaMultinotaController extends Controller {
             'persona'))->render();
         
 
-        $htmlBotones = view('partials.botones-avance-tramite', compact('formulario'))->render();
+        $htmlBotones = view('partials.botones-avance-tramite', compact('formulario', 'confirmarDeclaracionChecked'))->render();
 
         return response()->json([
             'htmlPasos' => $htmlPasos,
@@ -543,5 +546,22 @@ class InstanciaMultinotaController extends Controller {
         $data = $request->all();
 
         Session::put('ARCHIVOS', $data['archivos']);
+    }
+
+    public function handleCheckConfirmarDeclaracion(Request $request) {
+        $formulario = Session::get('FORMULARIO');
+
+        $data = $request->all();
+        $confirmarDeclaracionChecked = false;
+
+        if($data['checked']) {
+            $confirmarDeclaracionChecked = true;
+        }
+
+        $htmlVista = view('partials.botones-avance-tramite', compact('formulario', 'confirmarDeclaracionChecked'))->render();
+
+        return response()->json([
+            'htmlVista' => $htmlVista,
+        ]);
     }
 }
