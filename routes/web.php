@@ -95,7 +95,7 @@ Route::get('/estadoTramite/tienePermiso/{multinota}', [EstadoTramiteController::
 Route::post('/instanciaTramite/buscar', [InstanciaMultinotaController::class, 'buscar'])->name('instanciaTramite.buscar');
 Route::get('/instanciaTramite/avanzarPaso', [InstanciaMultinotaController::class, 'avanzarPaso'])->name('instanciaTramite.avanzarPaso');
 Route::get('/instanciaTramite/retrocederPaso', [InstanciaMultinotaController::class, 'retrocederPaso'])->name('instanciaTramite.retrocederPaso');
-/* Etapa 1: Datos del Solicitante */
+/* Etapa: Datos del Solicitante */
 Route::post('/instanciaTramite/guardarDatosDelSolicitante', [InstanciaMultinotaController::class, 'guardarDatosDelSolicitante'])->name('instanciaTramite.guardarDatosDelSolicitante');
 Route::get('/instanciaTramite/session-data', function () {
     return response()->json([
@@ -103,15 +103,18 @@ Route::get('/instanciaTramite/session-data', function () {
         'correo' => session('SOLICITANTE')->correo,
     ]);
 });
-/* Etapa 2: Datos del Representante */
+/* Etapa: Datos del Representante */
 Route::get('/instanciaTramite/buscarContribuyente/{cuit}', [InstanciaMultinotaController::class, 'buscarContribuyente'])->name('instanciaTramite.buscarContribuyente');
 Route::post('/instanciaTramite/guardarDatosSeccionSolicitante', [InstanciaMultinotaController::class, 'guardarDatosSeccionSolicitante'])->name('instanciaTramite.guardarDatosSeccionSolicitante');
 
-/* Etapa 3: Datos a Completar */
+/* Etapa: Datos a Completar */
 Route::post('/instanciaTramite/guardarDatosSeccionDatosACompletar', [InstanciaMultinotaController::class, 'guardarDatosSeccionDatosACompletar'])->name('instanciaTramite.guardarDatosSeccionDatosACompletar');
 
-/* Etapa 4: Información Adicional */
+/* Etapa: Información Adicional */
 Route::post('/instanciaTramite/guardarDatosSeccionInformacionAdicional', [InstanciaMultinotaController::class, 'guardarDatosSeccionInformacionAdicional'])->name('instanciaTramite.guardarDatosSeccionInformacionAdicional');
+
+/* Etapa: Resumen */
+Route::post('/instanciaTramite/handleCheckConfirmarDeclaracion', [InstanciaMultinotaController::class, 'handleCheckConfirmarDeclaracion'])->name('instanciaTramite.handleCheckConfirmarDeclaracion');
 
 //Categorías
 Route::get('/categorias', [CategoriaController::class, 'index'])->name('categorias.index');

@@ -229,7 +229,7 @@ class InstanciaMultinotaController extends Controller {
                 ['orden' => 2, 'titulo' => 'Datos a Completar', 'iconoPaso' => 'fa-pen-to-square', 'ruta' => 'partials.etapas-tramite.seccion-valor-multinota', 'completado' => false],
                 ['orden' => 3, 'titulo' => 'Información Adicional', 'iconoPaso' => 'fa-info', 'ruta' => 'partials.etapas-tramite.informacion-adicional', 'completado' => false],
                 ['orden' => 4, 'titulo' => 'Adjuntar Documentación', 'iconoPaso' => 'fa-upload', 'ruta' => 'partials.etapas-tramite.adjuntar-documentacion', 'completado' => false],
-                ['orden' => 5, 'titulo' => 'Resúmen', 'iconoPaso' => 'fa-file-lines', 'ruta' => 'partials.etapas-tramite.resumen-multinota', 'completado' => false],
+                ['orden' => 5, 'titulo' => 'Resumen', 'iconoPaso' => 'fa-file-lines', 'ruta' => 'partials.etapas-tramite.resumen-multinota', 'completado' => false],
             ];
         } else {
             $pasos = [
@@ -238,7 +238,7 @@ class InstanciaMultinotaController extends Controller {
                 ['orden' => 3, 'titulo' => 'Datos a Completar', 'iconoPaso' => 'fa-pen-to-square', 'ruta' => 'partials.etapas-tramite.seccion-valor-multinota', 'completado' => false],
                 ['orden' => 4, 'titulo' => 'Información Adicional', 'iconoPaso' => 'fa-info', 'ruta' => 'partials.etapas-tramite.informacion-adicional', 'completado' => false],
                 ['orden' => 5, 'titulo' => 'Adjuntar Documentación', 'iconoPaso' => 'fa-upload', 'ruta' => 'partials.etapas-tramite.adjuntar-documentacion', 'completado' => false],
-                ['orden' => 6, 'titulo' => 'Resúmen', 'iconoPaso' => 'fa-file-lines', 'ruta' => 'partials.etapas-tramite.resumen-multinota', 'completado' => false],
+                ['orden' => 6, 'titulo' => 'Resumen', 'iconoPaso' => 'fa-file-lines', 'ruta' => 'partials.etapas-tramite.resumen-multinota', 'completado' => false],
             ]; 
         }
 
