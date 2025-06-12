@@ -115,6 +115,7 @@ Route::post('/instanciaTramite/guardarDatosSeccionInformacionAdicional', [Instan
 
 /* Etapa: Resumen */
 Route::post('/instanciaTramite/handleCheckConfirmarDeclaracion', [InstanciaMultinotaController::class, 'handleCheckConfirmarDeclaracion'])->name('instanciaTramite.handleCheckConfirmarDeclaracion');
+Route::get('/instanciaTramite/registrarTramite', [InstanciaMultinotaController::class, 'registrarTramite'])->name('instanciaTramite.registrarTramite');
 
 //Categorías
 Route::get('/categorias', [CategoriaController::class, 'index'])->name('categorias.index');

@@ -533,6 +533,38 @@
                 }
             });
 
+            $(document).on('click', '#boton-registrar-tramite', async function () {
+                try {
+                    fetch('/instanciaTramite/registrarTramite')
+                    .then(response => response.json())
+                    .catch(error => {
+                        console.error('Error:', error);
+
+                        Swal.fire({
+                            position: "top-end",
+                            icon: "error",
+                            title: `${error.message}`,
+                            showConfirmButton: false,
+                            timer: 5000,
+                            timerProgressBar: true
+                        });
+                    })
+                } catch (error) {
+                    console.error(error.message);
+
+                    if(error.mostrar) {
+                        Swal.fire({
+                            position: "top-end",
+                            icon: "error",
+                            title: `${error.message}`,
+                            showConfirmButton: false,
+                            timer: 5000,
+                            timerProgressBar: true
+                        });
+                    }
+                }
+            });
+
             $(document).on('click', '#boton-retroceder-paso', function () {
                 ordenActual -= 1;
 

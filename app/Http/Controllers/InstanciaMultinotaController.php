@@ -17,6 +17,7 @@ use App\Models\OpcionCampo;
 use App\Models\MensajeInicial;
 use App\Models\Solicitante;
 use App\Models\SolicitanteCuentaCaracter;
+use App\Models\TipoDocumento;
 use App\Models\Direccion;
 use App\Models\CodigoArea;
 use App\DTOs\ContribuyenteMultinotaDTO;
@@ -563,5 +564,50 @@ class InstanciaMultinotaController extends Controller {
         return response()->json([
             'htmlVista' => $htmlVista,
         ]);
+    }
+
+    public function registrarTramite() {
+        try {
+            /* registrarTramite(t, t2);
+            t.registrarParticularidades(t2);
+
+            registrarInicio(t, t2);
+
+            new Thread(new NotificadorRegistro(t)).start(); */
+            
+            $representante = Session::get('REPRESENTANTE');
+
+            // Se inserta registro de dirección del representante
+            $direccion = Direccion::create([
+                'calle' => $representante->getDomicilio()->getCalle(),
+                'numero' => $representante->getDomicilio()->getNumero(),
+                'codigo_postal' => $representante->getDomicilio()->getCodigoPostal(),
+                'provincia' => $representante->getDomicilio()->getProvincia(),
+                'localidad' => $representante->getDomicilio()->getLocalidad(),
+                'pais' => $representante->getDomicilio()->getPais(),
+                'latitud' => $representante->getDomicilio()->getLatitud(),
+                'longitud' => $representante->getDomicilio()->getLongitud(),
+                'piso' => $representante->getDomicilio()->getPiso(),
+                'departamento' => $representante->getDomicilio()->getDepartamento(),
+            ]);
+
+            // Se inserta registro del representante
+            $id_direccion = $direccion->id_direccion;
+
+            // Se obtiene el ID de tipo_documento
+            $id_tipo_documento = TipoDocumento::where('nombre', $representante->getDocumento()->getTipo())->value('id_tipo_documento');
+
+            Solicitante::create([
+                'nombre' => $representante->getNombre(),
+                'documento' => $representante->getDocumento()->getNumero(),
+                'telefono' => $representante->getTelefono(),
+                'correo' => $representante->getCorreo(),
+                'id_tipo_documento' => $id_tipo_documento,
+                'apellido' => $representante->getApellido(),
+                'id_direccion' => $id_direccion
+            ]);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error al registrar el tramite: ' . $e->getMessage());
+        }
     }
 }

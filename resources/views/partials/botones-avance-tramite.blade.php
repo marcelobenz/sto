@@ -6,7 +6,7 @@
         </svg>
     </button>
     @if ($formulario->pasosFormulario[array_key_last($formulario->pasosFormulario)-1]['completado'] == true)
-        <button @if(!$confirmarDeclaracionChecked) disabled @endif id="boton-avanzar-paso" class="btn btn-secondary" style="background-color: #27ace3;">
+        <button @if(!$confirmarDeclaracionChecked) disabled @endif id="boton-registrar-tramite" class="btn btn-secondary" style="background-color: #27ace3;">
             CONFIRMAR
         </button>
     @else
