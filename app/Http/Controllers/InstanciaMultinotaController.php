@@ -16,10 +16,11 @@ use App\Models\Campo;
 use App\Models\OpcionCampo;
 use App\Models\MensajeInicial;
 use App\Models\Solicitante;
-use App\Models\SolicitanteCuentaCaracter;
+use App\Models\Multinota;
 use App\Models\TipoDocumento;
 use App\Models\Direccion;
 use App\Models\CodigoArea;
+use App\Models\Archivo;
 use App\DTOs\ContribuyenteMultinotaDTO;
 use App\DTOs\PersonaFisicaDTO;
 use App\DTOs\PersonaJuridicaDTO;
@@ -35,6 +36,7 @@ use App\DTOs\TipoCaracterDTO;
 use App\Enums\TipoCaracterEnum;
 use App\Transformers\PersonaFisicaTransformer;
 use App\Transformers\PersonaJuridicaTransformer;
+use App\Http\Controllers\ArchivoController;
 
 class InstanciaMultinotaController extends Controller {
     public function buscar(Request $request) {
@@ -110,6 +112,9 @@ class InstanciaMultinotaController extends Controller {
                     $model->codigo_activacion,
                     new DateTime($model->fecha_activacion)
                 );
+                
+                // Se guarda ContribuyenteDTO
+                Session::put('CONTRIBUYENTE', $contribuyente);
 
                 // Obtengo dirección del solicitante por ID
                 $direccion = Direccion::select('calle', 'numero')->where('id_direccion', $model->id_direccion)->first();
@@ -149,6 +154,9 @@ class InstanciaMultinotaController extends Controller {
                     $model->codigo_activacion,
                     new DateTime($model->fecha_activacion)
                 );
+
+                // Se guarda ContribuyenteDTO
+                Session::put('CONTRIBUYENTE', $contribuyente);
 
                 // Obtengo dirección del solicitante por ID
                 $direccion = Direccion::select('calle', 'numero')->where('id_direccion', $model->id_direccion)->first();
@@ -218,6 +226,8 @@ class InstanciaMultinotaController extends Controller {
         ->select('mensaje_inicial.*')
         ->orderBy('mensaje_inicial.id_mensaje_inicial', 'desc')
         ->first(); 
+
+        Session::put('MENSAJE_INICIAL', $mensajeInicial);
 
         $multinota->mensaje_inicial = $mensajeInicial->mensaje_inicial;
 
@@ -409,11 +419,15 @@ class InstanciaMultinotaController extends Controller {
 
         if(!is_null($solicitante)) {
             // Buscar cuenta caracter del representante
-            $cuentaCaracter = SolicitanteCuentaCaracter::where('id_solicitante', $solicitante->id_solicitante)
-            ->orderBy('id_solicitante_cuenta_caracter', 'desc')
+            $cuentaCaracter = Multinota::where('id_solicitante', $solicitante->id_solicitante)
+            ->orderBy('id_tramite', 'desc')
             ->first();
 
             // Obtener tipo caracter
+            if (!$cuentaCaracter) {
+                $cuentaCaracter = new \stdClass();
+            }
+            $cuentaCaracter->r_caracter = 33;
             $caracterEnum = TipoCaracterEnum::from($cuentaCaracter->r_caracter);
 
             // Instanciar RepresentanteDTO
@@ -575,9 +589,16 @@ class InstanciaMultinotaController extends Controller {
 
             new Thread(new NotificadorRegistro(t)).start(); */
             
+            $idContribuyenteMultinota = Session::get('CONTRIBUYENTE')->getIdContribuyenteMultinota();
+            $idUsuarioInterno = null; // TO-DO
             $representante = Session::get('REPRESENTANTE');
+            $solicitante = Session::get('SOLICITANTE');
+            $informacionAdicional = Session::get('INFORMACION_ADICIONAL');
+            $idTipoTramiteMultinota = Session::get('MULTINOTA')->id_tipo_tramite_multinota;
+            $idMensajeInicial = Session::get('MENSAJE_INICIAL')->id_mensaje_inicial;
+            $archivos = Session::get('ARCHIVOS');
 
-            // Se inserta registro de dirección del representante
+            // Se inserta dirección del representante
             $direccion = Direccion::create([
                 'calle' => $representante->getDomicilio()->getCalle(),
                 'numero' => $representante->getDomicilio()->getNumero(),
@@ -591,13 +612,13 @@ class InstanciaMultinotaController extends Controller {
                 'departamento' => $representante->getDomicilio()->getDepartamento(),
             ]);
 
-            // Se inserta registro del representante
             $id_direccion = $direccion->id_direccion;
 
             // Se obtiene el ID de tipo_documento
             $id_tipo_documento = TipoDocumento::where('nombre', $representante->getDocumento()->getTipo())->value('id_tipo_documento');
 
-            Solicitante::create([
+            // Se inserta representante
+            $solicitanteDB = Solicitante::create([
                 'nombre' => $representante->getNombre(),
                 'documento' => $representante->getDocumento()->getNumero(),
                 'telefono' => $representante->getTelefono(),
@@ -606,6 +627,37 @@ class InstanciaMultinotaController extends Controller {
                 'apellido' => $representante->getApellido(),
                 'id_direccion' => $id_direccion
             ]);
+
+            // Se inserta trámite
+            $multinota = Multinota::create([
+                'cuenta' => $solicitante->cuenta,
+                'id_tipo_tramite_multinota' => $idTipoTramiteMultinota,
+                'id_mensaje_inicial' => $idMensajeInicial,
+                'id_contribuyente_multinota' => $idContribuyenteMultinota ?? $idContribuyenteMultinota,
+                'informacion_adicional' => $informacionAdicional,
+                'id_prioridad' => 1,
+                'id_solicitante' => $solicitanteDB->id_solicitante,
+                'id_usuario_interno' => $idUsuarioInterno ?? $idUsuarioInterno,
+                'r_caracter' => $representante->getTipoCaracter()->getCodigo(),
+                'correo' => $solicitante->correo,
+                'cuit_contribuyente' => $solicitante->cuit
+            ]);
+
+            // Se guardan los archivos en el directorio final
+            (new ArchivoController)->moverArchivo($archivos, $multinota->id_tramite);
+
+            // Se recuperan archivos con path actualizado
+            $archivos = Session::get('ARCHIVOS');
+
+            // Se insertan archivos asociados al trámite
+            foreach ($archivos as $a) {
+                Archivo::create([
+                    'nombre' => $a['nombre'],
+                    'tipo_contenido' => $a['tipoContenido'],
+                    'path_archivo' => $a['pathArchivo'],
+                    'descripcion' => $a['comentario']
+                ]);
+            }
         } catch (\Exception $e) {
             return back()->with('error', 'Error al registrar el tramite: ' . $e->getMessage());
         }
