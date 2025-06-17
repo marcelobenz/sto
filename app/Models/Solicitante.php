@@ -14,8 +14,7 @@ class Solicitante extends Model {
     // Define the primary key
     protected $primaryKey = 'id_solicitante';
 
-    // Disable auto-incrementing as we are using mediumIncrements
-    public $incrementing = false;
+    public $incrementing = true;
 
     // Define the key type
     protected $keyType = 'int';
