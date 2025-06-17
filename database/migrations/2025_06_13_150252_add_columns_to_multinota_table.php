@@ -60,10 +60,6 @@ return new class extends Migration
             if (!$foreignKeys->contains('multinota_id_usuario_interno_foreign')) {
                 $table->foreign('id_usuario_interno')->references('id_usuario_interno')->on('usuario_interno');
             }
-
-            if (!$foreignKeys->contains('multinota_r_caracter_foreign')) {
-                $table->foreign('r_caracter')->references('r_caracter')->on('solicitante_cuenta_caracter');
-            }
         });
     }
 
