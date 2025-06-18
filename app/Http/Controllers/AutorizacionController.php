@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Redirect;
-use App\Models\IngresanteBuilder;
+use App\Builders\IngresanteBuilder;
 use App\Models\Ingresante;
 use App\Models\RequestLoginEmpleado;
 use App\Models\UsuarioView;

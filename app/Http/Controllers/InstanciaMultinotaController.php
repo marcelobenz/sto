@@ -22,6 +22,14 @@ use App\Models\Direccion;
 use App\Models\CodigoArea;
 use App\Models\Archivo;
 use App\Models\TramiteArchivo;
+use App\Models\ConfiguracionEstadoTramite;
+use App\Models\EstadoTramite;
+use App\Models\EstadoTramiteAsignable;
+use App\Models\UsuarioInterno;
+use App\Models\GrupoInterno;
+use App\DTOs\UsuarioInternoDTO;
+use App\DTOs\GrupoInternoDTO;
+use App\DTOs\EstadoTramiteDTO;
 use App\DTOs\ContribuyenteMultinotaDTO;
 use App\DTOs\PersonaFisicaDTO;
 use App\DTOs\PersonaJuridicaDTO;
@@ -34,10 +42,15 @@ use App\DTOs\CodigoAreaDTO;
 use App\DTOs\DocumentoDTO;
 use App\DTOs\DomicilioDTO;
 use App\DTOs\TipoCaracterDTO;
+use App\Builder\EstadoBuilder;
 use App\Enums\TipoCaracterEnum;
+use App\Enums\TipoEstadoEnum;
 use App\Transformers\PersonaFisicaTransformer;
 use App\Transformers\PersonaJuridicaTransformer;
 use App\Http\Controllers\ArchivoController;
+use App\Interfaces\AsignableATramite;
+use App\Factories\FactoryEstados;
+use App\Helpers\EstadoHelper;
 
 class InstanciaMultinotaController extends Controller {
     public function buscar(Request $request) {
@@ -581,6 +594,138 @@ class InstanciaMultinotaController extends Controller {
         ]);
     }
 
+    public function cargarEstados($idTipoTramiteMultinota) {
+        // Step 1: Get EstadoBuilder collection/array
+        $estadoBuilders = $this->obtenerEstados($idTipoTramiteMultinota);
+
+        // Step 2: Build EstadoTramite objects from EstadoBuilders
+        $factory = new EstadosFactory();
+        $estadosAux = $factory->construirEstados($estadoBuilders);
+
+        // Step 3: Collect initial states linked to those "EN_CREACION"
+        $estadosIniciales = collect();
+
+        foreach ($estadosAux as $estado) {
+            // Assuming getTipoEstado() returns string, compare with your constant
+            if ($estado->getTipoEstado() === TipoEstadoEnum::EN_CREACION) {
+                foreach ($estado->getEstadosPosteriores() as $estadoPosterior) {
+                    // Use Laravel Collection's contains with a callback to compare IDs
+                    if (!$estadosIniciales->contains(function ($e) use ($estadoPosterior) {
+                        return $e->getId() === $estadoPosterior->getId();
+                    })) {
+                        $estadosIniciales->push($estadoPosterior);
+                    }
+                }
+            }
+        }
+
+        return $estadosIniciales;
+    }
+
+    public function obtenerEstados($idTipoTramiteMultinota) {
+        // Se obtienen estados asociados a la multinota
+        $estadosTramite = EstadoTramite::select('estado_tramite.*')
+        ->join('configuracion_estado_tramite', 'estado_tramite.id_estado_tramite', '=', 'configuracion_estado_tramite.id_estado_tramite')
+        ->where('configuracion_estado_tramite.id_tipo_tramite_multinota', $idTipoTramiteMultinota)
+        ->where('configuracion_estado_tramite.activo', 1)
+        ->where('configuracion_estado_tramite.publico', 1)
+        ->groupBy([
+            'estado_tramite.id_estado_tramite',
+            'estado_tramite.fecha_sistema',
+            'estado_tramite.nombre',
+            'estado_tramite.tipo',
+            'estado_tramite.puede_rechazar',
+            'estado_tramite.puede_pedir_documentacion'
+        ])
+        ->get();
+
+        // Se guardan estados en un array plano
+        $estadoTramiteDTOS = $estadosTramite->map(function ($et) {
+            return new EstadoTramiteDTO(
+                $et->id_estado_tramite,
+                $et->nombre,
+                TipoEstadoEnum::from($et->tipo),
+                $et->puede_rechazar,
+                $et->puede_pedir_documentacion,
+                $et->puede_elegir_camino,
+                $et->estado_tiene_expediente
+            );
+        })->all();
+
+        $estadosBuilder = collect();
+
+        foreach($estadoTramiteDTOS as $etdto) {
+            $asignablesDB = EstadoTramiteAsignable::where('id_estado_tramite', $etdto->id_estado_tramite)->get();
+            $asignables = collect();
+            
+            foreach ($asignablesDB as $a) {
+                if($a->id_usuario_interno != null) {
+                    $modelo = UsuarioInterno::find($a->id_usuario_interno);
+                    if ($modelo) {
+                        $usuario = UsuarioInternoDTO::desdeModelo($modelo);
+                        $asignables->push($usuario);
+                    }
+                } else {
+                    $modelo = GrupoInterno::with('usuarios')->find($a->id_grupo_interno);
+
+                    if ($modelo) {
+                        $grupo = GrupoInternoDTO::desdeModelo($modelo);
+                        $asignables->push($grupo);
+                    }
+                }
+            }
+
+            // Construir EstadoBuilder
+            $builder = new EstadoBuilder($etdto->getNombre());
+            $builder->id = $etdto->getId();
+            $builder->tipoEstado = $etdto->getTipoEstado();
+            $builder->puedePedirDocumentacion = $etdto->getPuedePedirDocumentacion() === 1;
+            $builder->tieneExpediente = $etdto->getTieneExpediente() === 1;
+            $builder->puedeRechazar = $etdto->getPuedeRechazar() === 1;
+            $builder->puedeElegirCamino = $etdto->getPuedeElegirCamino() === 1;
+
+            // Initialize empty collections
+            $builder->estadosAnteriores = collect();
+            $builder->estadosPosteriores = collect();
+            $builder->nodosAnteriores = collect(); // if needed
+
+            // Agregar asignables
+            foreach ($asignables as $asignable) {
+                $builder->agregarAsignable($asignable);
+            }
+
+            // Agregar validadores según tipo de estado
+            $validadores = FactoryEstadoBuilder::obtenerValidadoresPorTipo($tipoEstado);
+            foreach ($validadores as $validador) {
+                $builder->agregarValidador($validador);
+            }
+
+            // Guardar en colección final
+            $estadosBuilder->push($builder);
+        }
+
+        foreach ($estadosBuilder as $eb) {
+            $configs = ConfiguracionEstadoTramite::where('id_estado_tramite', $eb->id)
+                ->where('activo', 1)
+                ->where('publico', 1)
+                ->get();
+
+            foreach($estadoTramiteDTOS as $etdto) {
+                if ($eb->id === $etdto->id_estado_tramite) {
+                    foreach($configs as $c) {
+                        $aAgregar = EstadoHelper::buscarEstado($config, $estadosBuilder);
+
+                        if ($aAgregar !== null) {
+                            $eb->agregarEstadoPosterior($aAgregar);
+                            $aAgregar->agregarEstadoAnterior($eb);
+                        }
+                    }
+                }
+            }
+        } 
+        return $estadosBuilder;
+    }
+
     public function registrarTramite() {
         try {
             /* registrarTramite(t, t2);
@@ -589,7 +734,8 @@ class InstanciaMultinotaController extends Controller {
             registrarInicio(t, t2);
 
             new Thread(new NotificadorRegistro(t)).start(); */
-            
+
+            // Se cargan datos
             $idContribuyenteMultinota = Session::get('CONTRIBUYENTE')->getIdContribuyenteMultinota();
             $idUsuarioInterno = null; // TO-DO
             $representante = Session::get('REPRESENTANTE');
@@ -598,6 +744,12 @@ class InstanciaMultinotaController extends Controller {
             $idTipoTramiteMultinota = Session::get('MULTINOTA')->id_tipo_tramite_multinota;
             $idMensajeInicial = Session::get('MENSAJE_INICIAL')->id_mensaje_inicial;
             $archivos = Session::get('ARCHIVOS');
+
+            // Cargar estados
+            $this->cargarEstados($idTipoTramiteMultinota);
+            
+            /* for( EstadoTramite estadoTramite : t.getEstadosActuales() )
+                estadoTramite.setUsuarioAsignado( new AsignableATramiteController().recomendado(estadoTramite) ); */
 
             // Se inserta dirección del representante
             $direccion = Direccion::create([
