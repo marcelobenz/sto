@@ -21,6 +21,7 @@ use App\Models\TipoDocumento;
 use App\Models\Direccion;
 use App\Models\CodigoArea;
 use App\Models\Archivo;
+use App\Models\TramiteArchivo;
 use App\DTOs\ContribuyenteMultinotaDTO;
 use App\DTOs\PersonaFisicaDTO;
 use App\DTOs\PersonaJuridicaDTO;
@@ -651,11 +652,16 @@ class InstanciaMultinotaController extends Controller {
 
             // Se insertan archivos asociados al trámite
             foreach ($archivos as $a) {
-                Archivo::create([
+                $archivo = Archivo::create([
                     'nombre' => $a['nombre'],
                     'tipo_contenido' => $a['tipoContenido'],
                     'path_archivo' => $a['pathArchivo'],
                     'descripcion' => $a['comentario']
+                ]);
+
+                TramiteArchivo::create([
+                    'id_archivo' => $archivo->id_archivo,
+                    'id_tramite' => $multinota->id_tramite
                 ]);
             }
         } catch (\Exception $e) {
