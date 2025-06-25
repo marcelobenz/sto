@@ -52,6 +52,9 @@ use App\Interfaces\AsignableATramite;
 use App\Factories\FactoryEstados;
 use App\Factories\FactoryEstadoBuilder;
 use App\Helpers\EstadoHelper;
+use App\Http\Controllers\AsignableATramiteController;
+use App\Services\LicenciaService;
+use App\Services\TramiteService;
 
 class InstanciaMultinotaController extends Controller {
     public function buscar(Request $request) {
@@ -757,10 +760,18 @@ class InstanciaMultinotaController extends Controller {
             $archivos = Session::get('ARCHIVOS');
 
             // Cargar estados
-            $this->cargarEstados($idTipoTramiteMultinota);
+            $estadosIniciales = $this->cargarEstados($idTipoTramiteMultinota);
 
-            /* for( EstadoTramite estadoTramite : t.getEstadosActuales() )
-                estadoTramite.setUsuarioAsignado( new AsignableATramiteController().recomendado(estadoTramite) ); */
+            $asignableController = new AsignableATramiteController(
+                new LicenciaService(),
+                new TramiteService()
+            );
+
+            foreach ($estadosIniciales as $e) {
+                $e->setUsuarioAsignado(
+                    $asignableController->recomendado($e)          // ← devuelve un UsuarioInternoDTO o null
+                );
+            }
 
             // Se inserta dirección del representante
             $direccion = Direccion::create([

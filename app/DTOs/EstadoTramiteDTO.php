@@ -5,6 +5,7 @@ namespace App\DTOs;
 use Illuminate\Support\Collection;
 
 use App\Enums\TipoEstadoEnum;
+use App\DTOs\UsuarioInternoDTO;
 
 class EstadoTramiteDTO {
   private int $id;
@@ -28,6 +29,8 @@ class EstadoTramiteDTO {
 
   /** @var Collection<int, EstadoTramiteDTO> */
   private Collection $nodosAnteriores;
+
+  private UsuarioInternoDTO $usuarioAsignado;
 
   public function __construct(
     string $id,
@@ -151,5 +154,13 @@ class EstadoTramiteDTO {
 
   public function setNodosAnteriores(Collection $nodosAnteriores): void {
     $this->nodosAnteriores = $nodosAnteriores;
+  }
+
+  public function getUsuarioAsignado(): UsuarioInternoDTO {
+    return $this->usuarioAsignado;
+  }
+
+  public function setUsuarioAsignado(UsuarioInternoDTO $usuarioAsignado): void {
+    $this->usuarioAsignado = $usuarioAsignado;
   }
 }
