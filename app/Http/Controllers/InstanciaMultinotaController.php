@@ -27,6 +27,7 @@ use App\Models\EstadoTramite;
 use App\Models\EstadoTramiteAsignable;
 use App\Models\UsuarioInterno;
 use App\Models\GrupoInterno;
+use App\Models\TramiteEstadoTramite;
 use App\DTOs\UsuarioInternoDTO;
 use App\DTOs\GrupoInternoDTO;
 use App\DTOs\EstadoTramiteDTO;
@@ -838,7 +839,21 @@ class InstanciaMultinotaController extends Controller {
                     'id_tramite' => $multinota->id_tramite
                 ]);
             }
-        } catch (\Exception $e) {
+
+            foreach ($estadosIniciales as $e) {
+                $usuario = $e->getUsuarioAsignado();
+
+                TramiteEstadoTramite::create([
+                    'id_tramite'             => $multinota->id_tramite,
+                    'id_estado_tramite'      => $e->getId(),
+                    'id_usuario_interno'     => $usuario->getId(),
+                    'activo'                 => 1,
+                    'completo'               => 0,
+                    'reiniciado'             => 0,
+                    'espera_documentacion'   => 0,
+                ]);
+            }
+        } catch (\Throwable $e) {
             return back()->with('error', 'Error al registrar el tramite: ' . $e->getMessage());
         }
     }
