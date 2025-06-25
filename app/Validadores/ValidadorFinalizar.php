@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Validators;
+namespace App\Validadores;
 
 use App\Interfaces\ValidadorEstado;
-use App\Builder\EstadoBuilder;
+use App\Builders\EstadoBuilder;
 use Exception;
 
 class ValidadorFinalizar implements ValidadorEstado
 {
     public function validar(EstadoBuilder $estadoBuilder): void
     {
-        if ($estadoBuilder->isPuedeElegirCamino()) {
+        if ($estadoBuilder->getPuedeElegirCamino()) {
             return;
         }
 

@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Validators;
+namespace App\Validadores;
 
 use App\Interfaces\ValidadorEstado;
-use App\Builder\EstadoBuilder;
+use App\Builders\EstadoBuilder;
 use Exception;
 
 class ValidadorAsignables implements ValidadorEstado

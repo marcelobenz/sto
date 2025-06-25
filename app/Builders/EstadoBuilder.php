@@ -1,12 +1,18 @@
 <?php
 
+namespace App\Builders;
+
+use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
+
+use App\DTOs\EstadoTramiteDTO;
 use App\Enums\TipoEstadoEnum;
 use App\Models\EstadoTramite;
 use App\Models\UsuarioInterno;
-use App\Models\DTOConfiguracionEstadoTramite;
+use App\Models\ConfiguracionEstadoTramite;
 use App\Repositories\ConfiguracionEstadoTramiteDTORepository; //TO-DO
-use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
+use App\Interfaces\AsignableATramite;
+use App\Interfaces\ValidadorEstado;
 
 class EstadoBuilder {
   public ?int $id = null;
@@ -42,6 +48,66 @@ class EstadoBuilder {
     $this->nodosAnteriores = collect();
   }
 
+  public function getId(): ?int {
+    return $this->id;
+  }
+
+  public function getNombre(): string {
+    return $this->nombre;
+  }
+
+  public function getTipoEstado(): TipoEstadoEnum {
+    return $this->tipoEstado;
+  }
+
+  public function getPuedePedirDocumentacion(): bool {
+    return $this->puedePedirDocumentacion;
+  }
+
+  public function getPuedeRechazar(): bool {
+    return $this->puedeRechazar;
+  }
+
+  public function getPuedeElegirCamino(): bool {
+    return $this->puedeElegirCamino;
+  }
+
+  public function getTieneExpediente(): bool {
+    return $this->tieneExpediente;
+  }
+
+  public function getAsignables(): Collection {
+    return $this->asignables;
+  }
+
+  public function getValidadores(): Collection {
+    return $this->validadores;
+  }
+
+  public function getUsuarioInterno(): ?UsuarioInterno {
+    return $this->usuarioInterno;
+  }
+
+  public function getEstadosAnteriores(): Collection {
+    return $this->estadosAnteriores;
+  }
+
+  public function getEstadosPosteriores(): Collection {
+    return $this->estadosPosteriores;
+  }
+
+  public function getNodosAnteriores(): Collection {
+    return $this->nodosAnteriores;
+  }
+
+  public function getTreeResponsables(): mixed {
+    return $this->treeResponsables;
+  }
+
+  public function getTreeResponsablesElegidos(): array {
+    return $this->treeResponsablesElegidos;
+  }
+
   public function getAsString(): string {
     return $this->nombre;
   }
@@ -52,26 +118,30 @@ class EstadoBuilder {
     }
   }
 
-  public function build(): EstadoTramite {
+  public function build(): EstadoTramiteDTO {
     $this->validar();
 
     $dtos = $this->id
-      ? ConfiguracionEstadoTramiteDTORepository::find($this, false)
+      ? ConfiguracionEstadoTramite::where('id_estado_tramite', $this->id)
+          ->where('activo', 1)
+          ->where('publico', 1)
+          ->get()
       : collect();
 
     $dto = $dtos->first();
 
-    return new EstadoTramite(
+    return new EstadoTramiteDTO(
       $this->id,
       $this->nombre,
       $this->tipoEstado,
-      $this->puedePedirDocumentacion,
-      $this->puedeRechazar,
-      $this->puedeElegirCamino,
-      $this->tieneExpediente,
+      $this->puedeRechazar ? 1 : 0,
+      $this->puedePedirDocumentacion ? 1 : 0,
+      $this->puedeElegirCamino ? 1 : 0,
+      $this->tieneExpediente ? 1 : 0,
       collect(),
       collect(),
       $this->asignables,
+      $this->nodosAnteriores,
       $dto?->id_estado_tramite_anterior
     );
   }

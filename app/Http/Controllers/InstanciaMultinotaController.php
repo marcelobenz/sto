@@ -42,7 +42,7 @@ use App\DTOs\CodigoAreaDTO;
 use App\DTOs\DocumentoDTO;
 use App\DTOs\DomicilioDTO;
 use App\DTOs\TipoCaracterDTO;
-use App\Builder\EstadoBuilder;
+use App\Builders\EstadoBuilder;
 use App\Enums\TipoCaracterEnum;
 use App\Enums\TipoEstadoEnum;
 use App\Transformers\PersonaFisicaTransformer;
@@ -50,6 +50,7 @@ use App\Transformers\PersonaJuridicaTransformer;
 use App\Http\Controllers\ArchivoController;
 use App\Interfaces\AsignableATramite;
 use App\Factories\FactoryEstados;
+use App\Factories\FactoryEstadoBuilder;
 use App\Helpers\EstadoHelper;
 
 class InstanciaMultinotaController extends Controller {
@@ -599,7 +600,7 @@ class InstanciaMultinotaController extends Controller {
         $estadoBuilders = $this->obtenerEstados($idTipoTramiteMultinota);
 
         // Step 2: Build EstadoTramite objects from EstadoBuilders
-        $factory = new EstadosFactory();
+        $factory = new FactoryEstados();
         $estadosAux = $factory->construirEstados($estadoBuilders);
 
         // Step 3: Collect initial states linked to those "EN_CREACION"
@@ -644,23 +645,33 @@ class InstanciaMultinotaController extends Controller {
             return new EstadoTramiteDTO(
                 $et->id_estado_tramite,
                 $et->nombre,
-                TipoEstadoEnum::from($et->tipo),
+                TipoEstadoEnum::fromName($et->tipo),
                 $et->puede_rechazar,
                 $et->puede_pedir_documentacion,
                 $et->puede_elegir_camino,
-                $et->estado_tiene_expediente
+                $et->estado_tiene_expediente,
+                collect(),
+                collect(),
+                collect(),
+                collect(),
+                null
             );
         })->all();
 
         $estadosBuilder = collect();
 
         foreach($estadoTramiteDTOS as $etdto) {
-            $asignablesDB = EstadoTramiteAsignable::where('id_estado_tramite', $etdto->id_estado_tramite)->get();
+            $asignablesDB = EstadoTramiteAsignable::where('id_estado_tramite', $etdto->getId())->get();
             $asignables = collect();
             
             foreach ($asignablesDB as $a) {
                 if($a->id_usuario_interno != null) {
-                    $modelo = UsuarioInterno::find($a->id_usuario_interno);
+                    $modelo = UsuarioInterno::with([
+                        'rol.permisos',
+                        'categoria',
+                        'grupoInterno.oficina',
+                    ])->find($a->id_usuario_interno);
+
                     if ($modelo) {
                         $usuario = UsuarioInternoDTO::desdeModelo($modelo);
                         $asignables->push($usuario);
@@ -695,7 +706,7 @@ class InstanciaMultinotaController extends Controller {
             }
 
             // Agregar validadores según tipo de estado
-            $validadores = FactoryEstadoBuilder::obtenerValidadoresPorTipo($tipoEstado);
+            $validadores = FactoryEstadoBuilder::obtenerValidadoresPorTipo($etdto->getTipoEstado());
             foreach ($validadores as $validador) {
                 $builder->agregarValidador($validador);
             }
@@ -711,9 +722,9 @@ class InstanciaMultinotaController extends Controller {
                 ->get();
 
             foreach($estadoTramiteDTOS as $etdto) {
-                if ($eb->id === $etdto->id_estado_tramite) {
+                if ($eb->id === $etdto->getId()) {
                     foreach($configs as $c) {
-                        $aAgregar = EstadoHelper::buscarEstado($config, $estadosBuilder);
+                        $aAgregar = EstadoHelper::buscarEstado($c, $estadosBuilder);
 
                         if ($aAgregar !== null) {
                             $eb->agregarEstadoPosterior($aAgregar);
@@ -747,7 +758,7 @@ class InstanciaMultinotaController extends Controller {
 
             // Cargar estados
             $this->cargarEstados($idTipoTramiteMultinota);
-            
+
             /* for( EstadoTramite estadoTramite : t.getEstadosActuales() )
                 estadoTramite.setUsuarioAsignado( new AsignableATramiteController().recomendado(estadoTramite) ); */
 

@@ -4,8 +4,10 @@ namespace App\Factories;
 
 use Exception;
 use Illuminate\Support\Collection;
+
 use App\Builders\EstadoBuilder;
-use App\DTOs\EstadoTramiteDTO; 
+use App\DTOs\EstadoTramiteDTO;
+use App\Enums\TipoEstadoEnum;
 
 class FactoryEstados {
   /**
@@ -18,7 +20,7 @@ class FactoryEstados {
 
     // First, link previous states for those in creation
     foreach ($estadosBuilder as $estadoBuilder) {
-      if ($estadoBuilder->tipoEstado->equals(TipoEstadoEnum::EN_CREACION)) {
+      if ($estadoBuilder->getTipoEstado() === TipoEstadoEnum::EN_CREACION) {
         $estadoBuilder->vincularAnteriores();
       }
     }
@@ -48,12 +50,16 @@ class FactoryEstados {
   ): void {
     foreach ($estadosBuilder as $estadoBuilder) {
       if ($estadoBuilder->nombre === $estado->getNombre()) {
-        $estado->getNodosAnteriores()->add(
-          ...$this->buscarNodosAnteriores($estadoBuilder, $estados)
+        $nuevos = $this->buscarNodosAnteriores($estadoBuilder, $estados);
+
+        // Une ambas colecciones y la vuelve a guardar en el DTO
+        $estado->setNodosAnteriores(
+          $estado->getNodosAnteriores()->merge($nuevos)
         );
       }
     }
   }
+
 
   /**
    * @param EstadoBuilder $estadoBuilder
@@ -84,8 +90,10 @@ class FactoryEstados {
   ): void {
     foreach ($estadosBuilder as $estadoBuilder) {
       if ($estadoBuilder->nombre === $estado->getNombre()) {
-        $estado->getEstadosAnteriores()->add(
-          ...$this->buscarEstadosAnteriores($estadoBuilder, $estados)
+        $anteriores = $this->buscarEstadosAnteriores($estadoBuilder, $estados);
+
+        $estado->setEstadosAnteriores(
+          $estado->getEstadosAnteriores()->merge($anteriores)
         );
       }
     }
@@ -98,13 +106,15 @@ class FactoryEstados {
   ): void {
     foreach ($estadosBuilder as $estadoBuilder) {
       if ($estadoBuilder->nombre === $estado->getNombre()) {
-        $estado->getEstadosPosteriores()->add(
-          ...$this->buscarEstadosPosteriores($estadoBuilder, $estados)
+        $posteriores = $this->buscarEstadosPosteriores($estadoBuilder, $estados);
+
+        $estado->setEstadosPosteriores(
+          $estado->getEstadosPosteriores()->merge($posteriores)
         );
       }
     }
   }
-
+  
   /**
    * @param EstadoBuilder $estadoBuilder
    * @param Collection<int, EstadoTramiteDTO> $estados

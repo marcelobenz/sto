@@ -1,11 +1,11 @@
 <?php
 
-namespace App\DTO;
+namespace App\DTOs;
 
 use App\Contracts\AsignableATramite;
 use App\Models\OficinaInterna;
-use App\DTO\UsuarioInternoDTO;
-use App\DTO\UsuarioCabecera;
+use App\DTOs\UsuarioInternoDTO;
+use App\DTOs\UsuarioCabecera;
 
 class GrupoInternoDTO implements AsignableATramite {
   public function __construct(

@@ -1,11 +1,14 @@
 <?php
 
-namespace App\DTO;
+namespace App\DTOs;
 
 use App\Interfaces\AsignableATramite;
-use App\Models\OficinaInterna;
+use App\Models\Oficina;
 use App\Models\GrupoInterno;
-use App\DTO\UsuarioCabecera;
+use App\Models\UsuarioInterno;
+use App\Models\CategoriaUsuario;
+use App\DTOs\UsuarioCabecera;
+use App\Enums\EstadoUsuarioInternoEnum;
 
 class UsuarioInternoDTO implements AsignableATramite {
   public function __construct(
@@ -18,12 +21,11 @@ class UsuarioInternoDTO implements AsignableATramite {
     public readonly ?string $dni,
     public readonly ?string $estado_nombre,
     public readonly ?string $legajo,
-    public readonly ?string $oficina,
-    public readonly array $permisos = [],
-    public readonly ?string $categoria = null,
-    public readonly bool $flag_menu = false,
-    public readonly ?int $limite = null,
-    public readonly ?OficinaInterna $oficina_interna = null
+    public readonly ?Oficina $oficina,
+    public readonly ?array $permisos = [],
+    public readonly ?CategoriaUsuario $categoria = null,
+    public readonly ?bool $flag_menu = false,
+    public readonly ?int $limite = null
   ) {}
 
   public function getDescripcion(): string {
@@ -51,7 +53,7 @@ class UsuarioInternoDTO implements AsignableATramite {
     return null;
   }
 
-  public function obtenerUsuarios(OficinaInterna $oficina, GrupoInterno $grupo): array {
+  public function obtenerUsuarios(Oficina $oficina, GrupoInterno $grupo): array {
     $correo = $this->correo_municipal ?? $this->correo;
 
     return [
@@ -67,23 +69,22 @@ class UsuarioInternoDTO implements AsignableATramite {
     ];
   }
 
-  public static function desdeModelo(\App\Models\UsuarioInterno $modelo): self {
+  public static function desdeModelo(UsuarioInterno $modelo): self {
     return new self(
-      id: $modelo->id,
+      id: $modelo->id_usuario_interno,
       nombre: $modelo->nombre,
       apellido: $modelo->apellido,
       correo: $modelo->correo,
       correo_municipal: $modelo->correo_municipal,
       cuit: $modelo->cuit,
       dni: $modelo->dni,
-      estado_nombre: $modelo->estado_nombre,
+      estado_nombre: EstadoUsuarioInternoEnum::fromId($modelo->estado)?->descripcion(),
       legajo: $modelo->legajo,
-      oficina: $modelo->oficina,
-      permisos: $modelo->permisos->all() ?? [],
-      categoria: optional($modelo->categoria)->nombre,
+      oficina: $modelo->grupoInterno?->oficina,
+      permisos: $modelo->rol?->permisos?->pluck('permiso_clave')->all() ?? [],
+      categoria: $modelo->categoria,
       flag_menu: $modelo->flag_menu,
-      limite: $modelo->limite,
-      oficina_interna: $modelo->oficinaInterna
+      limite: $modelo->limite
     );
   }
 }

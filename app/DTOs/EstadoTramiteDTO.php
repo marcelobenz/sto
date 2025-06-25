@@ -2,8 +2,13 @@
 
 namespace App\DTOs;
 
+use Illuminate\Support\Collection;
+
+use App\Enums\TipoEstadoEnum;
+
 class EstadoTramiteDTO {
   private int $id;
+  private ?int $idEstadoAnteriorParaWorkflow;
   private string $nombre;
   private TipoEstadoEnum $tipoEstado;
 
@@ -18,6 +23,9 @@ class EstadoTramiteDTO {
   /** @var Collection<int, EstadoTramiteDTO> */
   private Collection $estadosPosteriores;
 
+  /** @var Collection<int, AsignableATramite> */
+  public Collection $asignables;
+
   /** @var Collection<int, EstadoTramiteDTO> */
   private Collection $nodosAnteriores;
 
@@ -28,7 +36,12 @@ class EstadoTramiteDTO {
     string $puedeRechazar,
     string $puedePedirDocumentacion,
     string $puedeElegirCamino,
-    string $tieneExpediente
+    string $tieneExpediente,
+    Collection $estadosAnteriores,
+    Collection $estadosPosteriores,
+    Collection $asignables,
+    Collection $nodosAnteriores,
+    ?int $idEstadoAnteriorParaWorkflow
   ) {
     $this->id = $id;
     $this->nombre = $nombre;
@@ -37,10 +50,11 @@ class EstadoTramiteDTO {
     $this->puedePedirDocumentacion = $puedePedirDocumentacion;
     $this->puedeElegirCamino = $puedeElegirCamino;
     $this->tieneExpediente = $tieneExpediente;
-    // Initialize collections as empty Laravel Collections
-    $this->estadosAnteriores = collect();
-    $this->estadosPosteriores = collect();
-    $this->nodosAnteriores = collect();
+    $this->estadosAnteriores = $estadosAnteriores;
+    $this->estadosPosteriores = $estadosPosteriores;
+    $this->asignables = $asignables;
+    $this->nodosAnteriores = $nodosAnteriores;
+    $this->idEstadoAnteriorParaWorkflow = $idEstadoAnteriorParaWorkflow;
   }
 
   public function getId(): int {
@@ -49,6 +63,14 @@ class EstadoTramiteDTO {
 
   public function setId(int $id): void {
     $this->id = $id;
+  }
+
+  public function getIdEstadoAnteriorParaWorkflow(): int {
+    return $this->idEstadoAnteriorParaWorkflow;
+  }
+
+  public function setIdEstadoAnteriorParaWorkflow(int $idEstadoAnteriorParaWorkflow): void {
+    $this->idEstadoAnteriorParaWorkflow = $idEstadoAnteriorParaWorkflow;
   }
 
   public function getNombre(): string {
@@ -66,7 +88,6 @@ class EstadoTramiteDTO {
   public function setTipoEstado(TipoEstadoEnum $tipoEstado): void {
     $this->tipoEstado = $tipoEstado;
   }
-
 
   public function getPuedeRechazar(): int {
     return $this->puedeRechazar;
@@ -114,6 +135,14 @@ class EstadoTramiteDTO {
 
   public function setEstadosPosteriores(Collection $estadosPosteriores): void {
     $this->estadosPosteriores = $estadosPosteriores;
+  }
+
+  public function getAsignables(): Collection {
+    return $this->asignables;
+  }
+
+  public function setAsignables(Collection $asignables): void {
+    $this->asignables = $asignables;
   }
 
   public function getNodosAnteriores(): Collection {

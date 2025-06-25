@@ -3,7 +3,7 @@
 namespace App\Factories;
 
 use App\Enums\TipoEstadoEnum;
-use App\Builder\EstadoBuilder;
+use App\Builders\EstadoBuilder;
 use App\Validadores\{
   ValidadorAsignables,
   ValidadorBifurcaciones,
@@ -97,7 +97,7 @@ class FactoryEstadoBuilder {
 
     /** @return ValidadorInterface[] */
     public static function obtenerValidadoresPorTipo(TipoEstadoEnum $tipo): array {
-        return match (true) {
+        return match ($tipo) {
             $tipo === TipoEstadoEnum::DE_FINALIZACION => self::generarValidadoresDeFinalizacion(),
             $tipo === TipoEstadoEnum::EXPEDIENTE => self::generarValidadoresExpediente(),
             $tipo === TipoEstadoEnum::A_FINALIZAR => self::generarValidadoresAFinalizar(),

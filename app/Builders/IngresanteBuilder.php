@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Builders;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Ingresante;

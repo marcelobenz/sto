@@ -2,7 +2,7 @@
 
 namespace App\Interfaces;
 
-use App\Models\UsuarioInterno;
+use App\DTOs\UsuarioInternoDTO;
 
 interface AsignableATramite {
   public function getDescripcion(): string;
@@ -12,9 +12,9 @@ interface AsignableATramite {
   public function getId(): int;
 
   /**
-   * @return UsuarioInterno[]
+   * @return UsuarioInternoDTO[]
    */
   public function getUsuarios(): array;
 
-  public function getUsuarioQuePuedaSeguir(array $asignados): ?UsuarioInterno;
+  public function getUsuarioQuePuedaSeguir(array $asignados): ?UsuarioInternoDTO;
 }

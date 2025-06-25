@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Validators;
+namespace App\Validadores;
 
 use App\Interfaces\ValidadorEstado;
-use App\Builder\EstadoBuilder;
+use App\Builders\EstadoBuilder;
 use Exception;
 
 class ValidadorBifurcaciones implements ValidadorEstado
@@ -14,7 +14,7 @@ class ValidadorBifurcaciones implements ValidadorEstado
 
         foreach ($estadoBuilder->getEstadosAnteriores() as $estado) {
             if (
-                $estado->isPuedeElegirCamino() &&
+                $estado->getPuedeElegirCamino() &&
                 (!$estadoBuilder->esEstadoPosterior($estado) && !$estadoBuilder->esPosteriorObligatorio($estado))
             ) {
                 $tieneBifurcacionesPrevias = true;
