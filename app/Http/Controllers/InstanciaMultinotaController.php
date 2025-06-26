@@ -12,6 +12,7 @@ use App\Models\MultinotaServicio;
 use App\Models\ContribuyenteMultinota;
 use App\Models\TipoTramiteMultinota;
 use App\Models\SeccionMultinota;
+use App\Models\MultinotaSeccionValor;
 use App\Models\Campo;
 use App\Models\OpcionCampo;
 use App\Models\MensajeInicial;
@@ -751,6 +752,7 @@ class InstanciaMultinotaController extends Controller {
             new Thread(new NotificadorRegistro(t)).start(); */
 
             // Se cargan datos
+            $formulario = Session::get('FORMULARIO');
             $idContribuyenteMultinota = Session::get('CONTRIBUYENTE')->getIdContribuyenteMultinota();
             $idUsuarioInterno = null; // TO-DO
             $representante = Session::get('REPRESENTANTE');
@@ -759,6 +761,7 @@ class InstanciaMultinotaController extends Controller {
             $idTipoTramiteMultinota = Session::get('MULTINOTA')->id_tipo_tramite_multinota;
             $idMensajeInicial = Session::get('MENSAJE_INICIAL')->id_mensaje_inicial;
             $archivos = Session::get('ARCHIVOS');
+            $camposSecciones = Session::get('CAMPOS_SECCIONES');
 
             // Cargar estados
             $estadosIniciales = $this->cargarEstados($idTipoTramiteMultinota);
@@ -852,6 +855,54 @@ class InstanciaMultinotaController extends Controller {
                     'reiniciado'             => 0,
                     'espera_documentacion'   => 0,
                 ]);
+            }
+
+            // Indexamos $camposSecciones por id_campo para acceso rápido
+            $camposSeccionesPorId = collect($camposSecciones)->keyBy('id_campo');
+
+            // Iteramos cada sección y campo para obtener el valor correspondiente
+            foreach ($formulario->secciones as $seccion) {
+                foreach ($seccion->campos as $campo) {
+                    $campoData = $camposSeccionesPorId->get($campo->id_campo);
+                    if($campo->tipo === 'LISTA' || $campo->tipo === 'CAJAS_SELECCION') {
+                        $opcionConcatenada = []; // Se inicializa variable para guardar el valor de campos de tipo CAJAS_SELECCION
+                        
+                        foreach ($campo->opciones as $o) {
+                            if(is_string($campoData['valor'])) { // Para insertar campos tipo LISTA
+                                if((int) $campoData['valor'] === $o->id_opcion_campo) {
+                                    MultinotaSeccionValor::insert([
+                                        'id_tramite' => $multinota->id_tramite,
+                                        'id_seccion' => $seccion->id_seccion,
+                                        'id_campo'   => $campo->id_campo,
+                                        'valor'      => $o->opcion,
+                                    ]);
+                                }
+                            } else if(is_array($campoData['valor'])) { // Para guardar valores de campos tipo CAJAS_SELECCION
+                                foreach ($campoData['valor'] as $cValor) {
+                                    if((int) $cValor === $o->id_opcion_campo) {
+                                        $opcionConcatenada[] = $o->opcion;
+                                    }
+                                }
+                            }
+                        }
+
+                        if(is_array($campoData['valor'])) { // Para concatenar valores de campos tipo CAJAS_SELECCION e insertar en base
+                            MultinotaSeccionValor::insert([
+                                'id_tramite' => $multinota->id_tramite,
+                                'id_seccion' => $seccion->id_seccion,
+                                'id_campo'   => $campo->id_campo,
+                                'valor'      => implode(', ', $opcionConcatenada),
+                            ]);
+                        }
+                    } else {
+                        MultinotaSeccionValor::insert([
+                            'id_tramite' => $multinota->id_tramite,
+                            'id_seccion' => $seccion->id_seccion,
+                            'id_campo'   => $campo->id_campo,
+                            'valor'      => $campoData['valor'],
+                        ]);    
+                    }
+                }
             }
         } catch (\Throwable $e) {
             return back()->with('error', 'Error al registrar el tramite: ' . $e->getMessage());
