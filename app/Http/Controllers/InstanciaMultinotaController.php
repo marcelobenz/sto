@@ -29,6 +29,8 @@ use App\Models\EstadoTramiteAsignable;
 use App\Models\UsuarioInterno;
 use App\Models\GrupoInterno;
 use App\Models\TramiteEstadoTramite;
+use App\Models\TipoEvento;
+use App\Models\Evento;
 use App\DTOs\UsuarioInternoDTO;
 use App\DTOs\GrupoInternoDTO;
 use App\DTOs\EstadoTramiteDTO;
@@ -904,6 +906,16 @@ class InstanciaMultinotaController extends Controller {
                     }
                 }
             }
+
+            // Obtengo TipoEvento de DB con clave = 'INICIADO'
+            $iniciado = TipoEvento::where('clave', 'INICIADO')->first();
+
+            Evento::create([
+                'descripcion'      => $iniciado->mensaje,
+                'desc_contrib'     => $iniciado->mensaje,
+                'id_tipo_evento'   => $iniciado->id_tipo_evento,
+                'clave'            => $iniciado->clave,
+            ]);
         } catch (\Throwable $e) {
             return back()->with('error', 'Error al registrar el tramite: ' . $e->getMessage());
         }
