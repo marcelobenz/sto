@@ -80,6 +80,7 @@ Route::get('/workflow/{id}', [AdministracionWorkflowController::class, 'crear'])
 Route::post('/workflow/guardar/{id}', [AdministracionWorkflowController::class, 'guardar'])->name('workflow.guardar');
 Route::get('/workflow/editar/{id}', [AdministracionWorkflowController::class, 'editar'])->name('workflow.editar');
 Route::post('/workflow/editar/guardarEdicion/{id}', [AdministracionWorkflowController::class, 'guardarEdicion'])->name('workflow.guardarEdicion');
+Route::post('/workflow/editar/guardarBorrador/{id}', [AdministracionWorkflowController::class, 'guardarBorrador'])->name('workflow.guardarBorrador');
 
 
 Route::get('/set-usuario-interno', [UsuarioController::class, 'setUsuarioInterno']);

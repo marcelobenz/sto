@@ -18,6 +18,9 @@
     <button id="btn-guardar-configuracion" class="btn btn-success">
         <i class="fas fa-save"></i> Guardar Configuración
     </button>
+     <button id="btn-guardar-borrador" class="btn btn-warning ml-2">
+        <i class="fas fa-save"></i> Guardar Borrador
+    </button>
 </div>
 
 
@@ -497,6 +500,80 @@ document.getElementById("btn-guardar-configuracion").addEventListener("click", f
         Swal.fire("Error", "No se pudo guardar la configuración.", "error");
     });
 });
+
+document.getElementById("btn-guardar-borrador").addEventListener("click", function () {
+    if (!Object.keys(configuraciones).length) {
+        Swal.fire("Error", "No se ha configurado ningún estado.", "error");
+        return;
+    }
+
+    const payload = [];
+
+    Object.entries(configuraciones).forEach(([estadoActual, config]) => {
+        const usuariosSeleccionados = config.asignaciones || [];
+
+        payload.push({
+            estado_actual: estadoActual,
+            tipo: config.tipo,
+            puede_rechazar: config.puede_rechazar ?? 0,
+            puede_pedir_documentacion: config.puede_pedir_documentacion ?? 0,
+            estado_tiene_expediente: config.tiene_expediente ?? 0,
+            posteriores: config.posteriores.map(nombre => ({ nombre })),
+            asignaciones: usuariosSeleccionados
+        });
+    });
+
+    const todosLosEstados = @json(
+        $estados->map(fn($e) => $e['estado_actual'] ?? null)->filter()->values()
+    );
+
+    todosLosEstados.forEach(nombreEstado => {
+        const yaEsActual = payload.some(conf => conf.estado_actual === nombreEstado);
+        const esPosteriorDeAlguien = payload.some(conf =>
+            conf.posteriores.some(p => p.nombre === nombreEstado)
+        );
+
+        if (!yaEsActual && esPosteriorDeAlguien) {
+            payload.push({
+                estado_actual: nombreEstado,
+                posteriores: [] 
+            });
+        }
+    });
+
+    fetch("{{ route('workflow.guardarBorrador', ['id' => $tipoTramite->id_tipo_tramite_multinota]) }}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+        },
+        body: JSON.stringify({ configuraciones: payload })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                title: "Borrador guardado",
+                text: data.message,
+                icon: "success",
+                timer: 2000,
+                showConfirmButton: false
+            });
+            // Si NO quieres redirigir, elimina este bloque:
+            // setTimeout(() => {
+            //     window.location.href = "/estados";
+            // }, 2000);
+        } else {
+            Swal.fire("Error", data.message || "Ocurrió un error al guardar el borrador", "error");
+        }
+    })
+    .catch(error => {
+        console.error(error);
+        Swal.fire("Error", "No se pudo guardar el borrador.", "error");
+    });
+});
+
+
 });
 </script>
 @endsection
