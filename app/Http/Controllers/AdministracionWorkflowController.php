@@ -21,11 +21,16 @@ class AdministracionWorkflowController extends Controller
                 ->leftJoin('configuracion_estado_tramite', 'tipo_tramite_multinota.id_tipo_tramite_multinota', '=', 'configuracion_estado_tramite.id_tipo_tramite_multinota')
                 ->where('tipo_tramite_multinota.baja_logica', 0) 
                 ->select([
-                    'tipo_tramite_multinota.id_tipo_tramite_multinota',
-                    'categoria.nombre as categoria',
-                    'tipo_tramite_multinota.nombre as nombre_tipo_tramite',
-                    \DB::raw('IF(configuracion_estado_tramite.id_tipo_tramite_multinota IS NULL, 0, 1) as existe_configuracion')
-                ])
+                        'tipo_tramite_multinota.id_tipo_tramite_multinota',
+                        'categoria.nombre as categoria',
+                        'tipo_tramite_multinota.nombre as nombre_tipo_tramite',
+                        \DB::raw('IF(configuracion_estado_tramite.id_tipo_tramite_multinota IS NULL, 0, 1) as existe_configuracion'),
+                        \DB::raw("IF(EXISTS (
+                                SELECT 1 FROM configuracion_estado_tramite cet
+                                WHERE cet.id_tipo_tramite_multinota = tipo_tramite_multinota.id_tipo_tramite_multinota
+                                AND cet.publico = 0
+                                ), 1, 0) as existe_borrador")
+                        ])
                 ->groupBy('tipo_tramite_multinota.id_tipo_tramite_multinota', 'categoria.nombre', 'tipo_tramite_multinota.nombre');
 
             return DataTables::of($data)
@@ -107,6 +112,61 @@ class AdministracionWorkflowController extends Controller
 
     return view('estados.editar', compact('tipoTramite', 'estados', 'grupos'));
 }
+
+public function borrador($id)
+{
+    $tipoTramite = TipoTramiteMultinota::findOrFail($id);
+
+    $estadosDB = DB::table('estado_tramite as et')
+        ->join('configuracion_estado_tramite as cet', 'et.id_estado_tramite', '=', 'cet.id_estado_tramite')
+        ->where('cet.id_tipo_tramite_multinota', $id)
+        ->where('cet.activo', 0)
+        ->where('cet.publico', 0)
+        ->select('et.id_estado_tramite', 'et.nombre', 'et.tipo', 'et.puede_rechazar', 'et.puede_pedir_documentacion', 'et.estado_tiene_expediente')
+        ->distinct()
+        ->get();
+
+    $posteriores = DB::table('configuracion_estado_tramite as cet')
+        ->join('estado_tramite as et', 'cet.id_proximo_estado', '=', 'et.id_estado_tramite')
+        ->where('cet.id_tipo_tramite_multinota', $id)
+        ->where('cet.publico', 0)
+        ->whereNotNull('cet.id_proximo_estado')
+        ->select('cet.id_estado_tramite', 'et.nombre as nombre_posterior')
+        ->get()
+        ->groupBy('id_estado_tramite');
+
+    $asignaciones = DB::table('estado_tramite_asignable')
+        ->whereIn('id_estado_tramite', $estadosDB->pluck('id_estado_tramite'))
+        ->get()
+        ->groupBy('id_estado_tramite');
+
+    $estados = $estadosDB->map(function ($estado) use ($posteriores, $asignaciones) {
+        return [
+            'estado_actual' => (string) $estado->nombre,
+            'posteriores' => isset($posteriores[$estado->id_estado_tramite])
+                ? $posteriores[$estado->id_estado_tramite]->map(function ($p) {
+                    return ['nombre' => $p->nombre_posterior];
+                })->values()->toArray()
+                : [],
+            'puede_rechazar' => $estado->puede_rechazar,
+            'puede_pedir_documentacion' => $estado->puede_pedir_documentacion,
+            'estado_tiene_expediente' => $estado->estado_tiene_expediente,
+            'asignaciones' => isset($asignaciones[$estado->id_estado_tramite])
+            ? $asignaciones[$estado->id_estado_tramite]->map(function ($asig) {
+                return [
+                    'id_grupo_interno' => $asig->id_grupo_interno,
+                    'id_usuario_interno' => $asig->id_usuario_interno,
+                ];
+            })->values()->toArray()
+            : [],
+    ];
+});
+
+    $grupos = GrupoInterno::with('usuarios')->get();
+
+    return view('estados.borrador', compact('tipoTramite', 'estados', 'grupos'));
+}
+
 
     
 
@@ -218,6 +278,16 @@ public function guardarEdicion(Request $request, $id)
 
     DB::beginTransaction();
     try {
+        $versionesExistentes = DB::table('configuracion_estado_tramite')
+            ->where('id_tipo_tramite_multinota', $id)
+            ->select('version', 'publico', DB::raw('MAX(fecha_sistema) as fecha_maxima'))
+            ->groupBy('version', 'publico')
+            ->orderBy('fecha_maxima', 'desc')
+            ->get();
+
+            $versionesPublicas = $versionesExistentes->where('publico', 1)->values();
+            $borradores = $versionesExistentes->where('publico', 0)->values();
+
         DB::table('configuracion_estado_tramite')
             ->where('id_tipo_tramite_multinota', $id)
             ->where('activo', 1)
@@ -251,38 +321,37 @@ public function guardarEdicion(Request $request, $id)
                 $mapaEstados[$nombreEstado] = $idEstado;
             }
 
-     if (isset($conf['posteriores']) && is_array($conf['posteriores'])) {
-    foreach ($conf['posteriores'] as $postIndex => $posterior) {
-        if (!is_array($posterior)) {
-            throw new \Exception("Posterior en índice $postIndex no es un array");
-        }
+            if (isset($conf['posteriores']) && is_array($conf['posteriores'])) {
+                foreach ($conf['posteriores'] as $postIndex => $posterior) {
+                    if (!is_array($posterior)) {
+                        throw new \Exception("Posterior en índice $postIndex no es un array");
+                    }
 
-        if (!isset($posterior['nombre'])) {
-            throw new \Exception("Falta 'nombre' en posterior $postIndex");
-        }
+                    if (!isset($posterior['nombre'])) {
+                        throw new \Exception("Falta 'nombre' en posterior $postIndex");
+                    }
 
-        $nombrePosterior = $this->normalizarNombreEstado($posterior['nombre']);
+                    $nombrePosterior = $this->normalizarNombreEstado($posterior['nombre']);
 
-        if (!isset($mapaEstados[$nombrePosterior])) {
-            $posteriorConf = collect($configuraciones)->first(function ($c) use ($nombrePosterior) {
-                return $this->normalizarNombreEstado($c['estado_actual']) === $nombrePosterior;
-            });
+                    if (!isset($mapaEstados[$nombrePosterior])) {
+                        $posteriorConf = collect($configuraciones)->first(function ($c) use ($nombrePosterior) {
+                            return $this->normalizarNombreEstado($c['estado_actual']) === $nombrePosterior;
+                        });
 
-            $idPosterior = DB::table('estado_tramite')->insertGetId([
-                'fecha_sistema' => $now,
-                'nombre' => $nombrePosterior,
-                'tipo' => strtoupper(str_replace(' ', '_', $nombrePosterior)),
-                'puede_rechazar' => $this->parseBool($posteriorConf['puede_rechazar'] ?? 0),
-                'puede_pedir_documentacion' => $this->parseBool($posteriorConf['puede_pedir_documentacion'] ?? 0),
-                'puede_elegir_camino' => 0,
-                'estado_tiene_expediente' => $this->parseBool($posteriorConf['estado_tiene_expediente'] ?? 0),
-            ]);
+                        $idPosterior = DB::table('estado_tramite')->insertGetId([
+                            'fecha_sistema' => $now,
+                            'nombre' => $nombrePosterior,
+                            'tipo' => strtoupper(str_replace(' ', '_', $nombrePosterior)),
+                            'puede_rechazar' => $this->parseBool($posteriorConf['puede_rechazar'] ?? 0),
+                            'puede_pedir_documentacion' => $this->parseBool($posteriorConf['puede_pedir_documentacion'] ?? 0),
+                            'puede_elegir_camino' => 0,
+                            'estado_tiene_expediente' => $this->parseBool($posteriorConf['estado_tiene_expediente'] ?? 0),
+                        ]);
 
-            $mapaEstados[$nombrePosterior] = $idPosterior;
-        }
-    }
-}
-
+                        $mapaEstados[$nombrePosterior] = $idPosterior;
+                    }
+                }
+            }
         }
 
         foreach ($configuraciones as $conf) {
@@ -349,6 +418,16 @@ public function guardarEdicion(Request $request, $id)
             if (!empty($transiciones)) {
                 DB::table('configuracion_estado_tramite')->insert($transiciones);
             }
+        }
+
+       if ($versionesPublicas->count() > 2) {
+            $versionesPublicasAEliminar = $versionesPublicas->slice(2)->pluck('version');
+            
+            DB::table('configuracion_estado_tramite')
+                ->where('id_tipo_tramite_multinota', $id)
+                ->where('publico', 1)
+                ->whereIn('version', $versionesPublicasAEliminar)
+                ->delete();
         }
 
         DB::commit();
@@ -420,6 +499,7 @@ public function guardarBorrador(Request $request, $id)
         }
 
         $nombrePosterior = $this->normalizarNombreEstado($posterior['nombre']);
+
 
         if (!isset($mapaEstados[$nombrePosterior])) {
             $posteriorConf = collect($configuraciones)->first(function ($c) use ($nombrePosterior) {

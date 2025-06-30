@@ -12,7 +12,7 @@
         <br/>
         <br/>
         <br/>
-        <h2 class="mt-3">Crear Workflow de Estados - {{ $tipoTramite->nombre }}</h2>
+        <h2 class="mt-3">(BORRADOR)Crear Workflow de Estados - {{ $tipoTramite->nombre }}</h2>
 
         <div class="mt-3 text-right">
             <button id="btn-guardar-configuracion" class="btn btn-success">

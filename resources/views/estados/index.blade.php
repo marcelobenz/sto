@@ -50,19 +50,28 @@
             {
                 "data": "existe_configuracion",
                 "render": function(data, type, row) {
+                      let botones = '';
                     if (data == 0) {
-                        return `
+                        botones += `
                             <button class="btn btn-sm btn-primary fa fa-plus" 
                             onclick="window.location.href='/workflow/${row.id_tipo_tramite_multinota}'" 
                             title="Agregar"></button>
                         `;
                     } else {
-                        return `
+                        botones += `
                             <button class="btn btn-sm btn-warning fa fa-edit" 
                             onclick="window.location.href='/workflow/editar/${row.id_tipo_tramite_multinota}'" 
                             title="Editar"></button>
                         `;
                     }
+                    if (row.existe_borrador == 1) {
+                        botones += `
+                         <button class="btn btn-sm btn-info fa fa-file-alt" 
+                            onclick="window.location.href='/workflow/borrador/${row.id_tipo_tramite_multinota}'" 
+                            title="Borrador"></button>
+                        `;
+                    }
+                      return botones;
                 }
             }
         ],
