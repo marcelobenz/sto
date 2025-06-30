@@ -33,6 +33,7 @@ use App\Models\TramiteEstadoTramite;
 use App\Models\TipoEvento;
 use App\Models\Evento;
 use App\Models\HistorialTramite;
+use App\Models\Notificacion;
 use App\DTOs\UsuarioInternoDTO;
 use App\DTOs\GrupoInternoDTO;
 use App\DTOs\EstadoTramiteDTO;
@@ -50,6 +51,7 @@ use App\DTOs\DomicilioDTO;
 use App\DTOs\TipoCaracterDTO;
 use App\DTOs\HistorialTramiteDTO;
 use App\Builders\EstadoBuilder;
+use App\Builders\ComentarioNotificacionBuilder;
 use App\Enums\TipoCaracterEnum;
 use App\Enums\TipoEstadoEnum;
 use App\Transformers\PersonaFisicaTransformer;
@@ -929,7 +931,7 @@ class InstanciaMultinotaController extends Controller {
             //TO-DO
             // Si el usuario no es externo 
                 $dtoHistorialTramite->setIdUsuarioInternoAdministrador(Session::get('usuario_interno')->id_usuario_interno);
-                HistorialTramite::create([
+                $historialTramite = HistorialTramite::create([
                     'id_evento' => $dtoHistorialTramite->getIdEvento(),
                     'id_tramite' => $dtoHistorialTramite->getIdTramite(),
                     'id_usuario_interno_administrador' => $dtoHistorialTramite->getIdUsuarioInternoAdministrador()
@@ -939,6 +941,16 @@ class InstanciaMultinotaController extends Controller {
                     'id_evento' => $dtoHistorialTramite->getIdEvento(),
                     'id_tramite' => $dtoHistorialTramite->getIdTramite()
                 ]); */
+
+            // Insert en notificacion
+            $dtoHistorialTramite->setIdHistorialTramite($historialTramite->id_historial_tramite);
+
+            $comentarioNotificacion = (new ComentarioNotificacionBuilder())
+                ->comentario('El trámite fue iniciado')
+                ->notificaContribuyente(true)
+                ->build();
+
+            $comentarioNotificacion->guardarInicioTramite($dtoHistorialTramite, $multinota);
         } catch (\Throwable $e) {
             return back()->with('error', 'Error al registrar el tramite: ' . $e->getMessage());
         }
