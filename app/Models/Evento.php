@@ -15,6 +15,11 @@ class Evento extends Model
     // Indicamos que no se usarán timestamps automáticos (`created_at` y `updated_at`)
     public $timestamps = false;
 
+    public $incrementing = true;
+
+    // Define the key type
+    protected $keyType = 'int';
+
     // Asignación masiva
     protected $fillable = [
         'descripcion',

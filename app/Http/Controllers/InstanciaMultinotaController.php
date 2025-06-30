@@ -6,6 +6,7 @@ use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Carbon;
 
 use App\Models\TipoPersonalidadJuridica;
 use App\Models\MultinotaServicio;
@@ -31,6 +32,7 @@ use App\Models\GrupoInterno;
 use App\Models\TramiteEstadoTramite;
 use App\Models\TipoEvento;
 use App\Models\Evento;
+use App\Models\HistorialTramite;
 use App\DTOs\UsuarioInternoDTO;
 use App\DTOs\GrupoInternoDTO;
 use App\DTOs\EstadoTramiteDTO;
@@ -46,6 +48,7 @@ use App\DTOs\CodigoAreaDTO;
 use App\DTOs\DocumentoDTO;
 use App\DTOs\DomicilioDTO;
 use App\DTOs\TipoCaracterDTO;
+use App\DTOs\HistorialTramiteDTO;
 use App\Builders\EstadoBuilder;
 use App\Enums\TipoCaracterEnum;
 use App\Enums\TipoEstadoEnum;
@@ -910,12 +913,32 @@ class InstanciaMultinotaController extends Controller {
             // Obtengo TipoEvento de DB con clave = 'INICIADO'
             $iniciado = TipoEvento::where('clave', 'INICIADO')->first();
 
-            Evento::create([
+            $evento = Evento::create([
                 'descripcion'      => $iniciado->mensaje,
                 'desc_contrib'     => $iniciado->mensaje,
                 'id_tipo_evento'   => $iniciado->id_tipo_evento,
                 'clave'            => $iniciado->clave,
             ]);
+
+            // Insert en historial_tramite
+            $dtoHistorialTramite = new HistorialTramiteDTO(
+                id_evento: $evento->id_evento,
+                id_tramite: $multinota->id_tramite
+            );
+
+            //TO-DO
+            // Si el usuario no es externo 
+                $dtoHistorialTramite->setIdUsuarioInternoAdministrador(Session::get('usuario_interno')->id_usuario_interno);
+                HistorialTramite::create([
+                    'id_evento' => $dtoHistorialTramite->getIdEvento(),
+                    'id_tramite' => $dtoHistorialTramite->getIdTramite(),
+                    'id_usuario_interno_administrador' => $dtoHistorialTramite->getIdUsuarioInternoAdministrador()
+                ]);
+            // Else
+                /* HistorialTramite::create([
+                    'id_evento' => $dtoHistorialTramite->getIdEvento(),
+                    'id_tramite' => $dtoHistorialTramite->getIdTramite()
+                ]); */
         } catch (\Throwable $e) {
             return back()->with('error', 'Error al registrar el tramite: ' . $e->getMessage());
         }
