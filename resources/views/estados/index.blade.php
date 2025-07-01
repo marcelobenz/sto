@@ -39,34 +39,50 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-    $(document).ready(function() {
-        $('#tramitesTable').DataTable({
-            "processing": true,
-            "serverSide": true,
-            "ajax": "{{ route('estados.index') }}",
-            "columns": [
-                { "data": "categoria" },  
-                { "data": "nombre_tipo_tramite" },
-                {
-                    "data": null,
-                    "render": function(data, type, row) {
-                        return `
-                            <button class="btn btn-sm btn-primary fa fa-edit" 
-                            onclick="window.location.href='/workflow/${row.id_tipo_tramite_multinota}'">
-                            </button>
-                            <button class="btn btn-sm btn-danger fa fa-trash" onclick="confirmarEliminar(${row.id_tipo_tramite_multinota})" title="Eliminar"></button>
+   $(document).ready(function() {
+    $('#tramitesTable').DataTable({
+        "processing": true,
+        "serverSide": true,
+        "ajax": "{{ route('estados.index') }}",
+        "columns": [
+            { "data": "categoria" },  
+            { "data": "nombre_tipo_tramite" },
+            {
+                "data": "existe_configuracion",
+                "render": function(data, type, row) {
+                      let botones = '';
+                    if (data == 0) {
+                        botones += `
+                            <button class="btn btn-sm btn-primary fa fa-plus" 
+                            onclick="window.location.href='/workflow/${row.id_tipo_tramite_multinota}'" 
+                            title="Agregar"></button>
+                        `;
+                    } else {
+                        botones += `
+                            <button class="btn btn-sm btn-warning fa fa-edit" 
+                            onclick="window.location.href='/workflow/editar/${row.id_tipo_tramite_multinota}'" 
+                            title="Editar"></button>
                         `;
                     }
-                }
-            ],
-            "language": {
-                "paginate": {
-                    "previous": "<",
-                    "next": ">"
+                    if (row.existe_borrador == 1) {
+                        botones += `
+                         <button class="btn btn-sm btn-info fa fa-file-alt" 
+                            onclick="window.location.href='/workflow/borrador/${row.id_tipo_tramite_multinota}'" 
+                            title="Borrador"></button>
+                        `;
+                    }
+                      return botones;
                 }
             }
-        });
+        ],
+        "language": {
+            "paginate": {
+                "previous": "<",
+                "next": ">"
+            }
+        }
     });
+});
 </script>
 
 @endsection
