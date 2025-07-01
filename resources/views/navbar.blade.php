@@ -95,12 +95,12 @@
                             Administracion
                         </a>
                         <div class="dropdown-menu" aria-labelledby="administracionDropdown">
-                            <a class="dropdown-item" href="categorias">Categorias</a>
-                            <a class="dropdown-item" href="usuarios">Administrativos</a>
-                            <a class="dropdown-item" href="limite">Limite de asignaciones</a>
-                            <a class="dropdown-item" href="usuario">Usuarios</a>
-                            <a class="dropdown-item" href="cuestionarios">Cuestionarios</a>
-                            <a class="dropdown-item" href="estados">Estados</a>
+                            <a class="dropdown-item" href="{{ route('categorias.index') }}">Categorias</a>
+                            <a class="dropdown-item" href="{{ route('usuarios.index') }}">Administrativos</a>
+                            <a class="dropdown-item" href="{{ route('limites.index') }}">Limite de asignaciones</a>
+                            <a class="dropdown-item" href="{{ route('contribuyente.buscar') }}">Usuarios</a>
+                            <a class="dropdown-item" href="{{ route('cuestionarios.index') }}">Cuestionarios</a>
+                            <a class="dropdown-item" href="{{ route('estados.index') }}">Estados</a>
                             <a class="dropdown-item" href="{{ route('secciones-multinota.index') }}">Secciones Multinota</a>
                             <a class="dropdown-item" href="{{ route('multinotas.index') }}">Multinotas</a>
                         </div>
