@@ -33,9 +33,16 @@ class AdministracionWorkflowController extends Controller
                         ])
                 ->groupBy('tipo_tramite_multinota.id_tipo_tramite_multinota', 'categoria.nombre', 'tipo_tramite_multinota.nombre');
 
-            return DataTables::of($data)
-                ->addIndexColumn()
-                ->make(true);
+           return DataTables::of($data)
+                    ->addIndexColumn()
+                    ->filterColumn('categoria', function($query, $keyword) {
+                    $query->whereRaw('LOWER(categoria.nombre) LIKE ?', ["%" . strtolower($keyword) . "%"]);
+                })
+                    ->filterColumn('nombre_tipo_tramite', function($query, $keyword) {
+                    $query->whereRaw('LOWER(tipo_tramite_multinota.nombre) LIKE ?', ["%" . strtolower($keyword) . "%"]);
+            })
+                    ->make(true);
+
         }
 
         return view('estados.index');
