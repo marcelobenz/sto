@@ -12,7 +12,7 @@
         <br/>
         <br/>
         <br/>
-        <h2 class="mt-3">Crear Workflow de Estados - {{ $tipoTramite->nombre_tipo_tramite }}</h2>
+        <h2 class="mt-3">Crear Workflow de Estados - {{ $tipoTramite->nombre }}</h2>
 
 <div class="mt-3 text-right">
     <button id="btn-guardar-configuracion" class="btn btn-success">
@@ -58,7 +58,7 @@
             <div class="col-md-8">
                 <div id="seccion-relaciones" class="card" style="display: none;">
                     <div class="card-header">
-                        <h5>Relaciones</h5>
+                        <h5>Relaciones - <span id="estado-actual-titulo"></span></h5>
                     </div>
                     <div class="card-body">
                         <label><input type="hidden" name="relacion" value="posterior"> </label>
@@ -135,6 +135,7 @@ botonesEstado.forEach(button => {
         }
 
         estadoActualSeleccionado = this.getAttribute("data-estado");
+        document.getElementById('estado-actual-titulo').textContent = estadoActualSeleccionado;
 
         let selectEstado = document.getElementById("select-estado");
         selectEstado.innerHTML = '<option>Seleccionar...</option>';
@@ -152,17 +153,36 @@ botonesEstado.forEach(button => {
         seccionResponsables.style.display = "block";
         seccionRestricciones.style.display = (estadoActualSeleccionado === "En Creación") ? "none" : "block";
 
-        document.getElementById("lista-posteriores").innerHTML = "";
-        if (configuraciones[estadoActualSeleccionado]) {
-            configuraciones[estadoActualSeleccionado].posteriores.forEach(item => {
-                let nuevoItem = document.createElement("li");
-                nuevoItem.className = "list-group-item";
-                nuevoItem.textContent = item;
-                document.getElementById("lista-posteriores").appendChild(nuevoItem);
-            });
-        }
+        const listaPosteriores = document.getElementById("lista-posteriores");
+        listaPosteriores.innerHTML = "";
 
         const config = configuraciones[estadoActualSeleccionado] || {};
+          (config.posteriores || []).forEach(item => {
+            const nombrePosterior = typeof item === 'string' ? item : item.nombre;
+            if (nombrePosterior) {
+                const nuevoItem = document.createElement("li");
+                nuevoItem.className = "list-group-item d-flex justify-content-between align-items-center";
+                nuevoItem.innerHTML = `
+                    <span>${nombrePosterior}</span>
+                    <button class="btn btn-sm btn-danger btn-eliminar-posterior" data-nombre="${nombrePosterior}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                listaPosteriores.appendChild(nuevoItem);
+
+                nuevoItem.querySelector(".btn-eliminar-posterior").addEventListener("click", function() {
+                    const nombre = this.getAttribute("data-nombre");
+                    this.closest("li").remove();
+                    
+                    configuraciones[estadoActualSeleccionado].posteriores = 
+                        configuraciones[estadoActualSeleccionado].posteriores.filter(p => {
+                            if (typeof p === 'string') return p !== nombre;
+                            return p.nombre !== nombre;
+                        });
+                });
+            }
+        });
+
         document.getElementById("puede-rechazar").checked = config.puede_rechazar === 1;
         document.getElementById("puede-doc").checked = config.puede_pedir_documentacion === 1;
         document.getElementById("tiene-expediente").checked = config.tiene_expediente === 1;
@@ -220,11 +240,16 @@ document.getElementById("btn-agregar").addEventListener("click", function () {
         let yaExiste = Array.from(lista.children).some(item => item.textContent === estadoSeleccionado);
         if (yaExiste) return;
 
-        let nuevoItem = document.createElement("li");
-        nuevoItem.className = "list-group-item";
-        nuevoItem.textContent = estadoSeleccionado;
+        const nuevoItem = document.createElement("li");
+        nuevoItem.className = "list-group-item d-flex justify-content-between align-items-center";
+        nuevoItem.innerHTML = `
+            <span>${estadoSeleccionado}</span>
+            <button class="btn btn-sm btn-danger btn-eliminar-posterior" data-nombre="${estadoSeleccionado}">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
         lista.appendChild(nuevoItem);
-
+        
         configuraciones[estadoActualSeleccionado].posteriores.push(estadoSeleccionado);
     }
 });
