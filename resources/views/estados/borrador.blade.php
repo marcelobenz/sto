@@ -14,9 +14,11 @@
         <br/>
         <h2 class="mt-3">(BORRADOR)Crear Workflow de Estados - {{ $tipoTramite->nombre }}</h2>
 
+        <x-loader />
+
         <div class="mt-3 text-right">
-            <button id="btn-guardar-configuracion" class="btn btn-success">
-                <i class="fas fa-save"></i> Guardar Configuración
+            <button id="btn-publicar-borrador" class="btn btn-success">
+                <i class="fas fa-save"></i> Publicar Borrador
             </button>
             <button id="btn-guardar-borrador" class="btn btn-warning ml-2">
                 <i class="fas fa-save"></i> Guardar Borrador
@@ -337,7 +339,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    document.getElementById("btn-guardar-configuracion").addEventListener("click", function() {
+    document.getElementById("btn-publicar-borrador").addEventListener("click", function() {
         if (!Object.keys(configuraciones).length) {
             Swal.fire("Error", "No se ha configurado ningún estado.", "error");
             return;
@@ -346,6 +348,8 @@ document.addEventListener("DOMContentLoaded", function () {
         if (estadoActualSeleccionado) {
             actualizarConfiguracionEstado(estadoActualSeleccionado);
         }
+
+        document.getElementById("loader").style.display = "flex";
 
         const payload = Object.values(configuraciones).map(config => ({
             estado_actual: config.nombre,
@@ -357,7 +361,7 @@ document.addEventListener("DOMContentLoaded", function () {
             asignaciones: config.asignaciones
         }));
 
-        fetch("{{ route('workflow.guardarEdicion', ['id' => $tipoTramite->id_tipo_tramite_multinota]) }}", {
+        fetch("{{ route('workflow.publicarBorrador', ['id' => $tipoTramite->id_tipo_tramite_multinota]) }}", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -367,6 +371,7 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .then(response => response.json())
         .then(data => {
+            document.getElementById("loader").style.display = "none";
             if (data.success) {
                 Swal.fire({
                     title: "Éxito",

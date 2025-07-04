@@ -14,6 +14,8 @@
         <br/>
         <h2 class="mt-3">Crear Workflow de Estados - {{ $tipoTramite->nombre }}</h2>
 
+        <x-loader />
+
         <div class="mt-3 text-right">
             <button id="btn-guardar-configuracion" class="btn btn-success">
                 <i class="fas fa-save"></i> Guardar Configuración
@@ -347,6 +349,8 @@ document.addEventListener("DOMContentLoaded", function () {
             actualizarConfiguracionEstado(estadoActualSeleccionado);
         }
 
+        document.getElementById("loader").style.display = "flex";
+
         const payload = Object.values(configuraciones).map(config => ({
             estado_actual: config.nombre,
             tipo: config.tipo,
@@ -367,6 +371,7 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .then(response => response.json())
         .then(data => {
+            document.getElementById("loader").style.display = "none";
             if (data.success) {
                 Swal.fire({
                     title: "Éxito",
@@ -442,3 +447,32 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 @endsection
+
+<style>
+#loader {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(255, 255, 255, 0.7);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.spinner {
+    border: 6px solid #f3f3f3;
+    border-top: 6px solid #3498db;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
