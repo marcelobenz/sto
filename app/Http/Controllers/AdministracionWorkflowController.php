@@ -106,12 +106,15 @@ class AdministracionWorkflowController extends Controller
             'puede_rechazar' => $estado->puede_rechazar,
             'puede_pedir_documentacion' => $estado->puede_pedir_documentacion,
             'estado_tiene_expediente' => $estado->estado_tiene_expediente,
-            'asignaciones' => $asignaciones[$estado->id_estado_tramite]->map(function ($asig) {
-                return [
-                    'id_grupo_interno' => $asig->id_grupo_interno,
-                    'id_usuario_interno' => $asig->id_usuario_interno,
-                ];
+            'asignaciones' => isset($asignaciones[$estado->id_estado_tramite])
+            ? collect($asignaciones[$estado->id_estado_tramite])->map(function ($asig) {
+            return [
+                'id_grupo_interno' => $asig->id_grupo_interno,
+                'id_usuario_interno' => $asig->id_usuario_interno,
+            ];
             })->values()->toArray()
+            : [],
+
         ];
     });
 

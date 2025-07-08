@@ -26,8 +26,11 @@
 @section('contenidoPrincipal')
 <div class="container mt-5">
     <h1>Crear Nuevo Cuestionario</h1>
-    <form action="{{ route('cuestionarios.store') }}" method="POST">
-        @csrf
+    <div class="row">
+          {{-- Formulario principal --}}
+    <div class="col-md-9">
+        <form action="{{ route('cuestionarios.store') }}" method="POST">
+            @csrf
         <div class="mb-3">
             <label for="titulo" class="form-label">Título</label>
             <input type="text" name="titulo" class="form-control" required>
@@ -63,8 +66,51 @@
         </table>
 
         <button type="submit" class="btn btn-primary">Guardar Cuestionario</button>
+</div>
+
+   {{-- Sección lateral: tipo_tramite_multinota y estados --}}
+<div class="col-md-3">
+    <h5>Tipo de Trámite Multinota</h5>
+    
+    {{-- Filtro --}}
+    <input type="text" id="filtroTramites" class="form-control mb-2" placeholder="Buscar tipo...">
+
+    {{-- Contenedor scrollable --}}
+    <div id="listaTramites" style="max-height: 500px; overflow-y: auto;">
+        <div class="accordion" id="accordionTipos">
+            @foreach ($agrupado as $tipoId => $estados)
+                <div class="card mb-2 tipo-tramite" data-nombre="{{ strtolower($tipos[$tipoId] ?? 'desconocido') }}">
+                    <div class="card-header p-2" id="heading{{ $tipoId }}">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link grupo-label" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ $tipoId }}">
+                                {{ $tipos[$tipoId] ?? 'Desconocido' }}
+                            </button>
+                        </h2>
+                    </div>
+                    <div id="collapse{{ $tipoId }}" class="collapse" data-bs-parent="#accordionTipos">
+                        <div class="card-body">
+                            @foreach ($estados as $estado)
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox"
+                                           name="tipo_tramite_multinota[{{ $tipoId }}][]"
+                                           value="{{ $estado['id_estado_tramite'] }}"
+                                           id="estado_{{ $tipoId }}_{{ $estado['id_estado_tramite'] }}">
+                                    <label class="form-check-label" for="estado_{{ $tipoId }}_{{ $estado['id_estado_tramite'] }}">
+                                        {{ $estado['nombre_estado'] }}
+                                    </label>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
     </form>
 </div>
+
+
+
 @endsection
 
 
@@ -145,4 +191,19 @@
         this.appendChild(inputPreguntas);
     });
 </script>
+<script>
+    // Filtro en tiempo real para tipo_tramite_multinota
+    document.getElementById('filtroTramites').addEventListener('input', function () {
+        const filtro = this.value.toLowerCase();
+        const tramites = document.querySelectorAll('.tipo-tramite');
+
+        tramites.forEach(function (tramite) {
+            const nombre = tramite.getAttribute('data-nombre');
+            tramite.style.display = nombre.includes(filtro) ? '' : 'none';
+        });
+    });
+</script>
+
+{{-- Bootstrap Bundle for accordion --}}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 @endsection
