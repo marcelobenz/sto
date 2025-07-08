@@ -29,6 +29,13 @@
     <br/>
     <h1>Listado de Cuestionarios</h1>
 
+
+    <div class="mb-3">
+        <a href="{{ route('cuestionarios.create') }}" class="btn btn-success">
+            <i class="fas fa-plus"></i> Crear nuevo cuestionario
+        </a>
+    </div>
+
     <table class="table table-striped mt-3">
         <thead>
             <tr>
