@@ -56,7 +56,7 @@
         Teléfono
       </dt>
       <dd>
-        {{ '(' . $representante->getCodigoArea()->getCodigo() . ')-' . $representante->getTelefono() }}
+        {{ $representante->getTelefono() }}
       </dd>
     </dl>
   </div>

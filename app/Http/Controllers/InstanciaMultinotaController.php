@@ -563,11 +563,12 @@ class InstanciaMultinotaController extends Controller {
         $codigoAreaObject->provincia,
         $codigoAreaObject->localidad,
         $codigoAreaObject->codigo);
+
+        // Se concatena el código de área al telefono
+        $telefonoCompleto = '(' . $data['codArea'] . ')-' . $data['telefono'];
+        $data['telefono'] = $telefonoCompleto;
         
         $representanteNew = RepresentanteDTO::fromRequest($data);
-
-        // Se setea código de área
-        $representanteNew->setCodigoArea($codigoAreaDTO);
 
         Session::put('REPRESENTANTE', $representanteNew);
     }

@@ -17,6 +17,9 @@
     </style>
 </head>
 <body>
+    @php
+        $seccionesAgrupadas = collect($detalleTramite)->groupBy('titulo');
+    @endphp
 
     <div class="container">
         <!-- Encabezado -->
@@ -32,10 +35,54 @@
                 <td><strong>Fecha de Emisión</strong></td>
                 <td>{{ date('d-m-Y') }}</td>
             </tr>
+            <tr>
+                <td><strong>CUIT</strong></td>
+                <td>{{ $multinota->contribuyente->cuit }}</td>
+            </tr>
+            <tr>
+                <td><strong>Razón Social</strong></td>
+                <td>{{ $multinota->contribuyente->apellido }}</td>
+            </tr>
+        </table>
+
+        <div class="section-title">DATOS DEL REPRESENTANTE</div>
+        <table>
+            <tr>
+                <td><strong>Caracter</strong></td>
+                <td>{{ $tipoCaracter ?? '---' }}</td>
+            </tr>
+            <tr>
+                <td><strong>Teléfono</strong></td>
+                <td>{{ $multinota->solicitante->telefono ?? '---' }}</td>
+            </tr>
+            <tr>
+                <td><strong>Nombre / Razón Social</strong></td>
+                <td>{{ $multinota->solicitante->nombre ?? '---' }}</td>
+            </tr>
+            <tr>
+                <td><strong>Correo</strong></td>
+                <td>{{ $multinota->solicitante->correo ?? '---' }}</td>
+            </tr>
+        </table>
+
+        <div class="section-title">DATOS DEL VEHICULO</div>
+        <table>
+            <tr>
+                <td><strong>Cuenta</strong></td>
+                <td>{{ $multinota->cuenta ?? '---' }}</td>
+            </tr>
+            <tr>
+                <td><strong>CUIT</strong></td>
+                <td>{{ $multinota->contribuyente->cuit ?? '---' }}</td>
+            </tr>
+            <tr>
+                <td><strong>Nombre del Titular</strong></td>
+                <td>{{ $multinota->contribuyente->apellido ?? '---' }}</td>
+            </tr>
         </table>
 
         <!-- Datos del Titular -->
-        <div class="section-title">DATOS DEL TITULAR</div>
+        {{-- <div class="section-title">DATOS DEL TITULAR</div>
         <table>
             <tr>
                 <td><strong>Apellido y Nombre</strong></td>
@@ -82,7 +129,19 @@
                 <td><strong>Color</strong></td>
                 <td>{{ $detalleTramite->firstWhere('nombre', 'COLOR')->valor ?? '---' }}</td>
             </tr>
-        </table>
+        </table> --}}
+
+        @foreach($seccionesAgrupadas as $titulo => $campos)
+            <div class="section-title">{{ strtoupper($titulo) }}</div>
+            <table>
+                @foreach($campos as $campo)
+                    <tr>
+                        <td><strong>{{ $campo->nombre }}</strong></td>
+                        <td>{{ $campo->valor ?? '---' }}</td>
+                    </tr>
+                @endforeach
+            </table>
+        @endforeach
 
         <!-- Motivo -->
         <div class="section-title">MOTIVO</div>

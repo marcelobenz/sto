@@ -7,6 +7,10 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
+use App\Models\Solicitante;
+use App\Models\Multinota;
+use App\Enums\TipoCaracterEnum;
+
 class ReporteController extends Controller
 {
     public function generarPDF($idTramite)
@@ -25,6 +29,12 @@ class ReporteController extends Controller
             ->join('tipo_tramite_multinota as ttm', 'm.id_tipo_tramite_multinota', '=', 'ttm.id_tipo_tramite_multinota')
             ->select('ttm.nombre', 'm.fecha_alta')
             ->first();
+
+        $multinota = Multinota::where('id_tramite', $idTramite)->first();
+
+        // Se obtiene el label del tipo caracter
+        $obj = TipoCaracterEnum::from($multinota->r_caracter);
+        $tipoCaracter = $obj->descripcion();
 
         // Si no hay datos, asignar valores por defecto
         if (!$tramiteInfo || !$detalleTramite) {
@@ -63,6 +73,8 @@ class ReporteController extends Controller
             'idTramite' => $idTramite,
             'detalleTramite' => $detalleTramite, // Mantenerlo como colección
             'tramiteInfo' => $tramiteInfo,
+            'multinota' => $multinota,
+            'tipoCaracter' => $tipoCaracter,
             'qr' => $qr
         ]);
 
