@@ -441,20 +441,18 @@
                                 guardarDatosSeccionSolicitante();
                             } else {
                                 // Seccion 'Datos a Completar'
-                                
-                                //validarDatosSeccionDatosACompletar();
-                                //guardarDatosSeccionSolicitante();
+                                validarDatosSeccionDatosACompletar();
+                                guardarDatosSeccionDatosACompletar();
                             }
                             break;
                         case 3:
                             if(persona === 'Juridica') {
-                                // Seccion 'Datos del Completar'
+                                // Seccion 'Datos a Completar'
                                 validarDatosSeccionDatosACompletar();
                                 guardarDatosSeccionDatosACompletar();
                             } else {
                                 // Seccion 'Información Adicional'
-
-                                //guardarDatosSeccionInformacionAdicional();
+                                guardarDatosSeccionInformacionAdicional();
                             }
                             break;
                         case 4:
@@ -463,24 +461,27 @@
                                 guardarDatosSeccionInformacionAdicional();
                             } else {
                                 // Seccion 'Adjuntar Documentación'
-
-                                //validarDatosSeccionAdjuntarDocumentacion(); //Esta en ruta-paso-tramite
-                                //guardar -> se hace en ruta-paso-tramite con los handlers de comentario, archivo, subir archivo y eliminar archivo
-                            }
-                            break;
-                        case 5:
-                            if(persona === 'Juridica') {
-                                // Seccion 'Adjuntar Documentación'
-                                const result = validarDatosSeccionAdjuntarDocumentacion(); //Esta en ruta-paso-tramite
+                                const result = validarDatosSeccionAdjuntarDocumentacion(); // Esta en ruta-paso-tramite
                                 if(!result) {
                                     const error = new Error('Debe adjuntar la documentación solicitada');
                                     error.mostrar = true;
 
                                     throw error;
                                 }
-                                //guardar -> se hace en ruta-paso-tramite con los handlers de comentario, archivo, subir archivo y eliminar archivo
-                            } else {
-                                
+                                // guardar -> se hace en ruta-paso-tramite con los handlers de comentario, archivo, subir archivo y eliminar archivo
+                            }
+                            break;
+                        case 5:
+                            if(persona === 'Juridica') {
+                                // Seccion 'Adjuntar Documentación'
+                                const result = validarDatosSeccionAdjuntarDocumentacion(); // Esta en ruta-paso-tramite
+                                if(!result) {
+                                    const error = new Error('Debe adjuntar la documentación solicitada');
+                                    error.mostrar = true;
+
+                                    throw error;
+                                }
+                                // guardar -> se hace en ruta-paso-tramite con los handlers de comentario, archivo, subir archivo y eliminar archivo
                             }
                             break;
                         default:

@@ -44,7 +44,7 @@
                 <td>{{ $multinota->contribuyente->apellido }}</td>
             </tr>
         </table>
-
+        @if(isset($multinota->solicitante))
         <div class="section-title">DATOS DEL REPRESENTANTE</div>
         <table>
             <tr>
@@ -64,7 +64,7 @@
                 <td>{{ $multinota->solicitante->correo ?? '---' }}</td>
             </tr>
         </table>
-
+        @endif
         <div class="section-title">DATOS DEL VEHICULO</div>
         <table>
             <tr>

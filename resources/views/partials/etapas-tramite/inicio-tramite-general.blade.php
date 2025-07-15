@@ -32,6 +32,15 @@
                         </select>
                     </div>
                 </div>
+                <div class="col-md-4 col-xs-12" id="outputPanel" style="display: {{ ($solicitante->cuenta !== '' && $otraSeleccionada) ? 'block' : 'none' }};">
+                    <div class="col-xs-12 no-padding">
+                        <div class="form-group requerido">
+                            <label for="cuentaGeneralSinCuentas">Cuenta *</label>
+                            <input required type="text" id="cuentaGeneralSinCuentas" class="form-control uppercase"
+                                name="cuentaGeneralSinCuentas" value="{{ $solicitante->cuenta ?? '' }}" onblur="guardarDatosDelSolicitante()">
+                        </div>
+                    </div>
+                </div>
             @else
                 <div class="col-md-4 col-xs-12" id="outputPanelCuenta">
                     <div class="col-xs-12 no-padding">
@@ -43,15 +52,6 @@
                     </div>
                 </div>
             @endif
-            <div class="col-md-4 col-xs-12" id="outputPanel" style="display: {{ ($solicitante->cuenta !== '' && $otraSeleccionada) ? 'block' : 'none' }};">
-                <div class="col-xs-12 no-padding">
-                    <div class="form-group requerido">
-                        <label for="cuentaGeneralSinCuentas">Cuenta *</label>
-                        <input required type="text" id="cuentaGeneralSinCuentas" class="form-control uppercase"
-                            name="cuentaGeneralSinCuentas" value="{{ $solicitante->cuenta ?? '' }}" onblur="guardarDatosDelSolicitante()">
-                    </div>
-                </div>
-            </div>
             <div class="col-md-4 col-xs-12">
                 <div class="col-xs-12 no-padding">
                     <div class="form-group requerido">

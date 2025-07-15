@@ -1,33 +1,31 @@
-@if ($formulario->puedeCompletar())
-    @foreach ($formulario->pasosFormulario as $paso)
-        @if ($formulario->muestro($paso['orden']))
-            @if($paso['ruta'] === 'partials.etapas-tramite.solicitante')
-                <div id="paso-solicitante">
-                    @include($paso['ruta'], [
-                        'representante' => $representante ?? null,
-                        'codigosArea' => $codigosArea ?? null,
-                        'caracteres' => $caracteres ?? null
-                    ])
-                </div>
-            @elseif($paso['ruta'] === 'partials.etapas-tramite.adjuntar-documentacion')
-                <div id="paso-adjuntar-documentacion">
-                    @include($paso['ruta'], [
-                        'archivos' => $archivos ?? null
-                    ])
-                </div>
-            @else
-                <div>
-                    @include($paso['ruta'], [
-                        'solicitante' => $solicitante,
-                        'formulario' => $formulario,
-                        'persona' => $persona ?? null
-                    ])
-                </div>
-            @endif
-            @break
+@foreach ($formulario->pasosFormulario as $paso)
+    @if ($formulario->muestro($paso['orden']))
+        @if($paso['ruta'] === 'partials.etapas-tramite.solicitante')
+            <div id="paso-solicitante">
+                @include($paso['ruta'], [
+                    'representante' => $representante ?? null,
+                    'codigosArea' => $codigosArea ?? null,
+                    'caracteres' => $caracteres ?? null
+                ])
+            </div>
+        @elseif($paso['ruta'] === 'partials.etapas-tramite.adjuntar-documentacion')
+            <div id="paso-adjuntar-documentacion">
+                @include($paso['ruta'], [
+                    'archivos' => $archivos ?? null
+                ])
+            </div>
+        @else
+            <div>
+                @include($paso['ruta'], [
+                    'solicitante' => $solicitante,
+                    'formulario' => $formulario,
+                    'persona' => $persona ?? null
+                ])
+            </div>
         @endif
-    @endforeach
-@endif
+        @break
+    @endif
+@endforeach
 
 {{-- @include('tiles.modal.operatoria.modal-mostrar-pdf') --}}
 <style>
@@ -185,11 +183,19 @@
     });
 
     function guardarDatosDelSolicitante() {
-        const cuentaUsuario = document.querySelector('#cuentasUsuario').value;
-        const cuentaInput = document.querySelector('#cuentaGeneralSinCuentas').value;
+        const selectCuenta = document.querySelector('#cuentasUsuario');
+        const inputCuenta = document.querySelector('#cuentaGeneralSinCuentas');
+        const inputCorreo = document.querySelector('#correo');
 
+        // Protegerse contra elementos inexistentes
+        const cuentaUsuario = selectCuenta ? selectCuenta.value : null;
+        const cuentaInput = inputCuenta ? inputCuenta.value : null;
         const cuenta = (cuentaUsuario && cuentaUsuario !== 'Otra') ? cuentaUsuario : cuentaInput;
-        const correo = document.querySelector('#correo').value;
+
+        const correo = inputCorreo ? inputCorreo.value : '';
+
+        // Solo continuar si al menos hay cuenta y correo
+        if (!cuenta || !correo) return;
 
         fetch('{{ route('instanciaTramite.guardarDatosDelSolicitante') }}', {
             method: 'POST',
@@ -204,7 +210,7 @@
             }
         });
     }
-
+    
     function validarDatosSeccionAdjuntarDocumentacion() {
         if(archivos.length === 0) {
             return false;

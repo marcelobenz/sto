@@ -14,7 +14,6 @@ class FormularioMultinotaDTO {
     public string $fechaActual;
     public bool $llevaMensaje;
     public array $pasosFormulario;
-    public bool $puedeCompletar;
     public array $tiposCuenta;
     public Collection $secciones;
 
@@ -26,7 +25,6 @@ class FormularioMultinotaDTO {
         $this->fechaActual = Carbon::now()->format('d/m/Y');
         $this->llevaMensaje = $llevaMensaje;
         $this->pasosFormulario = $pasos;
-        $this->puedeCompletar = !empty($cuentas);
         $this->tiposCuenta = $multinota->tiposDeCuenta ?? [];
     }
 
@@ -68,10 +66,6 @@ class FormularioMultinotaDTO {
         }
 
         return 100.0 / $total;
-    }
-
-    public function puedeCompletar(): bool {
-        return count($this->cuentas) > 0;
     }
 
     public function muestro($orden): bool {

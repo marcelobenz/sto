@@ -752,14 +752,8 @@ class InstanciaMultinotaController extends Controller {
 
     public function registrarTramite() {
         try {
-            /* registrarTramite(t, t2);
-            t.registrarParticularidades(t2);
-
-            registrarInicio(t, t2);
-
-            new Thread(new NotificadorRegistro(t)).start(); */
-
             // Se cargan datos
+            $persona = Session::get('PERSONA');
             $formulario = Session::get('FORMULARIO');
             $idContribuyenteMultinota = Session::get('CONTRIBUYENTE')->getIdContribuyenteMultinota();
             $idUsuarioInterno = null; // TO-DO
@@ -785,35 +779,37 @@ class InstanciaMultinotaController extends Controller {
                 );
             }
 
-            // Se inserta dirección del representante
-            $direccion = Direccion::create([
-                'calle' => $representante->getDomicilio()->getCalle(),
-                'numero' => $representante->getDomicilio()->getNumero(),
-                'codigo_postal' => $representante->getDomicilio()->getCodigoPostal(),
-                'provincia' => $representante->getDomicilio()->getProvincia(),
-                'localidad' => $representante->getDomicilio()->getLocalidad(),
-                'pais' => $representante->getDomicilio()->getPais(),
-                'latitud' => $representante->getDomicilio()->getLatitud(),
-                'longitud' => $representante->getDomicilio()->getLongitud(),
-                'piso' => $representante->getDomicilio()->getPiso(),
-                'departamento' => $representante->getDomicilio()->getDepartamento(),
-            ]);
+            if($persona === 'Juridica') {
+                // Se inserta dirección del representante
+                $direccion = Direccion::create([
+                    'calle' => $representante->getDomicilio()->getCalle(),
+                    'numero' => $representante->getDomicilio()->getNumero(),
+                    'codigo_postal' => $representante->getDomicilio()->getCodigoPostal(),
+                    'provincia' => $representante->getDomicilio()->getProvincia(),
+                    'localidad' => $representante->getDomicilio()->getLocalidad(),
+                    'pais' => $representante->getDomicilio()->getPais(),
+                    'latitud' => $representante->getDomicilio()->getLatitud(),
+                    'longitud' => $representante->getDomicilio()->getLongitud(),
+                    'piso' => $representante->getDomicilio()->getPiso(),
+                    'departamento' => $representante->getDomicilio()->getDepartamento(),
+                ]);
+            
+                $id_direccion = $direccion->id_direccion;
 
-            $id_direccion = $direccion->id_direccion;
+                // Se obtiene el ID de tipo_documento
+                $id_tipo_documento = TipoDocumento::where('nombre', $representante->getDocumento()->getTipo())->value('id_tipo_documento');
 
-            // Se obtiene el ID de tipo_documento
-            $id_tipo_documento = TipoDocumento::where('nombre', $representante->getDocumento()->getTipo())->value('id_tipo_documento');
-
-            // Se inserta representante
-            $solicitanteDB = Solicitante::create([
-                'nombre' => $representante->getNombre(),
-                'documento' => $representante->getDocumento()->getNumero(),
-                'telefono' => $representante->getTelefono(),
-                'correo' => $representante->getCorreo(),
-                'id_tipo_documento' => $id_tipo_documento,
-                'apellido' => $representante->getApellido(),
-                'id_direccion' => $id_direccion
-            ]);
+                // Se inserta representante
+                $solicitanteDB = Solicitante::create([
+                    'nombre' => $representante->getNombre(),
+                    'documento' => $representante->getDocumento()->getNumero(),
+                    'telefono' => $representante->getTelefono(),
+                    'correo' => $representante->getCorreo(),
+                    'id_tipo_documento' => $id_tipo_documento,
+                    'apellido' => $representante->getApellido(),
+                    'id_direccion' => $id_direccion
+                ]);
+            }
 
             // Se inserta trámite
             $multinota = Multinota::create([
@@ -823,9 +819,9 @@ class InstanciaMultinotaController extends Controller {
                 'id_contribuyente_multinota' => $idContribuyenteMultinota ?? $idContribuyenteMultinota,
                 'informacion_adicional' => $informacionAdicional,
                 'id_prioridad' => 1,
-                'id_solicitante' => $solicitanteDB->id_solicitante,
+                'id_solicitante' => $persona === 'Juridica' ? $solicitanteDB->id_solicitante : null,
                 'id_usuario_interno' => $idUsuarioInterno ?? $idUsuarioInterno,
-                'r_caracter' => $representante->getTipoCaracter()->getCodigo(),
+                'r_caracter' => $persona === 'Juridica' ? $representante->getTipoCaracter()->getCodigo() : null,
                 'correo' => $solicitante->correo,
                 'cuit_contribuyente' => $solicitante->cuit
             ]);

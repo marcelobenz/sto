@@ -11,10 +11,8 @@ use App\Models\Solicitante;
 use App\Models\Multinota;
 use App\Enums\TipoCaracterEnum;
 
-class ReporteController extends Controller
-{
-    public function generarPDF($idTramite)
-    {
+class ReporteController extends Controller {
+    public function generarPDF($idTramite) {
         // Obtener información del trámite desde la base de datos
         $detalleTramite = DB::table('multinota_seccion_valor as ms')
             ->join('seccion as s', 'ms.id_seccion', '=', 's.id_seccion')
@@ -32,9 +30,11 @@ class ReporteController extends Controller
 
         $multinota = Multinota::where('id_tramite', $idTramite)->first();
 
-        // Se obtiene el label del tipo caracter
-        $obj = TipoCaracterEnum::from($multinota->r_caracter);
-        $tipoCaracter = $obj->descripcion();
+        if(isset($multinota->r_caracter)) {
+            // Se obtiene el label del tipo caracter
+            $obj = TipoCaracterEnum::from($multinota->r_caracter);
+            $tipoCaracter = $obj->descripcion();
+        }
 
         // Si no hay datos, asignar valores por defecto
         if (!$tramiteInfo || !$detalleTramite) {
@@ -74,7 +74,7 @@ class ReporteController extends Controller
             'detalleTramite' => $detalleTramite, // Mantenerlo como colección
             'tramiteInfo' => $tramiteInfo,
             'multinota' => $multinota,
-            'tipoCaracter' => $tipoCaracter,
+            'tipoCaracter' => $tipoCaracter ?? null,
             'qr' => $qr
         ]);
 
