@@ -533,35 +533,33 @@
                 }
             });
 
-            $(document).on('click', '#boton-registrar-tramite', async function () {
+            $(document).on('click', '#boton-registrar-tramite', async function (e) {
+                e.preventDefault(); // ← importante si está en un <form>
+
                 try {
-                    fetch('/instanciaTramite/registrarTramite')
-                    .then(response => response.json())
-                    .catch(error => {
-                        console.error('Error:', error);
+                    const response = await fetch('/instanciaTramite/registrarTramite');
 
-                        Swal.fire({
-                            position: "top-end",
-                            icon: "error",
-                            title: `${error.message}`,
-                            showConfirmButton: false,
-                            timer: 5000,
-                            timerProgressBar: true
-                        });
-                    })
-                } catch (error) {
-                    console.error(error.message);
+                    if (!response.ok) throw new Error('Error HTTP ' + response.status);
 
-                    if(error.mostrar) {
-                        Swal.fire({
-                            position: "top-end",
-                            icon: "error",
-                            title: `${error.message}`,
-                            showConfirmButton: false,
-                            timer: 5000,
-                            timerProgressBar: true
-                        });
+                    const data = await response.json();
+
+                    if (data.url) {
+                        window.location.href = data.url; // ← redirige correctamente
+                    } else {
+                        throw new Error('No se recibió una URL válida');
                     }
+
+                } catch (error) {
+                    console.error('Error:', error);
+
+                    Swal.fire({
+                        position: "top-end",
+                        icon: "error",
+                        title: error.message,
+                        showConfirmButton: false,
+                        timer: 5000,
+                        timerProgressBar: true
+                    });
                 }
             });
 

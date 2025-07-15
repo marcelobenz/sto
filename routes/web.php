@@ -68,6 +68,9 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard
 
 //Reportes
 Route::get('/reporte/constancia/{idTramite}', [ReporteController::class, 'generarPDF'])->name('reporte.constancia');
+Route::get('/reporte/constancia/modal/{idTramite}', function ($idTramite) {
+    return view('reportes.modal', compact('idTramite'));
+})->name('reporte.constancia.modal');
 
 //Archivos
 Route::post('/archivo/subir', [ArchivoController::class, 'subirArchivo'])->name('archivo.subir');

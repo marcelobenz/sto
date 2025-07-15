@@ -951,6 +951,11 @@ class InstanciaMultinotaController extends Controller {
                 ->build();
 
             $comentarioNotificacion->guardarInicioTramite($dtoHistorialTramite, $multinota);
+
+            // Generación de PDF
+            return response()->json([
+                'url' => route('reporte.constancia.modal', ['idTramite' => $multinota->id_tramite])
+            ]);
         } catch (\Throwable $e) {
             return back()->with('error', 'Error al registrar el tramite: ' . $e->getMessage());
         }
