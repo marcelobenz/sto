@@ -41,7 +41,11 @@
             </tr>
             <tr>
                 <td><strong>Razón Social</strong></td>
-                <td>{{ $multinota->contribuyente->apellido }}</td>
+                @if(isset($multinota->solicitante))
+                    <td>{{ $multinota->contribuyente->apellido ?? '---' }}</td>
+                @else
+                    <td>{{ $multinota->contribuyente->apellido . ', ' . $multinota->contribuyente->nombre ?? '---' }}</td>
+                @endif
             </tr>
         </table>
         @if(isset($multinota->solicitante))
@@ -77,7 +81,11 @@
             </tr>
             <tr>
                 <td><strong>Nombre del Titular</strong></td>
-                <td>{{ $multinota->contribuyente->apellido ?? '---' }}</td>
+                @if(isset($multinota->solicitante))
+                    <td>{{ $multinota->contribuyente->apellido ?? '---' }}</td>
+                @else
+                    <td>{{ $multinota->contribuyente->apellido . ', ' . $multinota->contribuyente->nombre ?? '---' }}</td>
+                @endif
             </tr>
         </table>
 
