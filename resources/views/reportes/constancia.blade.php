@@ -3,17 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Constancia</title>
+    <title>Constancia PDF</title>
     <style>
-        body { font-family: Arial, sans-serif; font-size: 14px; }
-        .container { width: 100%; padding: 20px; }
-        .header { text-align: center; font-weight: bold; font-size: 20px; }
-        .sub-header { text-align: center; font-size: 16px; margin-bottom: 10px; }
-        .section-title { font-weight: bold; font-size: 16px; margin-top: 20px; border-bottom: 1px solid black; padding-bottom: 5px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid black; padding: 8px; text-align: left; }
-        .qr-container { text-align: center; margin-top: 20px; }
-        .footer { margin-top: 30px; text-align: center; font-size: 12px; }
+        @page {
+            margin: 0cm;
+        }
+
+        body {
+            margin: 0cm;
+            padding: 2cm; /* or adjust as needed */
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
+
+        .container {
+            width: 100%;
+            padding: 0; /* Remove container padding since body now has padding */
+        }
+
+        .header {
+            text-align: center;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .sub-header {
+            text-align: center;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .section-title {
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 20px;
+            border-bottom: 1px solid black;
+            padding-bottom: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .qr-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
