@@ -95,7 +95,7 @@ Route::post('/tramites/darDeBaja', [TramiteController::class, 'darDeBaja'])->nam
 Route::get('/estadoTramite/tienePermiso/{multinota}', [EstadoTramiteController::class, 'tienePermiso'])->name('estadoTramite.tienePermiso');
 
 // Instancia Tramite
-Route::post('/instanciaTramite/buscar', [InstanciaMultinotaController::class, 'buscar'])->name('instanciaTramite.buscar');
+Route::get('/instanciaTramite/buscar', [InstanciaMultinotaController::class, 'buscar'])->name('instanciaTramite.buscar');
 Route::get('/instanciaTramite/avanzarPaso', [InstanciaMultinotaController::class, 'avanzarPaso'])->name('instanciaTramite.avanzarPaso');
 Route::get('/instanciaTramite/retrocederPaso', [InstanciaMultinotaController::class, 'retrocederPaso'])->name('instanciaTramite.retrocederPaso');
 /* Etapa: Datos del Solicitante */

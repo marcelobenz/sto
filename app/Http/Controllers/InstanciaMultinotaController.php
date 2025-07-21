@@ -68,7 +68,7 @@ use App\Services\TramiteService;
 class InstanciaMultinotaController extends Controller {
     public function buscar(Request $request) {
         try {
-            $cuil = $request->post('cuil');
+            $cuil = $request->query('cuil');
             $tipo = new TipoPersonalidadJuridica();
 
             $cuilFormateado = substr($cuil, 0, 2);;
@@ -87,12 +87,12 @@ class InstanciaMultinotaController extends Controller {
 
             // Se recupera el servicio asociado a la multinota
             $servicio = MultinotaServicio::join('tipo_tramite_multinota as ttm', 'ttm.id_multinota_servicio', '=', 'multinota_servicios.id_multinota_servicio')
-            ->where('ttm.id_tipo_tramite_multinota', (int) $request->post('idMultinota'))
+            ->where('ttm.id_tipo_tramite_multinota', (int) $request->query('idMultinota'))
             ->select('multinota_servicios.url')
             ->first();
 
             // Se recupera objeto de la multinota          
-            $multinota = TipoTramiteMultinota::where('id_tipo_tramite_multinota', (int) $request->post('idMultinota'))->first();
+            $multinota = TipoTramiteMultinota::where('id_tipo_tramite_multinota', (int) $request->query('idMultinota'))->first();
 
             // Se reemplaza el CUIT en el template de la URL
             if($servicio) {

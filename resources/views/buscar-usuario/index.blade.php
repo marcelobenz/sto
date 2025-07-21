@@ -32,8 +32,7 @@
                                 <div style="display: flex; flex-direction: column; padding: 0 15px 15px 15px;">
                                     <label>CUIL/CUIT del Usuario *</label>
                                     <span style="display: flex; gap: 10px;">
-                                        <form method="POST" style="width: 100%;" action="{{ route('instanciaTramite.buscar') }}">
-                                            @csrf
+                                        <form method="GET" style="width: 100%;" action="{{ route('instanciaTramite.buscar') }}">
                                             <input type="hidden" name="idMultinota" value="{{ $multinota }}">
                                             <input name="cuil" id="cuil" type="text" placeholder="99-99999999-9" minlength="13" maxlength="13" style="width: 30%;" />
                                             <button type="submit" class="btn btn-secondary">

@@ -74,9 +74,18 @@
                                                                         {{ $c->nombre }}
                                                                     </a>
                                                                     <div class="dropdown-menu">
-                                                                        @foreach ($subcategoriasMultinotasMap[$c->id_categoria] as $multinota)
-                                                                            <a class="dropdown-item" href={{ route('estadoTramite.tienePermiso', ['multinota' => $multinota]) }}>{{ $multinota->nombre }}</a>
-                                                                        @endforeach
+                                                                        @if(session('isExterno'))
+                                                                            @foreach ($subcategoriasMultinotasMap[$c->id_categoria] as $multinota)
+                                                                                <a class="dropdown-item" href={{ route('instanciaTramite.buscar', [
+                                                                                    'cuil' => session('contribuyente_multinota')->cuit,
+                                                                                    'idMultinota' => $multinota
+                                                                                ]) }}>{{ $multinota->nombre }}</a>
+                                                                            @endforeach
+                                                                        @else
+                                                                            @foreach ($subcategoriasMultinotasMap[$c->id_categoria] as $multinota)
+                                                                                <a class="dropdown-item" href={{ route('estadoTramite.tienePermiso', ['multinota' => $multinota]) }}>{{ $multinota->nombre }}</a>
+                                                                            @endforeach
+                                                                        @endif
                                                                     </div>
                                                                 </div>
                                                             @endif

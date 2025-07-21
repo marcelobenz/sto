@@ -31,7 +31,7 @@ class EstadoTramiteController extends Controller {
             return view('no-autorizado.index');
         } else {
             //Return a vista "Buscar usuario"
-            return view('buscar-usuario.index');
+            return view('buscar-usuario.index', compact('multinota'));
         }
     }
 }
