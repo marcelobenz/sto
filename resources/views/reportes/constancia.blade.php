@@ -87,14 +87,14 @@
                 </tr>
                 <tr>
                     <td><strong>CUIT</strong></td>
-                    <td>{{ $multinota->contribuyente->cuit }}</td>
+                    <td>{{ $contribuyenteMultinota->cuit }}</td>
                 </tr>
                 <tr>
                     <td><strong>Razón Social</strong></td>
                     @if(isset($multinota->solicitante))
-                        <td>{{ $multinota->contribuyente->apellido ?? '---' }}</td>
+                        <td>{{ $contribuyenteMultinota->apellido ?? '---' }}</td>
                     @else
-                        <td>{{ $multinota->contribuyente->apellido . ', ' . $multinota->contribuyente->nombre ?? '---' }}</td>
+                        <td>{{ $contribuyenteMultinota->apellido . ', ' . $contribuyenteMultinota->nombre ?? '---' }}</td>
                     @endif
                 </tr>
             </table>
@@ -127,14 +127,14 @@
                 </tr>
                 <tr>
                     <td><strong>CUIT</strong></td>
-                    <td>{{ $multinota->contribuyente->cuit ?? '---' }}</td>
+                    <td>{{ $contribuyenteMultinota->cuit ?? '---' }}</td>
                 </tr>
                 <tr>
                     <td><strong>Nombre del Titular</strong></td>
                     @if(isset($multinota->solicitante))
-                        <td>{{ $multinota->contribuyente->apellido ?? '---' }}</td>
+                        <td>{{ $contribuyenteMultinota->apellido ?? '---' }}</td>
                     @else
-                        <td>{{ $multinota->contribuyente->apellido . ', ' . $multinota->contribuyente->nombre ?? '---' }}</td>
+                        <td>{{ $contribuyenteMultinota->apellido . ', ' . $contribuyenteMultinota->nombre ?? '---' }}</td>
                     @endif
                 </tr>
             </table>

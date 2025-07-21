@@ -9,6 +9,7 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 use App\Models\Solicitante;
 use App\Models\Multinota;
+use App\Models\ContribuyenteMultinota;
 use App\Enums\TipoCaracterEnum;
 
 class ReporteController extends Controller {
@@ -29,6 +30,8 @@ class ReporteController extends Controller {
             ->first();
 
         $multinota = Multinota::where('id_tramite', $idTramite)->first();
+
+        $contribuyenteMultinota = ContribuyenteMultinota::where('cuit', $multinota->cuit_contribuyente)->first();
 
         if(isset($multinota->r_caracter)) {
             // Se obtiene el label del tipo caracter
@@ -74,6 +77,7 @@ class ReporteController extends Controller {
             'detalleTramite' => $detalleTramite, // Mantenerlo como colección
             'tramiteInfo' => $tramiteInfo,
             'multinota' => $multinota,
+            'contribuyenteMultinota' => $contribuyenteMultinota,
             'tipoCaracter' => $tipoCaracter ?? null,
             'qr' => $qr
         ]);
