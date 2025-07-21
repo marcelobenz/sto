@@ -68,12 +68,12 @@ use App\Services\TramiteService;
 class InstanciaMultinotaController extends Controller {
     public function buscar(Request $request) {
         try {
-            $cuil = $request->query('cuil');
+            $cuit = $request->query('cuit');
             $tipo = new TipoPersonalidadJuridica();
 
-            $cuilFormateado = substr($cuil, 0, 2);;
-            $cuilNumero = (int) $cuilFormateado;
-            if ($cuilNumero >= 30){
+            $cuitFormateado = substr($cuit, 0, 2);;
+            $cuitNumero = (int) $cuitFormateado;
+            if ($cuitNumero >= 30){
                 $tipo->setCodigo("2");
                 $tipo->setDescripcion("PERSONA JURIDICA");
             } else {
@@ -96,7 +96,7 @@ class InstanciaMultinotaController extends Controller {
 
             // Se reemplaza el CUIT en el template de la URL
             if($servicio) {
-                $url = str_replace('{cuit}', str_replace('-', '', $cuil), $servicio->url);
+                $url = str_replace('{cuit}', str_replace('-', '', $cuit), $servicio->url);
                 $response = Http::get($url)->throw();;
                 $data = $response->json();
 
@@ -118,7 +118,7 @@ class InstanciaMultinotaController extends Controller {
             }
 
             if ($tipo->isPersonaFisica()) {
-                $model = ContribuyenteMultinota::where('cuit', str_replace('-', '', $cuil))->first();
+                $model = ContribuyenteMultinota::where('cuit', str_replace('-', '', $cuit))->first();
 
                 if($model == null) {
                     throw new \Exception("El usuario ingresado no existe");
@@ -160,7 +160,7 @@ class InstanciaMultinotaController extends Controller {
                 
                 return InstanciaMultinotaController::showMultinotaInterna($multinota, $contribuyenteTransformed, 'Fisica');
             } else if ($tipo->isPersonaJuridica()) {
-                $model = ContribuyenteMultinota::where('cuit', str_replace('-', '', $cuil))->first();
+                $model = ContribuyenteMultinota::where('cuit', str_replace('-', '', $cuit))->first();
 
                 if($model == null) {
                     throw new \Exception("El usuario ingresado no existe");

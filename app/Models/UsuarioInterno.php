@@ -48,9 +48,9 @@ class UsuarioInterno extends Model
     // Disable timestamps if you are managing them manually
     public $timestamps = false;
 
-    public static function getUsuarioPorCuil($cuil) {
+    public static function getUsuarioPorCuit($cuit) {
         $res = DB::table("usuario_interno")
-        ->where("cuit", "=", $cuil)
+        ->where("cuit", "=", $cuit)
         ->get();
 
         $usuario = $res->toArray()[0];

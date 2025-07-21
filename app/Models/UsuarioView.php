@@ -12,28 +12,28 @@ class UsuarioView extends Model
 	private String $fechaIngreso;
 	private String $fechaNacimiento;
 	private String $juridiccion;
-	private String $cuil;
+	private String $cuit;
 	private String $mail;
 	private String $nombre;
 	private String $oficina;
 	private String $user;
   
     public function __construct(String $apellido, String $cargo, String $discapacitado, String $fechaIngreso, String $fechaNacimiento, 
-        String $juridiccion, String $cuil, String $mail, String $nombre, String $oficina, String $user) {
+        String $juridiccion, String $cuit, String $mail, String $nombre, String $oficina, String $user) {
             $this->apellido = $apellido;
             $this->cargo = $cargo;
             $this->discapacitado = $discapacitado;
             $this->fechaIngreso = $fechaIngreso;
             $this->fechaNacimiento = $fechaNacimiento;
             $this->juridiccion = $juridiccion;
-            $this->cuil = $cuil;
+            $this->cuit = $cuit;
             $this->mail = $mail;
             $this->nombre = $nombre;
             $this->oficina = $oficina;
             $this->user = $user;
     }
 
-    public function getCuil() {
-        return $this->cuil;
+    public function getCuit() {
+        return $this->cuit;
     }
 }

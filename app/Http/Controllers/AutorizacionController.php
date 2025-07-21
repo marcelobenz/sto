@@ -19,7 +19,7 @@ class AutorizacionController extends Controller
         try {
             $user = $this->obtenerUsuario();
             $ingresanteBuilder = new IngresanteBuilder();
-            $ingresanteBuilder->setCuil($user->getCuil());
+            $ingresanteBuilder->setCuit($user->getCuit());
             $ingresante = $ingresanteBuilder->build();
             $ingresante->ingresar();
             return Redirect::to('/bandeja-personal');
@@ -33,9 +33,9 @@ class AutorizacionController extends Controller
         } catch (NullPointerException e) { 
         	try {
             	UsuarioInterno usuario = new UsuarioInterno();
-                usuario.setLegajo(this.obtenerUsuario().getCuil());
-				usuario.setCuit(this.obtenerUsuario().getCuil());
-				usuario.setDni(this.obtenerUsuario().getCuil().substring(2, (this.obtenerUsuario().getCuil().length() - 1)));
+                usuario.setLegajo(this.obtenerUsuario().getCuit());
+				usuario.setCuit(this.obtenerUsuario().getCuit());
+				usuario.setDni(this.obtenerUsuario().getCuit().substring(2, (this.obtenerUsuario().getCuit().length() - 1)));
 	            usuario.setCorreoMunicipal(this.obtenerUsuario().getMail());
 	            usuario.setNombre(this.obtenerUsuario().getNombre());
 	            usuario.setApellido(this.obtenerUsuario().getApellido());
@@ -47,7 +47,7 @@ class AutorizacionController extends Controller
 	        	
 	        	new AsignableATramiteController().retieveAllFromDB();
 	        	
-	        	Ingresante ingresante = new IngresanteBuilder().setCuil(this.obtenerUsuario().getCuil()).build();
+	        	Ingresante ingresante = new IngresanteBuilder().setCuit(this.obtenerUsuario().getCuit()).build();
 	            ingresante.ingresar();
 	            this.setAnalizando(false);
 	            this.redireccionar(Navegacion.bandeja_personal);
@@ -86,12 +86,12 @@ class AutorizacionController extends Controller
     
             $res = $response->json();
     
-            if($res['cuil'] === null || $res['cuil'] === "") {
+            if($res['cuit'] === null || $res['cuit'] === "") {
                 throw new Exception("Faltan datos del usuario");
             }
     
             $requestView = new RequestLoginEmpleado();
-		    $requestView->setUsuario(new UsuarioView($res['apellido'], "?", "N", "?", "?", "?", $res['cuil'], $res['email'], $res['name'], "?", "?"));
+		    $requestView->setUsuario(new UsuarioView($res['apellido'], "?", "N", "?", "?", "?", $res['cuit'], $res['email'], $res['name'], "?", "?"));
 
 		    return $requestView->getUsuario();
         } catch (\Throwable $th) {

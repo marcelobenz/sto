@@ -8,9 +8,9 @@ use App\Http\Controllers\PermisoController;
 
 class UsuarioInternoController extends Controller
 {
-    public static function getUsuarioSessionPorCuil(String $cuil) {
+    public static function getUsuarioSessionPorCuit(String $cuit) {
         try {
-            $usuarioInterno = UsuarioInterno::getUsuarioPorCuil($cuil);
+            $usuarioInterno = UsuarioInterno::getUsuarioPorCuit($cuit);
             $permisos = PermisoController::getPermisosPorId($usuarioInterno->id_usuario_interno);
             return new UsuarioSession($usuarioInterno->id_usuario_interno, $usuarioInterno->legajo, $usuarioInterno->nombre, $usuarioInterno->apellido, 
                 $usuarioInterno->correo === null ? $usuarioInterno->correo_municipal : $usuarioInterno->correo,

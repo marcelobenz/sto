@@ -7,21 +7,21 @@ use App\Models\Ingresante;
 
 class IngresanteBuilder extends Model
 {
-    private String $cuil;
+    private String $cuit;
 
     public function build() {
-        if($this->cuil === null || $this->cuil === "") {
-            throw new Exception("El usuario no posee cuil");
+        if($this->cuit === null || $this->cuit === "") {
+            throw new Exception("El usuario no posee cuit");
         }
 
-        return new Ingresante($this->cuil);
+        return new Ingresante($this->cuit);
     }
 
-    public function setCuil(String $cuil) {
-		$this->cuil = $cuil;
+    public function setCuit(String $cuit) {
+		$this->cuit = $cuit;
 	}
 
-    public function getCuil() {
-		return $this->cuil;
+    public function getCuit() {
+		return $this->cuit;
 	}
 }
