@@ -755,8 +755,6 @@ class InstanciaMultinotaController extends Controller {
             // Se cargan datos
             $persona = Session::get('PERSONA');
             $formulario = Session::get('FORMULARIO');
-            $idContribuyenteMultinota = Session::get('CONTRIBUYENTE')->getIdContribuyenteMultinota();
-            $idUsuarioInterno = null; // TO-DO
             $representante = Session::get('REPRESENTANTE');
             $solicitante = Session::get('SOLICITANTE');
             $informacionAdicional = Session::get('INFORMACION_ADICIONAL');
@@ -816,11 +814,11 @@ class InstanciaMultinotaController extends Controller {
                 'cuenta' => $solicitante->cuenta,
                 'id_tipo_tramite_multinota' => $idTipoTramiteMultinota,
                 'id_mensaje_inicial' => $idMensajeInicial,
-                'id_contribuyente_multinota' => $idContribuyenteMultinota ?? $idContribuyenteMultinota,
+                'id_contribuyente_multinota' => session('isExterno') ? session('contribuyente_multinota')->id_contribuyente_multinota : null,
+                'id_usuario_interno' => !session('isExterno') ? session('usuario_interno')->id_usuario_interno : null,
                 'informacion_adicional' => $informacionAdicional,
                 'id_prioridad' => 1,
                 'id_solicitante' => $persona === 'Juridica' ? $solicitanteDB->id_solicitante : null,
-                'id_usuario_interno' => $idUsuarioInterno ?? $idUsuarioInterno,
                 'r_caracter' => $persona === 'Juridica' ? $representante->getTipoCaracter()->getCodigo() : null,
                 'correo' => $solicitante->correo,
                 'cuit_contribuyente' => $solicitante->cuit
@@ -925,19 +923,12 @@ class InstanciaMultinotaController extends Controller {
                 id_tramite: $multinota->id_tramite
             );
 
-            //TO-DO
-            // Si el usuario no es externo 
-                $dtoHistorialTramite->setIdUsuarioInternoAdministrador(Session::get('usuario_interno')->id_usuario_interno);
-                $historialTramite = HistorialTramite::create([
-                    'id_evento' => $dtoHistorialTramite->getIdEvento(),
-                    'id_tramite' => $dtoHistorialTramite->getIdTramite(),
-                    'id_usuario_interno_administrador' => $dtoHistorialTramite->getIdUsuarioInternoAdministrador()
-                ]);
-            // Else
-                /* HistorialTramite::create([
-                    'id_evento' => $dtoHistorialTramite->getIdEvento(),
-                    'id_tramite' => $dtoHistorialTramite->getIdTramite()
-                ]); */
+            $dtoHistorialTramite->setIdUsuarioInternoAdministrador(Session::get('usuario_interno')->id_usuario_interno);
+            $historialTramite = HistorialTramite::create([
+                'id_evento' => $dtoHistorialTramite->getIdEvento(),
+                'id_tramite' => $dtoHistorialTramite->getIdTramite(),
+                'id_usuario_interno_administrador' => !session('isExterno') ? $dtoHistorialTramite->getIdUsuarioInternoAdministrador() : null
+            ]);
 
             // Insert en notificacion
             $dtoHistorialTramite->setIdHistorialTramite($historialTramite->id_historial_tramite);
