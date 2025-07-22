@@ -33,9 +33,17 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             @if(session('error'))
-            <div id='success-alert' class="alert alert-danger mb-0 ml-3">
-                {{ session('error') }}
-            </div>
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+                Swal.fire({
+                    position: "top-end",
+                    icon: "error",
+                    title: @json(session('error')),
+                    showConfirmButton: false,
+                    timer: 5000,
+                    timerProgressBar: true
+                });
+            </script>
             @endif
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">

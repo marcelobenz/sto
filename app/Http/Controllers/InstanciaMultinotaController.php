@@ -68,6 +68,10 @@ use App\Services\TramiteService;
 class InstanciaMultinotaController extends Controller {
     public function buscar(Request $request) {
         try {
+            if ($request->query('cuit') == null) {
+                throw new \Exception("El usuario ingresado no existe");
+            }
+
             $cuit = $request->query('cuit');
             $tipo = new TipoPersonalidadJuridica();
 
@@ -204,9 +208,7 @@ class InstanciaMultinotaController extends Controller {
                 /* return new SinPersonalidadJuridicaTransformer().cuentas( cuentas ).cuit( cuit ).transform(); */
             }
         } catch (\Exception $e) {
-            return response()->json([
-                'error' => $e->getMessage()
-            ], 500);
+            return redirect()->back()->with('error', $e->getMessage());
         }
     }
 
