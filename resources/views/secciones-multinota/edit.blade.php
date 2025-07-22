@@ -186,6 +186,7 @@
     //Drag handlers de campos
 
     let draggedRow = null;
+    let isDragging = false;
 
     function handleDragCamposStart(event) {
         draggedRow = event.target.closest('.fila-campo');
@@ -289,6 +290,10 @@
 
     function handleDropOpcionesCampo(event) {
         event.preventDefault();
+        
+        if (isDragging) return; // prevent multiple parallel drops
+        isDragging = true;
+        lockUI();
 
         const container = document.querySelector('#tabla-opciones-campo');
         const rows = Array.from(container.children);
@@ -302,10 +307,13 @@
             url: `/secciones-multinota/setearNuevoOrdenOpcionesCampo/${arrayOpcionesCampo}`,
             success: function(data) {
                 $('#opciones-div').html(data.html);
+            },
+            complete: function () {
+                unlockUI();
+                draggedRow = null;
+                isDragging = false; // unlock
             }
         });
-
-        draggedRow = null; // Reset
     }
 
     function handleDragEnterOpcionesCampo(event) {
@@ -332,6 +340,14 @@
     });
 
     document.querySelector('#tabla-opciones-campo').addEventListener('dragover', handleDragEnterOpcionesCampo);
+
+    function lockUI() {
+        document.querySelector('#tabla-opciones-campo').style.pointerEvents = 'none';
+    }
+
+    function unlockUI() {
+        document.querySelector('#tabla-opciones-campo').style.pointerEvents = '';
+    }
 </script>
 <style>
     .fila-campo, .fila-opcion-campo {
