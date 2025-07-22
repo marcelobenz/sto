@@ -48,16 +48,6 @@ class UsuarioInterno extends Model
     // Disable timestamps if you are managing them manually
     public $timestamps = false;
 
-    public static function getUsuarioPorCuit($cuit) {
-        $res = DB::table("usuario_interno")
-        ->where("cuit", "=", $cuit)
-        ->get();
-
-        $usuario = $res->toArray()[0];
-
-        return $usuario;
-    }
-    
     public function categoria() {
         return $this->belongsTo(CategoriaUsuario::class, 'id_categoria_usuario');
     }
@@ -92,6 +82,6 @@ class UsuarioInterno extends Model
 
     // Use the permisos relation from rol
     public function permisos() {
-        return $this->rol ? $this->rol->permisos() : collect();
+        return $this->rol?->permisos ?? collect();
     }
 }
