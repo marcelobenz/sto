@@ -77,6 +77,8 @@ Route::post('/ingreso-externo/registrar', [IngresoExternoController::class, 'reg
 Route::get('/bandeja-usuario-externo', [IngresoExternoController::class, 'showBandeja'])->name('bandeja-usuario-externo');
 Route::get('/cambiar-clave', [ContribuyenteMultinotaController::class, 'showChangePasswordForm'])->name('cambiar-clave');
 Route::post('/cambiar-clave', [ContribuyenteMultinotaController::class, 'changePassword'])->name('cambiar-clave.submit');
+Route::get('/perfil-externo', [ContribuyenteMultinotaController::class, 'perfil'])->name('perfil-externo');
+Route::post('/perfil-externo', [ContribuyenteMultinotaController::class, 'actualizarPerfil'])->name('perfil-externo.actualizarPerfil');
 Route::get('/estados', [AdministracionWorkflowController::class, 'index'])->name('estados.index');
 Route::get('/workflow/{id}', [AdministracionWorkflowController::class, 'crear'])->name('workflow.crear');
 Route::post('/workflow/guardar/{id}', [AdministracionWorkflowController::class, 'guardar'])->name('workflow.guardar');

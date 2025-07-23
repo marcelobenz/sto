@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\ContribuyenteMultinota;
+use App\Models\Direccion; 
 
 class IngresoExternoController extends Controller
 {
@@ -55,27 +56,48 @@ class IngresoExternoController extends Controller
     }
 
 
-
-    public function registrar(Request $request)
+public function registrar(Request $request)
 {
     $request->validate([
         'cuit' => 'required|string|unique:contribuyente_multinota,cuit',
         'correo' => 'required|email|unique:contribuyente_multinota,correo',
         'nombre' => 'required|string|max:255',
         'apellido' => 'required|string|max:255',
-        'telefono1' => 'nullable|string|max:20',
-        'telefono2' => 'nullable|string|max:20',
+        'telefono_1' => 'nullable|string|max:20',
+        'telefono_2' => 'nullable|string|max:20',
         'clave' => 'required|string|min:6|confirmed',
+
+        'calle' => 'required|string|max:255',
+        'numero' => 'required|string|max:20',
+        'codigo_postal' => 'nullable|string|max:20',
+        'provincia' => 'nullable|string|max:255',
+        'localidad' => 'nullable|string|max:255',
+        'pais' => 'nullable|string|max:255',
+        'latitude' => 'nullable|numeric',
+        'longitude' => 'nullable|numeric',
     ]);
+
+    $direccion = new Direccion();
+    $direccion->calle = $request->calle;
+    $direccion->numero = $request->numero;
+    $direccion->codigo_postal = $request->codigo_postal;
+    $direccion->provincia = $request->provincia;
+    $direccion->localidad = $request->localidad;
+    $direccion->pais = $request->pais;
+    $direccion->latitud = $request->latitude;
+    $direccion->longitud = $request->longitude;
+    $direccion->fecha_alta = now();
+    $direccion->save();
 
     $usuario = new ContribuyenteMultinota();
     $usuario->cuit = $request->cuit;
     $usuario->correo = $request->correo;
     $usuario->nombre = $request->nombre;
     $usuario->apellido = $request->apellido;
-    $usuario->telefono1 = $request->telefono1;
-    $usuario->telefono2 = $request->telefono2;
+    $usuario->telefono1 = $request->telefono_1;
+    $usuario->telefono2 = $request->telefono_2;
     $usuario->clave = Hash::make($request->clave);
+    $usuario->id_direccion = $direccion->id_direccion;
     $usuario->save();
 
     session(['contribuyente_multinota' => $usuario]);
@@ -83,5 +105,6 @@ class IngresoExternoController extends Controller
 
     return redirect()->route('bandeja-usuario-externo');
 }
+
     
 }

@@ -1,69 +1,57 @@
 @extends('navbarExterno')
+
 @section('heading')
-<link href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<style>
-    .table-container { margin-left: 20px; }
-    .toggle-icon {
-        cursor: pointer;
-        margin-right: 5px;
-    }
-    .usuarios-list {
-        display: none; /* Ocultamos la lista de usuarios por defecto */
-    }
-    .grupo-label {
-        cursor: pointer;
-        font-weight: bold;
-    }
-</style>
 @endsection
 
 @section('contenidoPrincipal')
-<div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <br/>
-                <br/>
-                <br/>
-                <div class="card">
-                    <div class="card-header">Cambiar clave</div>
-                    
-                    <div class="card-body">
-    <form action="{{ route('cambiar-clave.submit') }}" method="POST">
-        @csrf
-        <br/>
-
-        @if($errors->any())
-            <div class="alert alert-danger">
-                <ul>
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-
-        <div class="form-group">
-            <label for="current_password">Contraseña Actual</label>
-            <input type="password" class="form-control" id="current_password" name="current_password" required>
+<div class="max-w-xl mx-auto px-4 py-8">
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="bg-gray-800 text-white text-lg font-semibold px-6 py-4">
+            Cambiar clave
         </div>
-        <div class="form-group">
-            <label for="new_password">Nueva Contraseña</label>
-            <input type="password" class="form-control" id="new_password" name="new_password" required>
+
+        <div class="p-6">
+            <form action="{{ route('cambiar-clave.submit') }}" method="POST" class="space-y-6">
+                @csrf
+
+                @if($errors->any())
+                    <div class="bg-red-100 text-red-700 border border-red-400 rounded px-4 py-3">
+                        <ul class="list-disc list-inside text-sm">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                <div>
+                    <label for="current_password" class="block font-medium text-sm text-gray-700">Contraseña Actual</label>
+                    <input type="password" id="current_password" name="current_password" required
+                           class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                </div>
+
+                <div>
+                    <label for="new_password" class="block font-medium text-sm text-gray-700">Nueva Contraseña</label>
+                    <input type="password" id="new_password" name="new_password" required
+                           class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                </div>
+
+                <div>
+                    <label for="new_password_confirmation" class="block font-medium text-sm text-gray-700">Confirmar Nueva Contraseña</label>
+                    <input type="password" id="new_password_confirmation" name="new_password_confirmation" required
+                           class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit"
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition">
+                        Cambiar Contraseña
+                    </button>
+                </div>
+            </form>
         </div>
-        <div class="form-group">
-            <label for="new_password_confirmation">Confirmar Nueva Contraseña</label>
-            <input type="password" class="form-control" id="new_password_confirmation" name="new_password_confirmation" required>
-        </div>
-        <button type="submit" class="btn btn-primary">Cambiar Contraseña</button>
-    </form>
     </div>
-   </div>
-  </div>
- </div>
+</div>
 @endsection

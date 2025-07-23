@@ -25,6 +25,17 @@ class ContribuyenteMultinotaController extends Controller
         return view('externo.cambiar-clave');
     }
 
+    public function perfil()
+{
+    $contribuyente = Session::get('contribuyente_multinota');
+
+    if (!$contribuyente) {
+        return redirect()->route('login-externo')->withErrors(['error' => 'Debes iniciar sesión para acceder al perfil.']);
+    }
+
+    return view('externo.perfil-externo', ['usuario' => $contribuyente]);
+}
+
    
     public function buscar(Request $request)
     {
@@ -131,6 +142,31 @@ public function changePassword(Request $request)
     return redirect()->route('bandeja-usuario-externo')->with('success', 'Contraseña cambiada con éxito.');
 }
 
+
+public function actualizarPerfil(Request $request){
+  $request->validate([
+    'cuit' => 'required|string|max:255',
+    'nombre' => 'required|string|max:255',
+    'apellido' => 'required|string|max:255',
+    'telefono1' => 'nullable|string|max:20',
+    'telefono2' => 'nullable|string|max:20',
+    'correo' => 'required|email',
+]);
+
+    $contribuyente = ContribuyenteMultinota::findOrFail($request->id_contribuyente_multinota);
+    $contribuyente->cuit = $request->cuit;
+    $contribuyente->nombre = $request->nombre;
+    $contribuyente->apellido = $request->apellido;
+    $contribuyente->telefono1 = $request->telefono1;
+    $contribuyente->telefono2 = $request->telefono2;
+    $contribuyente->correo = $request->correo;
+    $contribuyente->save();
+
+    Session::put('contribuyente_multinota', $contribuyente);
+
+    return redirect()->route('bandeja-usuario-externo')->with('success', 'Perfil actualizado correctamente.');
+
+}
 
 
 
