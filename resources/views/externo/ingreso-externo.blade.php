@@ -1,95 +1,53 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Login</title>
-    <!-- Incluye Bootstrap 5 -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #e0f7ff;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0;
-        }
-        .login-card {
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            padding: 40px;
-            max-width: 350px;
-            width: 100%;
-            text-align: center;
-        }
-        .login-card img {
-            width: 80px;
-            margin-bottom: 20px;
-        }
-        .form-control {
-            border-radius: 30px;
-            padding-left: 40px;
-        }
-        .input-icon {
-            position: relative;
-        }
-        .input-icon i {
-            position: absolute;
-            top: 50%;
-            left: 15px;
-            transform: translateY(-50%);
-            color: #007bff;
-        }
-        .btn-login {
-            border-radius: 30px;
-            background-color: #007bff;
-            border: none;
-            width: 100%;
-            color: white;
-            padding: 10px 0;
-            font-weight: bold;
-        }
-        .options {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.9rem;
-            margin-top: 10px;
-        }
-        .options a {
-            color: #007bff;
-            text-decoration: none;
-        }
-    </style>
-</head>
-<body>
-    <div class="login-card">
-
-    <h3 class="text-center mb-3">Ingreso Externo</h3>
-
-    <form method="POST" action="{{ route('ingreso-externo.login') }}">
-    @csrf
-    <div class="input-icon mb-3">
-        <i class="bi bi-person"></i>
-        <input type="text" class="form-control" placeholder="CUIT" name="cuit" required>
-    </div>
-    <div class="input-icon mb-3">
-        <i class="bi bi-lock"></i>
-        <input type="password" class="form-control" placeholder="Contraseña" name="clave" required>
-    </div>
-    <div class="options mb-3">
-        <div>
-            <input type="checkbox" id="recordarme">
-            <label for="recordarme">Recordarme</label>
-        </div>
-        <a href="#">¿Olvidaste tu contraseña?</a>
-    </div>
-    <button type="submit" class="btn-login">Iniciar Sesión</button>
-</form>
-
-    </div>
-
-    <!-- Incluye Bootstrap Icons y Bootstrap 5 JavaScript -->
+    <meta charset="UTF-8">
+    <title>Login - Ingreso Externo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</head>
+<body class="bg-blue-100 h-screen flex items-center justify-center">
+    <div class="bg-white shadow-xl rounded-xl p-8 w-full max-w-sm text-center space-y-6">
+        <h3 class="text-2xl font-bold text-blue-700">Ingreso Externo</h3>
+
+        <form method="POST" action="{{ route('ingreso-externo.login') }}" class="space-y-5">
+            @csrf
+
+            <!-- CUIT Input -->
+            <div class="relative">
+                <i class="bi bi-person absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500 text-lg"></i>
+                <input type="text" name="cuit" placeholder="CUIT" required
+                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+            </div>
+
+            <!-- Clave Input -->
+            <div class="relative">
+                <i class="bi bi-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500 text-lg"></i>
+                <input type="password" name="clave" placeholder="Contraseña" required
+                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+            </div>
+
+            <!-- Opciones -->
+            <div class="flex justify-between items-center text-sm text-gray-600">
+                <label class="flex items-center gap-2">
+                    <input type="checkbox" id="recordarme" class="accent-blue-500">
+                    Recordarme
+                </label>
+                <a href="#" class="text-blue-500 hover:underline">¿Olvidaste tu contraseña?</a>
+            </div>
+
+            <!-- Botones -->
+            <div class="space-y-2">
+                <button type="submit"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-full transition">
+                    Iniciar Sesión
+                </button>
+                <a href="{{ route('ingreso-externo.registro') }}"
+                    class="block w-full bg-gray-200 hover:bg-gray-300 text-blue-700 font-semibold py-2 rounded-full transition">
+                    Registrar
+                </a>
+            </div>
+        </form>
+    </div>
 </body>
 </html>

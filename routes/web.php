@@ -72,6 +72,8 @@ Route::get('/sistema', [ConfiguracionMailController::class, 'edit'])->name('conf
 Route::post('/sistema', [ConfiguracionMailController::class, 'update'])->name('configuracion.update');
 Route::get('/ingreso-externo', [IngresoExternoController::class, 'showLoginForm'])->name('ingreso-externo');
 Route::post('/ingreso-externo', [IngresoExternoController::class, 'login'])->name('ingreso-externo.login');
+Route::get('/ingreso-externo/registro', [IngresoExternoController::class, 'registro'])->name('ingreso-externo.registro');
+Route::post('/ingreso-externo/registrar', [IngresoExternoController::class, 'registrar'])->name('registro-externo.registrar');
 Route::get('/bandeja-usuario-externo', [IngresoExternoController::class, 'showBandeja'])->name('bandeja-usuario-externo');
 Route::get('/cambiar-clave', [ContribuyenteMultinotaController::class, 'showChangePasswordForm'])->name('cambiar-clave');
 Route::post('/cambiar-clave', [ContribuyenteMultinotaController::class, 'changePassword'])->name('cambiar-clave.submit');

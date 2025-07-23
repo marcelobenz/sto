@@ -8,10 +8,6 @@
 
     @yield('heading')
 </head>
-
-        .dropdown-submenu:hover > .dropdown-menu {
-            display: block;
-        }
     </style>
     <body>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
@@ -34,7 +30,7 @@
                         </a>
                         <div class="dropdown-menu" aria-labelledby="bandejasDropdown">
                             <a class="dropdown-item" href="#">Bandeja Personal</a>
-                            <a class="dropdown-item" href="{{ route('tramites.enCurso') }}">Trámites en Curso</a>
+                            <a class="dropdown-item" href="#">Trámites en Curso</a>
                             <a class="dropdown-item" href="{{ route('tramites.index') }}">Todos los Trámites</a>
                         </div>
                     </li>
@@ -42,39 +38,6 @@
                         <a class="nav-link dropdown-toggle" href="#" id="formulariosDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Formularios
                         </a>
-                        <div class="dropdown-menu" aria-labelledby="formulariosDropdown">
-                            @foreach ($categoriasSubcategoriasMap as $idPadre => $categorias)
-                                @foreach($categorias as $c)
-                                    @if($c->id_categoria == $idPadre)
-                                        @if($categoriaPadreTieneCategoriasConMulinotasActivas[$idPadre] == true)
-                                            <div class="dropdown-submenu">
-                                                <a class="dropdown-item dropdown-toggle" href="#">
-                                                    {{ $c->nombre }}
-                                                </a>
-                                                <div class="dropdown-menu">
-                                                    @foreach($categorias as $c)
-                                                        @if($c->id_categoria != $idPadre)
-                                                            @if(count($subcategoriasMultinotasMap[$c->id_categoria]) > 0)
-                                                                <div class="dropdown-submenu">
-                                                                    <a class="dropdown-item dropdown-toggle" href="#">
-                                                                        {{ $c->nombre }}
-                                                                    </a>
-                                                                    <div class="dropdown-menu">
-                                                                        @foreach ($subcategoriasMultinotasMap[$c->id_categoria] as $multinota)
-                                                                            <a class="dropdown-item" href={{ route('estadoTramite.tienePermiso', ['multinota' => $multinota]) }}>{{ $multinota->nombre }}</a>
-                                                                        @endforeach
-                                                                    </div>
-                                                                </div>
-                                                            @endif
-                                                        @endif
-                                                    @endforeach
-                                                </div>
-                                            </div>
-                                        @endif
-                                    @endif
-                                @endforeach
-                            @endforeach
-                        </div>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="administracionDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -87,8 +50,6 @@
                             <a class="dropdown-item" href="{{ route('contribuyente.buscar') }}">Usuarios</a>
                             <a class="dropdown-item" href="{{ route('cuestionarios.index') }}">Cuestionarios</a>
                             <a class="dropdown-item" href="{{ route('estados.index') }}">Estados</a>
-                            <a class="dropdown-item" href="{{ route('secciones-multinota.index') }}">Secciones Multinota</a>
-                            <a class="dropdown-item" href="{{ route('multinotas.index') }}">Multinotas</a>
                         </div>
                     </li>
                     <li class="nav-item dropdown">
@@ -136,9 +97,7 @@
             </div>
         </nav>
         <div>
-            @yield('contenidoPrincipal')
         </div>
-        @endif
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                         <li class="nav-item">

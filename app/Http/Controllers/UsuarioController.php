@@ -135,38 +135,6 @@ public function update(Request $request, $id)
 }
 
 
-public function setUsuarioInterno()
-    {
-        $usuario = UsuarioInterno::findOrFail($id);
-        $roles = Rol::all(); 
-        return view('usuarios.edit', compact('usuario', 'roles'));
-    }
-
-
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'legajo' => 'required|string|max:255',
-            'nombre' => 'required|string|max:255',
-            'apellido' => 'required|string|max:255',
-            'correo_municipal' => 'required|email|max:255',
-            'dni' => 'required|numeric',
-            'id_rol' => 'required|exists:rol,id_rol',
-        ]);
-
-        $usuario = UsuarioInterno::findOrFail($id);
-        $usuario->update([
-            'legajo' => $request->legajo,
-            'nombre' => $request->nombre,
-            'apellido' => $request->apellido,
-            'correo_municipal' => $request->correo_municipal,
-            'dni' => $request->dni,
-            'id_rol' => $request->id_rol,
-        ]);
-
-        return redirect()->route('usuarios.index')->with('success', 'Usuario actualizado correctamente');
-    }
-
     public function setUsuarioInterno()
     {
     

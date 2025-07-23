@@ -16,6 +16,11 @@ class IngresoExternoController extends Controller
     }
 
 
+      public function registro()
+    {
+        return view('externo.registro');
+    }
+
     public function showBandeja()
     {
         return view('externo.bandeja-usuario-externo');
@@ -48,5 +53,35 @@ class IngresoExternoController extends Controller
             ]);
         }
     }
+
+
+
+    public function registrar(Request $request)
+{
+    $request->validate([
+        'cuit' => 'required|string|unique:contribuyente_multinota,cuit',
+        'correo' => 'required|email|unique:contribuyente_multinota,correo',
+        'nombre' => 'required|string|max:255',
+        'apellido' => 'required|string|max:255',
+        'telefono1' => 'nullable|string|max:20',
+        'telefono2' => 'nullable|string|max:20',
+        'clave' => 'required|string|min:6|confirmed',
+    ]);
+
+    $usuario = new ContribuyenteMultinota();
+    $usuario->cuit = $request->cuit;
+    $usuario->correo = $request->correo;
+    $usuario->nombre = $request->nombre;
+    $usuario->apellido = $request->apellido;
+    $usuario->telefono1 = $request->telefono1;
+    $usuario->telefono2 = $request->telefono2;
+    $usuario->clave = Hash::make($request->clave);
+    $usuario->save();
+
+    session(['contribuyente_multinota' => $usuario]);
+    session(['isExterno' => true]);
+
+    return redirect()->route('bandeja-usuario-externo');
+}
     
 }
