@@ -38,6 +38,7 @@ class IngresoExternoController extends Controller
         if ($usuario && Hash::check($clave, $usuario->clave)) {
            
             session(['contribuyente_multinota' => $usuario]);
+            session(['isExterno' => true]);
     
            
             return redirect()->route('bandeja-usuario-externo');

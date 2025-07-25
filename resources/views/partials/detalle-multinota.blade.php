@@ -25,6 +25,10 @@
                 <label>{{ $multinotaSelected->nombre }}
             </div>
             <div style="display: flex; flex-direction: column;">
+                <label>¿Llama a un servicio?</label>
+                <label>{{ $multinotaSelected->nombre_servicio }}</label>
+            </div>
+            <div style="display: flex; flex-direction: column;">
                 <label>Pública</label>
                 <label>
                     @if ($multinotaSelected->publico == '1')

@@ -124,7 +124,7 @@
 
 @endsection
 
-@section('scripting')
+@push('scripts')
 <script>
     let contador = {{ $cuestionario->preguntas->count() + 1 }};
 
@@ -185,4 +185,5 @@
 
 {{-- Bootstrap Bundle for accordion --}}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-@endsection
+
+@endpush

@@ -60,12 +60,32 @@
                                         @endif
                                     </div>
                                     <div style="display: flex; flex-direction: column; width: 100%;">
-                                        <label style="font-weight: bold;">Nombre del Trámite</label>
+                                        <label style="font-weight: bold;">Nombre del trámite</label>
                                         @if($multinotaSelected->nombre == null)
                                             <input name="nombre" id="nombre-tramite" type="text" required />
                                         @else
                                             <input name="nombre" id="nombre-tramite" type="text" value="{{ $multinotaSelected->nombre }}" required />
                                         @endif
+                                    </div>
+                                    <div style="display: flex; flex-direction: column; width: 100%;">
+                                        <label style="font-weight: bold;">¿Llama a un servicio?</label>
+                                        <select id="select-servicio" name="servicio" id="servicio" required>
+                                            @if($multinotaSelected->id_multinota_servicio == null)
+                                                <option selected value="0">No</option>
+                                                @foreach($multinotaServicios as $ms)
+                                                    <option value="{{ $ms->id_multinota_servicio }}">{{ $ms->nombre }}</option>
+                                                @endforeach
+                                            @else
+                                                <option value="0">No</option>
+                                                @foreach($multinotaServicios as $ms)
+                                                    @if($multinotaSelected->id_multinota_servicio == $ms->id_multinota_servicio)
+                                                        <option selected value="{{ $ms->id_multinota_servicio }}">{{ $ms->nombre }}</option>
+                                                    @else
+                                                        <option value="{{ $ms->id_multinota_servicio }}">{{ $ms->nombre }}</option>
+                                                    @endif
+                                                @endforeach
+                                            @endif
+                                        </select>
                                     </div>
                                 </div>
                                 <div style="display: flex; width: 100%; gap: 50px;">
@@ -126,8 +146,7 @@
     @include('partials.modal-confirmacion-salir', ['path' => '/multinotas'])
 @endsection
 
-@section('scripting')
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+@push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     var codigos = @json($codigos);
@@ -492,4 +511,5 @@
         display: none;
     }
 </style>
-@endsection
+
+@endpush

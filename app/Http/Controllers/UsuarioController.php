@@ -142,6 +142,7 @@ class UsuarioController extends Controller
 
         if ($usuarioInterno) {
             Session::put('usuario_interno', $usuarioInterno); // Guardar en la sesión
+            session(['isExterno' => false]);
         }
 
         // Redirigir a la página principal del sistema

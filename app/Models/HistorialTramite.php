@@ -12,8 +12,10 @@ class HistorialTramite extends Model
     // Llave primaria
     protected $primaryKey = 'id_historial_tramite';
 
-    // Indicamos que no se usarán timestamps automáticos (`created_at` y `updated_at`)
-    public $timestamps = false;
+    public $incrementing = true;
+
+    // Define the key type
+    protected $keyType = 'int';
 
     // Asignación masiva
     protected $fillable = [
@@ -29,4 +31,7 @@ class HistorialTramite extends Model
         'id_usuario_interno_administrador',
         'id_usuario_interno_asignado',
     ];
+
+    // Disable timestamps if you are managing them manually
+    public $timestamps = false;
 }

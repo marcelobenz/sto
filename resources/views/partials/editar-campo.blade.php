@@ -60,14 +60,6 @@
                     </div>
                 </div>
             @endif
-            
-            @if($campoSelected->tipo == 'TEXTAREA_FIJO')
-                <div style="display: flex; flex-direction: column;">
-                    <textarea maxlength="500" placeholder="Ingrese un texto...">
-
-                    </textarea>
-                </div>
-            @endif
 
             @if($campoSelected->tipo == 'LISTA' || $campoSelected->tipo == 'CAJAS_SELECCION')
                 <h3>Listas / Cajas de selección</h3>
@@ -117,12 +109,12 @@
         }
 
         $('#select-tipos').on('change', function() {
-            var selectedValue = $(this).val(); // Get the selected value using jQuery
-            const nombreCampo = document.getElementById('nombre').value;
-            fetch(`/secciones-multinota/getOpcionesFormTipoCampo/${nombreCampo}/${selectedValue}`)
+            var selectedValue = $(this).val();
+            
+            fetch(`/secciones-multinota/getOpcionesFormTipoCampo/${selectedValue}`)
                 .then(response => response.text())
                 .then(data => {
-                    $("#editar-campo-container").html(data); // Update the container with the fetched data
+                    $("#editar-campo-container").html(data);
                 })
                 .catch(error => console.error('Error:', error));
         });

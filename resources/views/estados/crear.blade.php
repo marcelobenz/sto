@@ -98,8 +98,7 @@
     </div>
 @endsection
 
-@section('scripting')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@push('scripts')
 <script>
     document.addEventListener("DOMContentLoaded", function () {
     let seccionRelaciones = document.getElementById("seccion-relaciones");
@@ -325,4 +324,4 @@ document.getElementById("btn-guardar-configuracion").addEventListener("click", f
 });
 });
 </script>
-@endsection
+@endpush

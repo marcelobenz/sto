@@ -22,7 +22,9 @@ class TipoTramiteMultinota extends Model {
 
     // Define fillable attributes for mass assignment
     protected $fillable = [
-        'nombre', 'codigo', 'id_categoria', 'publico', 'nivel', 'muestra_mensaje', 'lleva_expediente', 'baja_logica', 'fecha_alta', 'fecha_ultima_actualizacion', 'codigo_crm', 'lleva_documentacion'
+        'nombre', 'codigo', 'id_categoria', 'publico', 'nivel', 'muestra_mensaje', 'lleva_expediente', 
+        'baja_logica', 'fecha_alta', 'fecha_ultima_actualizacion', 'codigo_crm', 'lleva_documentacion',
+        'id_multinota_servicio'
     ];
 
     protected $casts = [

@@ -9,14 +9,14 @@ use \stdClass;
 
 class Ingresante extends Model
 {
-	private String $cuil;
+	private String $cuit;
   
-    public function __construct(String $cuil) {
-        $this->cuil = $cuil;
+    public function __construct(String $cuit) {
+        $this->cuit = $cuit;
     }
 
     public function ingresar() {
-        $usuarioSession = UsuarioInternoController::getUsuarioSessionPorCuil($this->cuil);
+        $usuarioSession = UsuarioInternoController::getUsuarioSessionPorCuit($this->cuit);
 
         if ($usuarioSession === null) {
             throw new Exception("El usuario ingresado es incorrecto");

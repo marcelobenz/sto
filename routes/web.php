@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AutorizacionController;
 use App\Http\Controllers\TramiteController;
+use App\Http\Controllers\EstadoTramiteController;
+use App\Http\Controllers\InstanciaMultinotaController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\UsuarioController;
@@ -66,9 +68,15 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard
 
 //Reportes
 Route::get('/reporte/constancia/{idTramite}', [ReporteController::class, 'generarPDF'])->name('reporte.constancia');
+Route::get('/reporte/constancia/modal/{idTramite}', function ($idTramite) {
+    return view('reportes.modal', compact('idTramite'));
+})->name('reporte.constancia.modal');
 
 //Archivos
 Route::post('/archivo/subir', [ArchivoController::class, 'subirArchivo'])->name('archivo.subir');
+Route::post('/archivo/subirTemporal', [ArchivoController::class, 'subirArchivoTemporal'])->name('archivo.subirTemporal');
+Route::post('/archivo/cargarComentario', [ArchivoController::class, 'cargarComentario'])->name('archivo.cargarComentario');
+Route::post('/archivo/eliminarTemporal', [ArchivoController::class, 'eliminarArchivoTemporal'])->name('archivo.eliminarTemporal');
 Route::get('/archivo/descargar/{id}', [ArchivoController::class, 'descargar'])->name('archivo.descargar');
 
 //Comtentarios
@@ -82,6 +90,35 @@ Route::get('/tramites/en-curso', [TramiteController::class, 'enCurso'])->name('t
 Route::post('/tramites/tomarTramite', [TramiteController::class, 'tomarTramite'])->name('tramites.tomarTramite');
 Route::post('/tramites/cambiar-prioridad', [TramiteController::class, 'cambiarPrioridad'])->name('tramites.cambiarPrioridad');
 Route::post('/tramites/darDeBaja', [TramiteController::class, 'darDeBaja'])->name('tramites.darDeBaja');
+
+//Estado Trámite
+Route::get('/estadoTramite/tienePermiso/{multinota}', [EstadoTramiteController::class, 'tienePermiso'])->name('estadoTramite.tienePermiso');
+
+// Instancia Tramite
+Route::get('/instanciaTramite/buscar', [InstanciaMultinotaController::class, 'buscar'])->name('instanciaTramite.buscar');
+Route::get('/instanciaTramite/avanzarPaso', [InstanciaMultinotaController::class, 'avanzarPaso'])->name('instanciaTramite.avanzarPaso');
+Route::get('/instanciaTramite/retrocederPaso', [InstanciaMultinotaController::class, 'retrocederPaso'])->name('instanciaTramite.retrocederPaso');
+/* Etapa: Datos del Solicitante */
+Route::post('/instanciaTramite/guardarDatosDelSolicitante', [InstanciaMultinotaController::class, 'guardarDatosDelSolicitante'])->name('instanciaTramite.guardarDatosDelSolicitante');
+Route::get('/instanciaTramite/session-data', function () {
+    return response()->json([
+        'cuenta' => session('SOLICITANTE')->cuenta,
+        'correo' => session('SOLICITANTE')->correo,
+    ]);
+});
+/* Etapa: Datos del Representante */
+Route::get('/instanciaTramite/buscarContribuyente/{cuit}', [InstanciaMultinotaController::class, 'buscarContribuyente'])->name('instanciaTramite.buscarContribuyente');
+Route::post('/instanciaTramite/guardarDatosSeccionSolicitante', [InstanciaMultinotaController::class, 'guardarDatosSeccionSolicitante'])->name('instanciaTramite.guardarDatosSeccionSolicitante');
+
+/* Etapa: Datos a Completar */
+Route::post('/instanciaTramite/guardarDatosSeccionDatosACompletar', [InstanciaMultinotaController::class, 'guardarDatosSeccionDatosACompletar'])->name('instanciaTramite.guardarDatosSeccionDatosACompletar');
+
+/* Etapa: Información Adicional */
+Route::post('/instanciaTramite/guardarDatosSeccionInformacionAdicional', [InstanciaMultinotaController::class, 'guardarDatosSeccionInformacionAdicional'])->name('instanciaTramite.guardarDatosSeccionInformacionAdicional');
+
+/* Etapa: Resumen */
+Route::post('/instanciaTramite/handleCheckConfirmarDeclaracion', [InstanciaMultinotaController::class, 'handleCheckConfirmarDeclaracion'])->name('instanciaTramite.handleCheckConfirmarDeclaracion');
+Route::get('/instanciaTramite/registrarTramite', [InstanciaMultinotaController::class, 'registrarTramite'])->name('instanciaTramite.registrarTramite');
 
 //Categorías
 Route::get('/categorias', [CategoriaController::class, 'index'])->name('categorias.index');
@@ -102,7 +139,7 @@ Route::get('/secciones-multinota/setearNuevoOrdenOpcionesCampo/{array}', [Seccio
 Route::get('/secciones-multinota/addOpcionCampo/{nueva_opcion}', [SeccionesMultinotaController::class, 'addOpcionCampo'])->name('secciones-multinota.addOpcionCampo');
 Route::get('/secciones-multinota/getOpcionesCampo', [SeccionesMultinotaController::class, 'getOpcionesCampo'])->name('secciones-multinota.getOpcionesCampo');
 Route::get('/secciones-multinota/getOpcionesCampoAlfabeticamente', [SeccionesMultinotaController::class, 'getOpcionesCampoAlfabeticamente'])->name('secciones-multinota.getOpcionesCampoAlfabeticamente');
-Route::get('/secciones-multinota/getOpcionesFormTipoCampo/{nombre_campo}/{tipo}', [SeccionesMultinotaController::class, 'getOpcionesFormTipoCampo'])->name('secciones-multinota.getOpcionesFormTipoCampo');
+Route::get('/secciones-multinota/getOpcionesFormTipoCampo/{tipo}', [SeccionesMultinotaController::class, 'getOpcionesFormTipoCampo'])->name('secciones-multinota.getOpcionesFormTipoCampo');
 Route::get('/secciones-multinota/deleteOpcionCampo/{id}', [SeccionesMultinotaController::class, 'deleteOpcionCampo'])->name('secciones-multinota.deleteOpcionCampo');
 Route::get('/secciones-multinota/{id}/edit', [SeccionesMultinotaController::class, 'edit'])->name('secciones-multinota.edit');
 Route::get('/secciones-multinota/crearNuevaSeccion', [SeccionesMultinotaController::class, 'crearNuevaSeccion'])->name('secciones-multinota.crearNuevaSeccion');
@@ -181,7 +218,7 @@ Route::post('/workflow/editar/guardarBorrador/{id}', [AdministracionWorkflowCont
 Route::post('/workflow/editar/publicarBorrador/{id}', [AdministracionWorkflowController::class, 'publicarBorrador'])->name('workflow.publicarBorrador');
 
 //Navbar
-Route::view('/navbar','/navbar')->name('navbar');
+Route::view('/navbar', [NavbarController::class, 'cargarElementos'])->name('navbar');
 
 //Bandeja Personal
 Route::get('/bandeja-personal', [BandejaPersonalController::class, 'index'])->name('bandeja-personal.index');

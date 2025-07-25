@@ -9,6 +9,7 @@ use App\Models\MensajeInicial;
 use App\Models\TipoTramiteMensajeInicial;
 use App\Models\MultinotaTipoCuenta;
 use App\Models\MultinotaSeccion;
+use App\Models\MultinotaServicio;
 use App\Models\SeccionMultinota;
 use App\Models\Campo;
 use Illuminate\Database\Eloquent\Collection;
@@ -199,6 +200,7 @@ class MultinotaController extends Controller
         $seccionesAsociadas = $array[1];
         $todasLasSecciones = $array[2];
         $categoriasPadre = $array[3];
+        $multinotaServicios = $array[4];
 
         $subcategorias = MultinotaController::getSubcategoriasPorIdPadre($multinotaSelected->id_categoria_padre);
         Session::put('SUBCATEGORIAS', $subcategorias);
@@ -206,7 +208,7 @@ class MultinotaController extends Controller
         Session::put('IS_EDITAR', true);
         $isEditar = Session::get('IS_EDITAR');
 
-        return view('multinotas.edit', compact('multinotaSelected', 'seccionesAsociadas', 'todasLasSecciones', 'subcategorias', 'categoriasPadre', 'codigos', 'isEditar'));
+        return view('multinotas.edit', compact('multinotaSelected', 'seccionesAsociadas', 'todasLasSecciones', 'subcategorias', 'categoriasPadre', 'codigos', 'multinotaServicios', 'isEditar'));
     }
 
     public function crearNuevaMultinota() {
@@ -223,14 +225,20 @@ class MultinotaController extends Controller
         $multinotaSelected->lleva_expediente = 0;
         $multinotaSelected->nombre_subcategoria = null;
         $multinotaSelected->mensaje_inicial = '';
+        $multinotaSelected->id_multinota_servicio = null;
+        $multinotaSelected->nombre_servicio = 'No';
 
         $seccionesAsociadas = [];
         $todasLasSecciones = MultinotaController::getTodasLasSecciones();
         Session::put('TODAS_LAS_SECCIONES', $todasLasSecciones);
+        
         $subcategorias = [];
         $categoriasPadre = MultinotaController::getCategoriasPadre();
         Session::put('CATEGORIAS_PADRE', $categoriasPadre);
+        
         $codigos = MultinotaController::getCodigosMultinotasActivas();
+        
+        $multinotaServicios = MultinotaController::getTodosLosServicios();
 
         //Se setean los datos de sesion en 'nulos'
         Session::put('MULTINOTA_SELECTED', $multinotaSelected);
@@ -239,7 +247,7 @@ class MultinotaController extends Controller
         Session::put('IS_EDITAR', false);
         $isEditar = Session::get('IS_EDITAR');
 
-        return view('multinotas.edit', compact('multinotaSelected', 'seccionesAsociadas', 'todasLasSecciones', 'subcategorias', 'categoriasPadre', 'codigos', 'isEditar'));
+        return view('multinotas.edit', compact('multinotaSelected', 'seccionesAsociadas', 'todasLasSecciones', 'subcategorias', 'categoriasPadre', 'codigos', 'multinotaServicios', 'isEditar'));
     }
 
     private static function buildMultinotaSelected($id, $data) {
@@ -319,7 +327,16 @@ class MultinotaController extends Controller
 
         Session::put('TODAS_LAS_SECCIONES', $todasLasSecciones);
 
-        return array($multinotaSelected, $seccionesAsociadas, $todasLasSecciones, $categoriasPadre);
+        $multinotaServicios = MultinotaController::getTodosLosServicios();
+
+        // Servicio asociado a la multinota
+        if($multinotaSelected->id_multinota_servicio != 0) {
+            $multinotaSelected->nombre_servicio = MultinotaController::getNombreServicioPorId($multinotaSelected->id_multinota_servicio);
+        } else {
+            $multinotaSelected->nombre_servicio = 'No';
+        }
+
+        return array($multinotaSelected, $seccionesAsociadas, $todasLasSecciones, $categoriasPadre, $multinotaServicios);
     }
 
     public static function getCodigosMultinotasActivas() {
@@ -365,6 +382,16 @@ class MultinotaController extends Controller
         }
 
         return $todasLasSecciones;
+    }
+
+    public static function getTodosLosServicios() {
+        $multinotaServicios = MultinotaServicio::all();
+        return $multinotaServicios;
+    }
+
+    public static function getNombreServicioPorId($id) {
+        $nombreServicio = MultinotaServicio::where('id_multinota_servicio', (int) $id)->value('nombre');
+        return $nombreServicio;
     }
 
     public function refresh() {
@@ -535,6 +562,15 @@ class MultinotaController extends Controller
         // Nombre
         $multinotaSelected->nombre = $request->post('nombre');
 
+        // ID y Nombre de servicio seleccionado
+        if((int) $request->post('servicio') != 0) {
+            $multinotaSelected->id_multinota_servicio = $request->post('servicio');
+            $multinotaSelected->nombre_servicio = MultinotaController::getNombreServicioPorId($request->post('servicio'));
+        } else {
+            $multinotaSelected->id_multinota_servicio = null;
+            $multinotaSelected->nombre_servicio = 'No';
+        }
+
         // Categoria y Subcategoria
         foreach ($categorias as $c) {
             if($c->id_categoria == $request->post('categoria')) {
@@ -602,6 +638,7 @@ class MultinotaController extends Controller
             'lleva_expediente' => $multinotaSelected->lleva_expediente,
             'baja_logica' => 0,
             'lleva_documentacion' => $multinotaSelected->lleva_documentacion,
+            'id_multinota_servicio' => $multinotaSelected->id_multinota_servicio,
         ]);
 
         // La recupero para saber el ID de la nueva multinota
