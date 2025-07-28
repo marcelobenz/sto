@@ -284,7 +284,6 @@ class InstanciaMultinotaController extends Controller {
 
         $formulario = new FormularioMultinotaDTO($multinota, $secciones, $contribuyente['cuentas'], $pasos, $llevaMensaje);
 
-        /* $solicitante = new SolicitanteDTO(str_replace(' ', '', $contribuyente['cuentas'][0]->getCodigo()), ''); */
         $solicitante = new SolicitanteDTO();
         
         // Se guardan datos que se mostrarán en el resumen final del trámite
