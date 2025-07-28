@@ -1,32 +1,31 @@
-@extends('navbar')
+@extends("layouts.app")
 
-@section('heading')
-    <h1>Editar Categoría</h1>
-@endsection
-
-@section('contenidoPrincipal')
+@section("content")
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-8">
-                @if(session('error'))
-                    <div class="alert alert-danger">
-                        {{ session('error') }}
-                    </div>
-                @endif
-
-                <br/>
                 <div class="card">
                     <div class="card-header">Editar Categoría</div>
 
                     <div class="card-body">
-                        <form method="POST" action="{{ route('categorias.update', $categoria->id_categoria) }}">
+                        <form
+                            method="POST"
+                            action="{{ route("categorias.update", $categoria->id_categoria) }}"
+                        >
                             @csrf
-                            @method('PUT')
+                            @method("PUT")
 
                             <div class="form-group">
                                 <label for="nombre">Nombre</label>
-                                <input type="text" class="form-control @error('nombre') is-invalid @enderror" id="nombre" name="nombre" value="{{ old('nombre', $categoria->nombre) }}" required>
-                                @error('nombre')
+                                <input
+                                    type="text"
+                                    class="form-control @error("nombre") is-invalid @enderror"
+                                    id="nombre"
+                                    name="nombre"
+                                    value="{{ old("nombre", $categoria->nombre) }}"
+                                    required
+                                />
+                                @error("nombre")
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
                                     </span>
@@ -35,15 +34,22 @@
 
                             <div class="form-group">
                                 <label for="id_padre">Categoría Padre</label>
-                                <select class="form-control @error('id_padre') is-invalid @enderror" id="id_padre" name="id_padre">
+                                <select
+                                    class="form-control @error("id_padre") is-invalid @enderror"
+                                    id="id_padre"
+                                    name="id_padre"
+                                >
                                     <option value="">Ninguna</option>
-                                    @foreach($categoriasActivas as $cat)
-                                        <option value="{{ $cat->id_categoria }}" {{ old('id_padre', $categoria->id_padre) == $cat->id_categoria ? 'selected' : '' }}>
+                                    @foreach ($categoriasActivas as $cat)
+                                        <option
+                                            value="{{ $cat->id_categoria }}"
+                                            {{ old("id_padre", $categoria->id_padre) == $cat->id_categoria ? "selected" : "" }}
+                                        >
                                             {{ $cat->nombre }}
                                         </option>
                                     @endforeach
                                 </select>
-                                @error('id_padre')
+                                @error("id_padre")
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
                                     </span>
@@ -52,19 +58,41 @@
 
                             <div class="form-group">
                                 <label for="flag_activo">Activo</label>
-                                <select class="form-control @error('flag_activo') is-invalid @enderror" id="flag_activo" name="flag_activo" required>
-                                    <option value="1" {{ old('flag_activo', $categoria->flag_activo) == 1 ? 'selected' : '' }}>Sí</option>
-                                    <option value="0" {{ old('flag_activo', $categoria->flag_activo) == 0 ? 'selected' : '' }}>No</option>
+                                <select
+                                    class="form-control @error("flag_activo") is-invalid @enderror"
+                                    id="flag_activo"
+                                    name="flag_activo"
+                                    required
+                                >
+                                    <option
+                                        value="1"
+                                        {{ old("flag_activo", $categoria->flag_activo) == 1 ? "selected" : "" }}
+                                    >
+                                        Sí
+                                    </option>
+                                    <option
+                                        value="0"
+                                        {{ old("flag_activo", $categoria->flag_activo) == 0 ? "selected" : "" }}
+                                    >
+                                        No
+                                    </option>
                                 </select>
-                                @error('flag_activo')
+                                @error("flag_activo")
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
                                     </span>
                                 @enderror
                             </div>
 
-                            <button type="submit" class="btn btn-primary">Actualizar Categoría</button>
-                            <a href="{{ route('categorias.index') }}" class="btn btn-secondary">Volver</a>
+                            <button type="submit" class="btn btn-primary">
+                                Actualizar Categoría
+                            </button>
+                            <a
+                                href="{{ route("categorias.index") }}"
+                                class="btn btn-secondary"
+                            >
+                                Volver
+                            </a>
                         </form>
                     </div>
                 </div>

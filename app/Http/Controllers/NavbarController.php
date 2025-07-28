@@ -25,7 +25,7 @@ class NavbarController extends Controller
     public function cargarItemsFormularios() {
         $categoriasSubcategoriasMap = collect();
         $subcategoriasMultinotasMap = collect();
-        $categoriaPadreTieneCategoriasConMulinotasActivas = collect();
+        $categoriaPadreTieneCategoriasConMultinotasActivas = collect();
         $categorias = new Categoria();
 
         // Obtengo los IDs de las distintas categorias padre
@@ -72,12 +72,12 @@ class NavbarController extends Controller
                 }
             }
 
-            $categoriaPadreTieneCategoriasConMulinotasActivas->put($key, false);
+            $categoriaPadreTieneCategoriasConMultinotasActivas->put($key, false);
 
             // Se verifica si hay al menos 1 categoria con multinotas activas
             foreach ($arrayCounts as $a) {
                 if($a > 0) {
-                    $categoriaPadreTieneCategoriasConMulinotasActivas->put($key, true);
+                    $categoriaPadreTieneCategoriasConMultinotasActivas->put($key, true);
                 }
             }
         }
@@ -85,7 +85,7 @@ class NavbarController extends Controller
         return [
             'categoriasSubcategoriasMap' => $categoriasSubcategoriasMap,
             'subcategoriasMultinotasMap' => $subcategoriasMultinotasMap,
-            'categoriaPadreTieneCategoriasConMulinotasActivas' => $categoriaPadreTieneCategoriasConMulinotasActivas
+            'categoriaPadreTieneCategoriasConMultinotasActivas' => $categoriaPadreTieneCategoriasConMultinotasActivas
         ];
     }
 }

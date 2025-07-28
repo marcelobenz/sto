@@ -1,12 +1,6 @@
-@extends('navbar')
+@extends('layouts.app')
 
-@section('heading')
-<link href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
+@push('styles')
 <style>
     .table-container { margin-left: 20px; }
     .toggle-icon {
@@ -21,9 +15,9 @@
         font-weight: bold;
     }
 </style>
-@endsection
+@endpush
 
-@section('contenidoPrincipal')
+@section('content')
 <div class="container mt-5">
     <h1>Crear Nuevo Cuestionario</h1>
     <div class="row">
@@ -108,11 +102,7 @@
     </div>
     </form>
 </div>
-
-
-
 @endsection
-
 
 @push('scripts')
 <script>
@@ -203,7 +193,4 @@
         });
     });
 </script>
-
-{{-- Bootstrap Bundle for accordion --}}
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 @endpush

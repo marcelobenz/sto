@@ -1,10 +1,6 @@
-@extends('navbar')
+@extends('layouts.app')
 
-@section('heading')
-
-    <!-- Incluye DataTables CSS -->
-    <link href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+@push('styles')
     <style>
         /* Estilos personalizados para los iconos de flecha */
         .dataTables_wrapper .dataTables_paginate .paginate_button {
@@ -18,9 +14,9 @@
             height: 16px; /* Ajusta el alto del icono */
         }
     </style>
-@endsection
+@endpush
 
-@section('contenidoPrincipal')
+@section('content')
     <div class="container-fluid px-3">
         <div class="row mb-3 px-3" style="justify-content: end;">            
             <div class="col-md-12">
@@ -40,10 +36,3 @@
         </div>
     </div>
 @endsection
-
-@push('scripts')
-    <!-- Incluye jQuery y DataTables JS -->
-    <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-@endpush

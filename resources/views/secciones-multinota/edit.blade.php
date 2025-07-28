@@ -1,19 +1,35 @@
-@extends('navbar')
+@extends('layouts.app')
 
-@section('heading')
-    <h1>Editar Sección Multinota</h1>
-@endsection
+@push('styles')
+<style>
+    .fila-campo, .fila-opcion-campo {
+        background-color: #ededed;
+        border: 1px solid black;
+        padding: 10px;
+        cursor: grab;
+        transition: all 0.2s ease;
+        position: relative;
+    }
 
-@section('contenidoPrincipal')
+    .fila-campo:active, .fila-opcion-campo:active {
+        cursor: grabbing;
+        opacity: 0.7;
+    }
+
+    .fila-campo.dragging, .fila-opcion-campo.dragging {
+        opacity: 0.5;
+    }
+
+    .fila-campo:hover, .fila-opcion-campo:hover {
+        background-color: #b9b7b7;
+    }
+</style>
+@endpush
+
+@section('content')
     <div class="container-xxl" style="margin-left: 20%; margin-right: 20%;">
         <div class="row justify-content-center">
             <div class="col-md-12">
-                @if(session('error'))
-                    <div class="alert alert-danger">
-                        {{ session('error') }}
-                    </div>
-                @endif
-
                 <div class="card">
                     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
                         Editar Sección Multinota
@@ -349,27 +365,4 @@
         document.querySelector('#tabla-opciones-campo').style.pointerEvents = '';
     }
 </script>
-<style>
-    .fila-campo, .fila-opcion-campo {
-        background-color: #ededed;
-        border: 1px solid black;
-        padding: 10px;
-        cursor: grab;
-        transition: all 0.2s ease;
-        position: relative;
-    }
-
-    .fila-campo:active, .fila-opcion-campo:active {
-        cursor: grabbing;
-        opacity: 0.7;
-    }
-
-    .fila-campo.dragging, .fila-opcion-campo.dragging {
-        opacity: 0.5;
-    }
-
-    .fila-campo:hover, .fila-opcion-campo:hover {
-        background-color: #b9b7b7;
-    }
-</style>
 @endpush

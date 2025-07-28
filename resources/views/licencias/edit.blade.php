@@ -1,49 +1,87 @@
-@extends('navbar')
+@extends("layouts.app")
 
-@section('heading')
-    <h1>Registrar Nueva Licencia</h1>
-@endsection
-
-@section('contenidoPrincipal')
+@section("content")
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-8">
-                <br/>
+                <br />
                 <div class="card">
                     <div class="card-header">Registrar Nueva Licencia</div>
-                    
+
                     <div class="card-body">
                         <!-- Formulario para registrar una nueva licencia -->
-                        <form method="POST" action="{{ route('licencias.store', $usuario->id_usuario_interno) }}">
+                        <form
+                            method="POST"
+                            action="{{ route("licencias.store", $usuario->id_usuario_interno) }}"
+                        >
                             @csrf
 
                             <div class="form-group">
                                 <label for="legajo">Legajo</label>
-                                <input type="text" class="form-control" id="legajo" name="legajo" value="{{ $usuario->legajo }}" disabled>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="legajo"
+                                    name="legajo"
+                                    value="{{ $usuario->legajo }}"
+                                    disabled
+                                />
                             </div>
 
                             <div class="form-group">
                                 <label for="nombre">Nombre</label>
-                                <input type="text" class="form-control" id="nombre" name="nombre" value="{{ $usuario->nombre }} {{$usuario->apellido}}" disabled>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="nombre"
+                                    name="nombre"
+                                    value="{{ $usuario->nombre }} {{ $usuario->apellido }}"
+                                    disabled
+                                />
                             </div>
 
                             <div class="form-group">
                                 <label for="fecha_inicio">Fecha Desde</label>
-                                <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" required>
+                                <input
+                                    type="date"
+                                    class="form-control"
+                                    id="fecha_inicio"
+                                    name="fecha_inicio"
+                                    required
+                                />
                             </div>
 
                             <div class="form-group">
                                 <label for="fecha_fin">Fecha Hasta</label>
-                                <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" required>
+                                <input
+                                    type="date"
+                                    class="form-control"
+                                    id="fecha_fin"
+                                    name="fecha_fin"
+                                    required
+                                />
                             </div>
 
                             <div class="form-group">
                                 <label for="motivo">Motivo</label>
-                                <input type="text" class="form-control" id="motivo" name="motivo" required>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="motivo"
+                                    name="motivo"
+                                    required
+                                />
                             </div>
 
-                            <button type="submit" class="btn btn-primary">Guardar Licencia</button>
-                            <a href="{{ route('usuarios.index') }}" class="btn btn-secondary">Volver</a>
+                            <button type="submit" class="btn btn-primary">
+                                Guardar Licencia
+                            </button>
+                            <a
+                                href="{{ route("usuarios.index") }}"
+                                class="btn btn-secondary"
+                            >
+                                Volver
+                            </a>
                         </form>
                     </div>
                 </div>
@@ -65,7 +103,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($historialLicencias as $licencia)
+                                @foreach ($historialLicencias as $licencia)
                                     <tr>
                                         <td>{{ $licencia->motivo }}</td>
                                         <td>{{ $licencia->fecha_inicio }}</td>

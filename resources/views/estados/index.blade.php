@@ -1,13 +1,6 @@
-@extends('navbar')
+@extends("layouts.app")
 
-@section('heading')
-    <!-- DataTables CSS -->
-    <link href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-@endsection
-
-@section('contenidoPrincipal')
+@section("content")
     <div class="container-fluid px-3">
         <h2 class="mt-3">Administración Workflow de Estados</h2>
 
@@ -16,7 +9,10 @@
                 <h5>Tipos de Trámite</h5>
             </div>
             <div class="card-body">
-                <table id="tramitesTable" class="table table-bordered table-striped">
+                <table
+                    id="tramitesTable"
+                    class="table table-bordered table-striped"
+                >
                     <thead>
                         <tr>
                             <th>Categoría</th>
@@ -31,59 +27,53 @@
     </div>
 @endsection
 
-@push('scripts')
-    <!-- jQuery y DataTables JS -->
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+@push("scripts")
     <script>
-   $(document).ready(function() {
-    $('#tramitesTable').DataTable({
-        "processing": true,
-        "serverSide": true,
-        "ajax": "{{ route('estados.index') }}",
-       "columns": [
-    { "data": "categoria" },
-    { "data": "nombre_tipo_tramite" },
-    {
-        "data": "existe_configuracion",
-        "orderable": false,
-        "searchable": false,
-        "render": function(data, type, row) {
-            let botones = '';
-            if (data == 0) {
-                botones += `
-                    <button class="btn btn-sm btn-primary fa fa-plus" 
-                    onclick="window.location.href='/workflow/${row.id_tipo_tramite_multinota}'" 
+        $(document).ready(function () {
+            $('#tramitesTable').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: '{{ route("estados.index") }}',
+                columns: [
+                    { data: 'categoria' },
+                    { data: 'nombre_tipo_tramite' },
+                    {
+                        data: 'existe_configuracion',
+                        orderable: false,
+                        searchable: false,
+                        render: function (data, type, row) {
+                            let botones = '';
+                            if (data == 0) {
+                                botones += `
+                    <button class="btn btn-sm btn-primary fa fa-plus"
+                    onclick="window.location.href='/workflow/${row.id_tipo_tramite_multinota}'"
                     title="Agregar"></button>
                 `;
-            } else {
-                botones += `
-                    <button class="btn btn-sm btn-warning fa fa-edit" 
-                    onclick="window.location.href='/workflow/editar/${row.id_tipo_tramite_multinota}'" 
+                            } else {
+                                botones += `
+                    <button class="btn btn-sm btn-warning fa fa-edit"
+                    onclick="window.location.href='/workflow/editar/${row.id_tipo_tramite_multinota}'"
                     title="Editar"></button>
                 `;
-            }
-            if (row.existe_borrador == 1) {
-                botones += `
-                 <button class="btn btn-sm btn-info fa fa-file-alt" 
-                    onclick="window.location.href='/workflow/borrador/${row.id_tipo_tramite_multinota}'" 
+                            }
+                            if (row.existe_borrador == 1) {
+                                botones += `
+                 <button class="btn btn-sm btn-info fa fa-file-alt"
+                    onclick="window.location.href='/workflow/borrador/${row.id_tipo_tramite_multinota}'"
                     title="Borrador"></button>
                 `;
-            }
-            return botones;
-        }
-    }
-],
-        "language": {
-            "paginate": {
-                "previous": "<",
-                "next": ">"
-            }
-        }
-    });
-});
-</script>
+                            }
+                            return botones;
+                        },
+                    },
+                ],
+                language: {
+                    paginate: {
+                        previous: '<',
+                        next: '>',
+                    },
+                },
+            });
+        });
+    </script>
 @endpush
