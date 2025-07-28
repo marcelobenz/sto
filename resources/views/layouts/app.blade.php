@@ -68,10 +68,7 @@
             @yield("content")
         </main>
         <footer class="h-10 shrink-0 text-center text-sm/8">
-            <p>
-                &copy; {{ date("Y") }} Sistema de Trámites Online. Todos los
-                derechos reservados.
-            </p>
+            <p>&copy; {{ date("Y") }} Sistema de Trámites Online.</p>
         </footer>
         <!-- Global libraries -->
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
