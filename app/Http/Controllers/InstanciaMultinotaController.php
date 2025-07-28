@@ -314,7 +314,7 @@ class InstanciaMultinotaController extends Controller {
         // Se insertan objetos/arrays vacíos que posteriormente guardarán datos de las distintas etapas
         $archivos = [];
 
-        return view('multinota-interno', [
+        return view('partials.formularios.multinota', [
             'formulario' => $formulario,
             'getOrdenActual' => $formulario->getOrdenActual(),
             'persona' => $persona,
