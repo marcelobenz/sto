@@ -144,7 +144,6 @@
             margin-bottom: 0;
             margin-top: 4px;
         }
-
         .custom-tooltip {
             position: absolute;
             display: flex;
@@ -161,7 +160,6 @@
             max-width: 260px;
             z-index: 1000;
         }
-
         .custom-tooltip::before {
             content: '';
             position: absolute;
@@ -174,7 +172,6 @@
             border-top: 8px solid white;
             filter: drop-shadow(0 -1px 1px rgba(0, 0, 0, 0.1));
         }
-
         .custom-tooltip-icon {
             flex-shrink: 0;
             width: 24px;

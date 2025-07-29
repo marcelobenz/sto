@@ -56,7 +56,7 @@
         <header
             class="sticky top-0 z-10 h-16 shrink-0 shadow-[0_2px_4px_rgba(0,0,0,0.1)]"
         >
-            @if (session("isExterno"))
+            @if (session("isExterno") === true)
                 @include("partials.externo.navbar-externo")
             @else
                 @include("partials.navbar")

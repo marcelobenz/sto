@@ -8,10 +8,6 @@
         .cuerpo-seccion-tramite {
             padding: 5px;
         }
-
-        .uppercase {
-            text-transform: uppercase;
-        }
     </style>
 @endpush
 

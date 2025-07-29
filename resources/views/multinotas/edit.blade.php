@@ -75,26 +75,6 @@
         #boton-guardar-multinota {
             margin: 0 1.25rem 1.25rem 0;
         }
-
-        .flex {
-            display: flex;
-        }
-
-        .flex-col {
-            flex-direction: column;
-        }
-
-        .justify-flex-end {
-            justify-content: flex-end;
-        }
-
-        .justify-between {
-            justify-content: space-between;
-        }
-
-        .hidden {
-            display: none;
-        }
     </style>
 @endpush
 
@@ -365,7 +345,7 @@
                                 name="mensajeInicial"
                                 id="myeditorinstance"
                             >
-{{ $multinotaSelected->mensaje_inicial ?? "" }}</textarea
+                                {{ $multinotaSelected->mensaje_inicial ?? "" }}</textarea
                             >
                         </div>
                         <div
@@ -377,7 +357,7 @@
                         </div>
                         <div
                             id="seccion-boton-previsualizar"
-                            class="flex justify-flex-end"
+                            class="flex justify-end"
                         >
                             <button
                                 type="submit"
