@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\ContribuyenteMultinota;
 use App\Models\Direccion; 
+use Yajra\DataTables\DataTables;
+use Illuminate\Http\Request;
+use DB;
+use Log;
+
 
 class IngresoExternoController extends Controller
 {
@@ -22,10 +25,53 @@ class IngresoExternoController extends Controller
         return view('externo.registro');
     }
 
-    public function showBandeja()
-    {
-        return view('externo.bandeja-usuario-externo');
+public function bandejaExterna(Request $request)
+{
+    if ($request->ajax()) {
+        $usuario = session('contribuyente_multinota');
+        $cuitLogueado = $usuario ? $usuario->cuit : null;
+
+        $tramites = DB::table('tramite as t')
+            ->join('multinota as m', 't.id_tramite', '=', 'm.id_tramite')
+            ->join('tramite_estado_tramite as tet', 'tet.id_tramite', '=', 't.id_tramite')
+            ->join('tipo_tramite_multinota as ttm', 'ttm.id_tipo_tramite_multinota', '=', 'm.id_tipo_tramite_multinota')
+            ->join('categoria as c', 'ttm.id_categoria', '=', 'c.id_categoria')
+            ->leftJoin('usuario_interno as u', 'u.id_usuario_interno', '=', 'tet.id_usuario_interno')
+            ->select(
+                't.id_tramite', 
+                't.fecha_alta', 
+                't.fecha_modificacion', 
+                't.correo', 
+                't.cuit_contribuyente', 
+                'c.nombre as nombre_categoria'
+            )
+            ->distinct()
+            ->orderBy('t.id_tramite', 'DESC');
+
+    
+        if ($cuitLogueado) {
+            $tramites->where('t.cuit_contribuyente', $cuitLogueado);
+        } else {
+            return response()->json([], 403);
+        }
+
+        Log::info('Consulta SQL ejecutada: ' . $tramites->toSql());
+
+        $registros = $tramites->get();
+
+        if ($registros->isEmpty()) {
+            Log::info('No se encontraron registros');
+        } else {
+            Log::info('Registros encontrados', ['count' => $registros->count()]);
+        }
+
+        return DataTables::of($registros)->make(true);
     }
+
+    return view('externo.bandeja-usuario-externo');
+}
+
+
 
     
     public function login(Request $request)

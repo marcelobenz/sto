@@ -16,23 +16,14 @@
 </head>
 <body class="bg-gray-100 text-gray-900">
 
-    <nav class="bg-gray-800 text-white px-4 py-3 fixed top-0 left-0 right-0 z-50">
-        <div class="w-full flex justify-between items-center">
-            <div class="flex items-center space-x-6 pl-44">
-                <a href="/dashboard" class="text-white hover:text-gray-300 font-semibold">Principal</a>
+  <nav class="bg-gray-800 text-white px-4 py-3 fixed top-0 left-0 right-0 z-50">
+    <div class="w-full flex justify-between items-center">
+        <div class="flex items-center space-x-6 pl-44">
+            <a href="/dashboard" class="text-white hover:text-gray-300 font-semibold">Principal</a>
 
-    
-                <div x-data="{ open: false }" class="relative">
-                    <button @click="open = !open" class="text-white hover:text-gray-300 font-semibold focus:outline-none">
-                        Bandejas <svg class="w-4 h-4 inline ml-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.939l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.25 8.29a.75.75 0 01-.02-1.06z" clip-rule="evenodd" /></svg>
-                    </button>
-                    <div x-show="open" x-cloak @click.outside="open = false"
-                    class="absolute mt-2 w-48 bg-white text-gray-800 shadow-md rounded-md z-50 py-2">
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100">Bandeja Personal</a>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100">Trámites en Curso</a>
-                    <a href="tramites" class="block px-4 py-2 hover:bg-gray-100">Todos los Trámites</a>
-                </div>
-            </div>
+            <a href="{{ route('bandeja-usuario-externo') }}" class="text-white hover:text-gray-300 font-semibold">
+                Bandeja
+            </a>
 
             <a href="#" class="text-white hover:text-gray-300 font-semibold">Formularios</a>
         </div>
