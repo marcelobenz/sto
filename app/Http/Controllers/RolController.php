@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Rol;
 use App\Models\Permiso;
+use App\Models\Rol;
 use Illuminate\Http\Request;
 
 class RolController extends Controller
@@ -12,6 +12,7 @@ class RolController extends Controller
     public function index()
     {
         $roles = Rol::all();
+
         return view('roles.index', compact('roles'));
     }
 
@@ -43,10 +44,10 @@ class RolController extends Controller
         return redirect()->route('roles.index')->with('success', 'Rol actualizado con éxito.');
     }
 
-
     public function create()
     {
         $permisos = Permiso::all(); // Obtener todos los permisos para asignar al rol
+
         return view('roles.create', compact('permisos'));
     }
 
@@ -58,9 +59,9 @@ class RolController extends Controller
             'permisos' => 'array',
         ]);
 
-        $rol = new Rol();
+        $rol = new Rol;
         $rol->nombre = $request->input('nombre');
-        
+
         // Formatear el nombre para el campo clave
         $rol->clave = strtolower(str_replace(' ', '_', trim($rol->nombre)));
 

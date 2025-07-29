@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Evento;
 use App\Models\HistorialTramite;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ComentarioController extends Controller
@@ -27,7 +27,7 @@ class ComentarioController extends Controller
             ->where('id_tipo_evento', 5)
             ->value('id_tipo_evento');
 
-        if (!$id_tipo_evento) {
+        if (! $id_tipo_evento) {
             return back()->with('error', 'Error: Tipo de evento no encontrado.');
         }
 
@@ -37,7 +37,7 @@ class ComentarioController extends Controller
             'fecha_modificacion' => Carbon::now(),
             'id_tipo_evento' => $id_tipo_evento,
             'clave' => 'COMENTARIO',
-            'desc_contrib' => $request->mensaje
+            'desc_contrib' => $request->mensaje,
         ]);
 
         // Crear un registro en la tabla HISTORIAL_TRAMITE
@@ -45,9 +45,9 @@ class ComentarioController extends Controller
             'mensaje' => $request->mensaje,
             'id_tramite' => $request->id_tramite,
             'id_evento' => $evento->id_evento, // Usar el id_evento del registro recién creado
-            /*'id_usuario_administador' => auth()->user()->id, */
+            /* 'id_usuario_administador' => auth()->user()->id, */
             'id_usuario_administador' => auth()->check() ? auth()->user()->id : '152',
-            'id_usuario_interno_asignado' => 107 // Puedes modificarlo según corresponda
+            'id_usuario_interno_asignado' => 107, // Puedes modificarlo según corresponda
         ]);
 
         return back()->with('success', 'Comentario agregado correctamente.');

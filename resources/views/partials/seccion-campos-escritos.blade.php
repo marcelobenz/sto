@@ -1,21 +1,23 @@
 @foreach ($campos as $c)
     @php
         $valorCampo = null;
-        if (!empty($camposSecciones)) {
-            $match = collect($camposSecciones)->firstWhere('id_campo', $c->id_campo);
+        if (! empty($camposSecciones)) {
+            $match = collect($camposSecciones)->firstWhere("id_campo", $c->id_campo);
             if ($match) {
-                $valorCampo = $match['valor'];
+                $valorCampo = $match["valor"];
             }
         }
     @endphp
 
-    <dl style="grid-column: span {{ $c->gridSpan }} / span {{ $c->gridSpan }};">
+    <dl
+        style="grid-column: span {{ $c->gridSpan }} / span {{ $c->gridSpan }}"
+    >
         <dt>
             {{ $c->nombre }}
         </dt>
         <dd>
             @if ($c->isCajasSeleccion)
-                @if(is_array($valorCampo))
+                @if (is_array($valorCampo))
                     @php
                         $selectedLabels = [];
                         foreach ($c->opciones as $opc) {
@@ -24,13 +26,14 @@
                             }
                         }
                     @endphp
-                    {{ implode(', ', $selectedLabels) }}
+
+                    {{ implode(", ", $selectedLabels) }}
                 @else
                     {{ $valorCampo }}
                 @endif
             @elseif ($c->isSelect)
                 @foreach ($c->opciones as $opc)
-                    @if($valorCampo == $opc->id_opcion_campo)
+                    @if ($valorCampo == $opc->id_opcion_campo)
                         {{ $opc->opcion }}
                     @endif
                 @endforeach

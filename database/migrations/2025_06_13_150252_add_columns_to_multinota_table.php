@@ -9,37 +9,38 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up() {
+    public function up()
+    {
         Schema::table('multinota', function (Blueprint $table) {
-            if (!Schema::hasColumn('multinota', 'id_prioridad')) {
+            if (! Schema::hasColumn('multinota', 'id_prioridad')) {
                 $table->unsignedMediumInteger('id_prioridad')->nullable();
             }
 
-            if (!Schema::hasColumn('multinota', 'id_solicitante')) {
+            if (! Schema::hasColumn('multinota', 'id_solicitante')) {
                 $table->unsignedMediumInteger('id_solicitante')->nullable();
             }
 
-            if (!Schema::hasColumn('multinota', 'id_usuario_interno')) {
+            if (! Schema::hasColumn('multinota', 'id_usuario_interno')) {
                 $table->integer('id_usuario_interno')->nullable();
             }
 
-            if (!Schema::hasColumn('multinota', 'r_caracter')) {
+            if (! Schema::hasColumn('multinota', 'r_caracter')) {
                 $table->unsignedMediumInteger('r_caracter')->nullable();
             }
 
-            if (!Schema::hasColumn('multinota', 'correo')) {
+            if (! Schema::hasColumn('multinota', 'correo')) {
                 $table->string('correo')->nullable();
             }
 
-            if (!Schema::hasColumn('multinota', 'cuit_contribuyente')) {
+            if (! Schema::hasColumn('multinota', 'cuit_contribuyente')) {
                 $table->string('cuit_contribuyente')->nullable();
             }
 
-            if (!Schema::hasColumn('multinota', 'flag_rechazado')) {
+            if (! Schema::hasColumn('multinota', 'flag_rechazado')) {
                 $table->boolean('flag_rechazado')->default(false);
             }
 
-            if (!Schema::hasColumn('multinota', 'flag_cancelado')) {
+            if (! Schema::hasColumn('multinota', 'flag_cancelado')) {
                 $table->boolean('flag_cancelado')->default(false);
             }
         });
@@ -49,15 +50,15 @@ return new class extends Migration
             $sm = Schema::getConnection()->getDoctrineSchemaManager();
             $foreignKeys = collect($sm->listTableForeignKeys('multinota'))->map->getName();
 
-            if (!$foreignKeys->contains('multinota_id_prioridad_foreign')) {
+            if (! $foreignKeys->contains('multinota_id_prioridad_foreign')) {
                 $table->foreign('id_prioridad')->references('id_prioridad')->on('prioridad');
             }
 
-            if (!$foreignKeys->contains('multinota_id_solicitante_foreign')) {
+            if (! $foreignKeys->contains('multinota_id_solicitante_foreign')) {
                 $table->foreign('id_solicitante')->references('id_solicitante')->on('solicitante');
             }
 
-            if (!$foreignKeys->contains('multinota_id_usuario_interno_foreign')) {
+            if (! $foreignKeys->contains('multinota_id_usuario_interno_foreign')) {
                 $table->foreign('id_usuario_interno')->references('id_usuario_interno')->on('usuario_interno');
             }
         });
@@ -66,7 +67,8 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-    public function down(): void {
+    public function down(): void
+    {
         Schema::table('multinota', function (Blueprint $table) {
             $table->dropColumn([
                 'id_prioridad',

@@ -23,7 +23,7 @@ class EstadoTramiteAsignable extends Model
 
     // Define fillable attributes for mass assignment
     protected $fillable = [
-        'fecha_sistema', 'id_estado_tramite', 'id_grupo_interno', 'id_usuario_interno'
+        'fecha_sistema', 'id_estado_tramite', 'id_grupo_interno', 'id_usuario_interno',
     ];
 
     // Disable timestamps if you are managing them manually

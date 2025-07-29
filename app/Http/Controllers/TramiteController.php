@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
-
-use DB;
 
 class TramiteController extends Controller
 {
@@ -17,7 +16,7 @@ class TramiteController extends Controller
     {
         return view('tramites.index', [
             'tituloPagina' => 'Todos los Trámites',
-            'soloIniciados' => false
+            'soloIniciados' => false,
         ]);
     }
 
@@ -51,7 +50,7 @@ class TramiteController extends Controller
                 'e.nombre as estado',
                 'm.fecha_alta',
                 't.cuit_contribuyente',
-                't.flag_cancelado', 
+                't.flag_cancelado',
                 't.flag_rechazado',
                 DB::raw("CONCAT(ce.nombre, ' ', ce.apellido) as contribuyente"),
                 DB::raw("CONCAT(u.nombre, ' ', u.apellido) as usuario_interno")
@@ -59,42 +58,42 @@ class TramiteController extends Controller
             ->where('te.activo', 1);
         if ($soloIniciados) {
             $query->where('t.flag_cancelado', '!=', 1)
-            ->where('t.flag_rechazado', '!=', 1)
-            ->where('e.nombre', 'Iniciado');
+                ->where('t.flag_rechazado', '!=', 1)
+                ->where('e.nombre', 'Iniciado');
         }
-                
+
         // Filtro de búsqueda
-        if (!empty($searchValue)) {
+        if (! empty($searchValue)) {
             $query->where(function ($q) use ($searchValue) {
                 $q->where('m.id_tramite', 'like', "%{$searchValue}%")
-                  ->orWhere('m.cuenta', 'like', "%{$searchValue}%")
-                  ->orWhere('c.nombre', 'like', "%{$searchValue}%")
-                  ->orWhere('tt.nombre', 'like', "%{$searchValue}%")
-                  ->orWhere('e.nombre', 'like', "%{$searchValue}%")
-                  ->orWhere(DB::raw("CONCAT(ce.nombre, ' ', ce.apellido)"), 'like', "%{$searchValue}%")
-                  ->orWhere(DB::raw("CONCAT(u.nombre, ' ', u.apellido)"), 'like', "%{$searchValue}%");
+                    ->orWhere('m.cuenta', 'like', "%{$searchValue}%")
+                    ->orWhere('c.nombre', 'like', "%{$searchValue}%")
+                    ->orWhere('tt.nombre', 'like', "%{$searchValue}%")
+                    ->orWhere('e.nombre', 'like', "%{$searchValue}%")
+                    ->orWhere(DB::raw("CONCAT(ce.nombre, ' ', ce.apellido)"), 'like', "%{$searchValue}%")
+                    ->orWhere(DB::raw("CONCAT(u.nombre, ' ', u.apellido)"), 'like', "%{$searchValue}%");
             });
         }
-    
+
         // Ordenar por columna seleccionada
         $query->orderBy($columnName, $columnSortOrder);
-    
+
         // Total de registros después del filtro
         $totalFiltered = $query->count();
-    
+
         // Paginación
         $data = $query->skip($request->get('start'))->take($request->get('length'))->get();
 
         // Reemplazar "A finalizar" con "Finalizado" en la columna estado
         $data = collect($data)->map(function ($item) {
             $item = (array) $item;
-        
+
             if ($item['flag_cancelado'] == 1) {
-                $item['estado'] = "Dado de Baja";
+                $item['estado'] = 'Dado de Baja';
             } elseif ($item['flag_rechazado'] == 1) {
-                $item['estado'] = "Rechazado";
-            }elseif ($item['estado'] === "A Finalizar") {
-                $item['estado'] = "Finalizado";
+                $item['estado'] = 'Rechazado';
+            } elseif ($item['estado'] === 'A Finalizar') {
+                $item['estado'] = 'Finalizado';
             }
             unset($item['flag_cancelado']);
             unset($item['flag_rechazado']);
@@ -107,13 +106,13 @@ class TramiteController extends Controller
             ->join('tramite_estado_tramite as te', 'm.id_tramite', '=', 'te.id_tramite')
             ->where('te.activo', 1)
             ->count();
-    
+
         // Respuesta en formato JSON
         return response()->json([
-            "draw" => intval($request->get('draw')),
-            "recordsTotal" => $totalData,
-            "recordsFiltered" => $totalFiltered,
-            "data" => $data
+            'draw' => intval($request->get('draw')),
+            'recordsTotal' => $totalData,
+            'recordsFiltered' => $totalFiltered,
+            'data' => $data,
         ]);
     }
 
@@ -130,9 +129,9 @@ class TramiteController extends Controller
         $tramiteInfo = DB::table('multinota as m')
             ->join('tramite as t', 'm.id_tramite', '=', 't.id_tramite') // 👈 Agregá esta línea
             ->join('tipo_tramite_multinota as ttm', 'm.id_tipo_tramite_multinota', '=', 'ttm.id_tipo_tramite_multinota')
-            ->leftJoin('tramite_estado_tramite as tet', function($join) {
+            ->leftJoin('tramite_estado_tramite as tet', function ($join) {
                 $join->on('tet.id_tramite', '=', 'm.id_tramite')
-                     ->where('tet.activo', 1);
+                    ->where('tet.activo', 1);
             })
             ->leftJoin('usuario_interno as ui', 'ui.id_usuario_interno', '=', 'tet.id_usuario_interno')
             ->leftJoin('estado_tramite as et', 'et.id_estado_tramite', '=', 'tet.id_estado_tramite')
@@ -149,21 +148,20 @@ class TramiteController extends Controller
             )
             ->where('m.id_tramite', $idTramite)
             ->first();
-        
- 
-            if ($tramiteInfo) {
-                if ($tramiteInfo->flag_cancelado == 1) {
-                    $tramiteInfo->estado_actual = 'Dado de Baja';
-                } elseif ($tramiteInfo->flag_rechazado == 1) {
-                    $tramiteInfo->estado_actual = 'Rechazado';
-                } elseif ($tramiteInfo->estado_actual === 'A Finalizar') {
-                    $tramiteInfo->estado_actual = 'Finalizado';
-                }
-            
-                unset($tramiteInfo->flag_cancelado);
-                unset($tramiteInfo->flag_rechazado);
+
+        if ($tramiteInfo) {
+            if ($tramiteInfo->flag_cancelado == 1) {
+                $tramiteInfo->estado_actual = 'Dado de Baja';
+            } elseif ($tramiteInfo->flag_rechazado == 1) {
+                $tramiteInfo->estado_actual = 'Rechazado';
+            } elseif ($tramiteInfo->estado_actual === 'A Finalizar') {
+                $tramiteInfo->estado_actual = 'Finalizado';
             }
-            
+
+            unset($tramiteInfo->flag_cancelado);
+            unset($tramiteInfo->flag_rechazado);
+        }
+
         $historialTramite = DB::table('historial_tramite as h')
             ->join('evento as e', 'h.id_evento', '=', 'e.id_evento')
             ->join('usuario_interno as u', 'h.id_usuario_interno_asignado', '=', 'u.id_usuario_interno')
@@ -173,7 +171,7 @@ class TramiteController extends Controller
             ->get();
 
         $tramiteArchivo = DB::table('archivo as a')
-            ->join('tramite_archivo as ta', 'a.id_archivo', '=','ta.id_archivo')
+            ->join('tramite_archivo as ta', 'a.id_archivo', '=', 'ta.id_archivo')
             ->select('a.id_archivo', 'a.fecha_alta', 'a.nombre', 'a.descripcion', 'a.path_archivo')
             ->where('ta.id_tramite', $idTramite)
             ->orderBy('a.descripcion')
@@ -189,59 +187,59 @@ class TramiteController extends Controller
         try {
             Log::debug('Inicio de la función darDeBaja');
             Log::debug('Contenido del Request:', $request->all());
-    
+
             $idTramite = $request->input('idTramite');
-            Log::debug('ID del trámite recibido: ' . $idTramite);
-    
+            Log::debug('ID del trámite recibido: '.$idTramite);
+
             DB::beginTransaction(); // 1️⃣ Iniciar transacción
             Log::debug('Transacción iniciada');
-    
+
             // 2️⃣ Actualizar el trámite
             $affected = DB::table('tramite')
                 ->where('id_tramite', $idTramite)
                 ->update([
                     'flag_cancelado' => 1,
                     'flag_ingreso' => 1,
-                    'fecha_modificacion' => now()
+                    'fecha_modificacion' => now(),
                 ]);
-            Log::debug("Trámite actualizado. Registros afectados: " . $affected);
-    
+            Log::debug('Trámite actualizado. Registros afectados: '.$affected);
+
             // 3️⃣ Insertar el evento
             $idEvento = DB::table('evento')->insertGetId([
                 'descripcion' => 'Se dio de baja el trámite',
                 'fecha_alta' => now(),
                 'fecha_modificacion' => now(),
                 'id_tipo_evento' => 14,
-                'clave' => 'CANCELAR'
+                'clave' => 'CANCELAR',
             ]);
-            Log::debug("Evento insertado con ID: " . $idEvento);
-    
+            Log::debug('Evento insertado con ID: '.$idEvento);
+
             // 4️⃣ Registrar en historial_tramite
             $idHistorial = DB::table('historial_tramite')->insertGetId([
                 'fecha' => now(),
                 'id_tramite' => $idTramite,
                 'id_evento' => $idEvento,
-                'id_usuario_interno_asignado' => 107
+                'id_usuario_interno_asignado' => 107,
             ], 'id_historial_tramite'); // <- especificar el nombre de la PK autoincremental
-            
-            Log::debug("Historial de trámite registrado con ID: " . $idHistorial);
-           
-            
+
+            Log::debug('Historial de trámite registrado con ID: '.$idHistorial);
+
             // Inmediatamente consultar
             $ultimoHistorial = DB::table('historial_tramite')
                 ->where('id_tramite', $idTramite)
                 ->orderBy('id_historial_tramite', 'desc')
                 ->first();
-            
-            Log::debug("Último historial tras insert:", (array) $ultimoHistorial);
+
+            Log::debug('Último historial tras insert:', (array) $ultimoHistorial);
 
             DB::commit(); // 5️⃣ Confirmar cambios
-            Log::debug("Transacción confirmada");
-    
+            Log::debug('Transacción confirmada');
+
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
             DB::rollBack(); // 6️⃣ Revertir cambios en caso de error
-            Log::error('Error en darDeBaja: ' . $e->getMessage());
+            Log::error('Error en darDeBaja: '.$e->getMessage());
+
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
     }
@@ -261,19 +259,19 @@ class TramiteController extends Controller
                 ->where('id_tramite', $request->id_tramite)
                 ->update([
                     'id_prioridad' => $request->id_prioridad,
-                    'fecha_modificacion' => now()
+                    'fecha_modificacion' => now(),
                 ]);
 
             // Registrar evento
             $prioridad = DB::table('prioridad')->where('id_prioridad', $request->id_prioridad)->first();
-            $descripcionEvento = 'Se cambió la prioridad del trámite a: ' . ($prioridad->nombre ?? 'Desconocida');
+            $descripcionEvento = 'Se cambió la prioridad del trámite a: '.($prioridad->nombre ?? 'Desconocida');
 
             $idEvento = DB::table('evento')->insertGetId([
                 'descripcion' => $descripcionEvento,
                 'fecha_alta' => now(),
                 'fecha_modificacion' => now(),
                 'id_tipo_evento' => 4, // Asigná un tipo de evento específico
-                'clave' => 'CAMBIO_PRIORIDAD'
+                'clave' => 'CAMBIO_PRIORIDAD',
             ]);
 
             // Insertar en historial
@@ -281,7 +279,7 @@ class TramiteController extends Controller
                 'fecha' => now(),
                 'id_tramite' => $request->id_tramite,
                 'id_evento' => $idEvento,
-                'id_usuario_interno_asignado' => auth()->user()->id_usuario_interno ?? 107
+                'id_usuario_interno_asignado' => auth()->user()->id_usuario_interno ?? 107,
             ]);
 
             DB::commit();
@@ -289,14 +287,15 @@ class TramiteController extends Controller
             return redirect()->back()->with('success', 'Prioridad actualizada correctamente.');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error al cambiar prioridad: ' . $e->getMessage());
+            Log::error('Error al cambiar prioridad: '.$e->getMessage());
+
             return redirect()->back()->with('error', 'Error al cambiar prioridad.');
         }
     }
 
     public function tomarTramite(Request $request)
     {
-        try{
+        try {
             $idTramite = $request->input('idTramite');
             $usuario = Session::get('usuario_interno');
 
@@ -307,7 +306,7 @@ class TramiteController extends Controller
                 ->where('activo', 1)
                 ->update([
                     'id_usuario_interno' => $usuario->id_usuario_interno,
-                    'fecha_sistema' => now()
+                    'fecha_sistema' => now(),
                 ]);
 
             // 3️⃣ Insertar el evento
@@ -316,38 +315,36 @@ class TramiteController extends Controller
                 'fecha_alta' => now(),
                 'fecha_modificacion' => now(),
                 'id_tipo_evento' => 3,
-                'clave' => 'ASIGNACIÓN'
+                'clave' => 'ASIGNACIÓN',
             ]);
-            Log::debug("Evento insertado con ID: " . $idEvento);
-    
+            Log::debug('Evento insertado con ID: '.$idEvento);
+
             // 4️⃣ Registrar en historial_tramite
             $idHistorial = DB::table('historial_tramite')->insertGetId([
                 'fecha' => now(),
                 'id_tramite' => $idTramite,
                 'id_evento' => $idEvento,
-                'id_usuario_interno_asignado' => $usuario->id_usuario_interno
+                'id_usuario_interno_asignado' => $usuario->id_usuario_interno,
             ], 'id_historial_tramite'); // <- especificar el nombre de la PK autoincremental
-            
-            Log::debug("Historial de trámite registrado con ID: " . $idHistorial);
+
+            Log::debug('Historial de trámite registrado con ID: '.$idHistorial);
             DB::commit(); // 5️⃣ Confirmar cambios
-            Log::debug("Transacción confirmada");
-    
+            Log::debug('Transacción confirmada');
+
             return response()->json(['success' => true]);
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             DB::rollBack(); // 6️⃣ Revertir cambios en caso de error
-            Log::error('Error al tomar trámite: ' . $e->getMessage());
+            Log::error('Error al tomar trámite: '.$e->getMessage());
+
             return response()->json(['success' => false, 'message' => $e->getMessage()]);
         }
-
     }
 
     public function enCurso()
     {
         return view('tramites.index', [
             'tituloPagina' => 'Trámites en Curso',
-            'soloIniciados' => true
+            'soloIniciados' => true,
         ]);
     }
-    
-    
 }

@@ -29,11 +29,13 @@ class Campo extends Model
     // Disable timestamps if you are managing them manually
     public $timestamps = false;
 
-    public function setTipo(String $tipo) {
-		$this->tipo = $tipo;
-	}
+    public function setTipo(string $tipo)
+    {
+        $this->tipo = $tipo;
+    }
 
-    public function getTipo() {
-		return $this->tipo;
-	}
+    public function getTipo()
+    {
+        return $this->tipo;
+    }
 }

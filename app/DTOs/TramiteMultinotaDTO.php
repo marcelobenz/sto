@@ -2,7 +2,8 @@
 
 namespace App\DTOs;
 
-class TramiteMultinotaDTO {
+class TramiteMultinotaDTO
+{
     public function __construct(
         public string $paginaResumen = 'detalle-multinota',
         public string $paginaEdicion = 'editar-multinota',

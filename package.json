@@ -3,7 +3,9 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "vite build"
+        "build": "vite build",
+        "format:blade": "prettier --write \"resources/views/**/*.blade.php\"",
+        "format:php": "php vendor/bin/pint"
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.2",

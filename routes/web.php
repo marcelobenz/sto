@@ -1,29 +1,28 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AutorizacionController;
-use App\Http\Controllers\TramiteController;
-use App\Http\Controllers\EstadoTramiteController;
-use App\Http\Controllers\InstanciaMultinotaController;
-use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\AdministracionWorkflowController;
+use App\Http\Controllers\ArchivoController;
+use App\Http\Controllers\BandejaPersonalController;
 use App\Http\Controllers\CategoriaController;
-use App\Http\Controllers\UsuarioController;
-use App\Http\Controllers\LicenciaController;
-use App\Http\Controllers\RolController;
-use App\Http\Controllers\LimiteController;
+use App\Http\Controllers\ComentarioController;
+use App\Http\Controllers\ConfiguracionMailController;
 use App\Http\Controllers\ContribuyenteMultinotaController;
 use App\Http\Controllers\CuestionarioController;
-use App\Http\Controllers\ComentarioController;
-use App\Http\Controllers\ArchivoController;
-use App\Http\Controllers\ReporteController;
-use App\Http\Controllers\ConfiguracionMailController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EstadoTramiteController;
 use App\Http\Controllers\IngresoExternoController;
-use App\Http\Controllers\AdministracionWorkflowController;
-use App\Http\Controllers\BandejaPersonalController;
-use App\Http\Controllers\SeccionesMultinotaController;
+use App\Http\Controllers\InstanciaMultinotaController;
+use App\Http\Controllers\LicenciaController;
+use App\Http\Controllers\LimiteController;
 use App\Http\Controllers\MultinotaController;
+use App\Http\Controllers\ReporteController;
+use App\Http\Controllers\RolController;
+use App\Http\Controllers\SeccionesMultinotaController;
+use App\Http\Controllers\TramiteController;
+use App\Http\Controllers\UsuarioController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 
 /*
@@ -37,7 +36,7 @@ use Illuminate\Support\Facades\Session;
 |
 */
 
-//Login
+// Login
 Route::get('/success', function (Request $request) {
     $code = $request->code;
 
@@ -53,7 +52,7 @@ Route::get('/success', function (Request $request) {
 
     Session::put('TOKEN_TYPE', $res['token_type']);
     Session::put('ACCESS_TOKEN', $res['access_token']);
-    Session::put('REFRESH_TOKEN', $res['refresh_token']);    
+    Session::put('REFRESH_TOKEN', $res['refresh_token']);
     Session::put('EXPIRES_IN', $res['expires_in']);
 
     return redirect('/ingreso');
@@ -63,26 +62,26 @@ Route::get('/', function () {
     return redirect(env('URL_REDIRECT_INICIO'));
 });
 
-//Dashboard
+// Dashboard
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
 
-//Reportes
+// Reportes
 Route::get('/reporte/constancia/{idTramite}', [ReporteController::class, 'generarPDF'])->name('reporte.constancia');
 Route::get('/reporte/constancia/modal/{idTramite}', function ($idTramite) {
     return view('reportes.modal', compact('idTramite'));
 })->name('reporte.constancia.modal');
 
-//Archivos
+// Archivos
 Route::post('/archivo/subir', [ArchivoController::class, 'subirArchivo'])->name('archivo.subir');
 Route::post('/archivo/subirTemporal', [ArchivoController::class, 'subirArchivoTemporal'])->name('archivo.subirTemporal');
 Route::post('/archivo/cargarComentario', [ArchivoController::class, 'cargarComentario'])->name('archivo.cargarComentario');
 Route::post('/archivo/eliminarTemporal', [ArchivoController::class, 'eliminarArchivoTemporal'])->name('archivo.eliminarTemporal');
 Route::get('/archivo/descargar/{id}', [ArchivoController::class, 'descargar'])->name('archivo.descargar');
 
-//Comtentarios
+// Comtentarios
 Route::post('/comentario/guardar', [ComentarioController::class, 'guardarComentario'])->name('comentario.guardar');
 
-//Trámites
+// Trámites
 Route::get('/tramites/{id}/detalle', [TramiteController::class, 'show'])->name('tramites.detalle');
 Route::get('/tramites', [TramiteController::class, 'index'])->name('tramites.index');
 Route::get('/tramites/data', [TramiteController::class, 'getTramitesData'])->name('tramites.data');
@@ -91,7 +90,7 @@ Route::post('/tramites/tomarTramite', [TramiteController::class, 'tomarTramite']
 Route::post('/tramites/cambiar-prioridad', [TramiteController::class, 'cambiarPrioridad'])->name('tramites.cambiarPrioridad');
 Route::post('/tramites/darDeBaja', [TramiteController::class, 'darDeBaja'])->name('tramites.darDeBaja');
 
-//Estado Trámite
+// Estado Trámite
 Route::get('/estadoTramite/tienePermiso/{multinota}', [EstadoTramiteController::class, 'tienePermiso'])->name('estadoTramite.tienePermiso');
 
 // Instancia Tramite
@@ -120,7 +119,7 @@ Route::post('/instanciaTramite/guardarDatosSeccionInformacionAdicional', [Instan
 Route::post('/instanciaTramite/handleCheckConfirmarDeclaracion', [InstanciaMultinotaController::class, 'handleCheckConfirmarDeclaracion'])->name('instanciaTramite.handleCheckConfirmarDeclaracion');
 Route::get('/instanciaTramite/registrarTramite', [InstanciaMultinotaController::class, 'registrarTramite'])->name('instanciaTramite.registrarTramite');
 
-//Categorías
+// Categorías
 Route::get('/categorias', [CategoriaController::class, 'index'])->name('categorias.index');
 Route::put('/categorias/{id}/desactivar', [CategoriaController::class, 'desactivar'])->name('categorias.desactivar');
 Route::get('/categorias/{id}/edit', [CategoriaController::class, 'edit'])->name('categorias.edit');
@@ -128,7 +127,7 @@ Route::put('/categorias/{id}', [CategoriaController::class, 'update'])->name('ca
 Route::get('categorias/create', [CategoriaController::class, 'create'])->name('categorias.create');
 Route::post('categorias', [CategoriaController::class, 'store'])->name('categorias.store');
 
-//Secciones Multinota
+// Secciones Multinota
 Route::get('/secciones-multinota', [SeccionesMultinotaController::class, 'index'])->name('secciones-multinota.index');
 Route::get('/secciones-multinota/{id}/select', [SeccionesMultinotaController::class, 'selectCampo'])->name('secciones-multinota.selectCampo');
 Route::get('/secciones-multinota/nuevoCampo', [SeccionesMultinotaController::class, 'nuevoCampo'])->name('secciones-multinota.nuevoCampo');
@@ -146,7 +145,7 @@ Route::get('/secciones-multinota/crearNuevaSeccion', [SeccionesMultinotaControll
 Route::post('/secciones-multinota/editarSeccion', [SeccionesMultinotaController::class, 'editarSeccion'])->name('secciones-multinota.editarSeccion');
 Route::put('/secciones-multinota/{id}/desactivar', [SeccionesMultinotaController::class, 'desactivarSeccion'])->name('secciones-multinota.desactivarSeccion');
 
-//Multinotas
+// Multinotas
 Route::get('/multinotas', [MultinotaController::class, 'index'])->name('multinotas.index');
 Route::get('/multinotas/{id}/view', [MultinotaController::class, 'view'])->name('multinotas.view');
 Route::get('/multinotas/{id}/edit', [MultinotaController::class, 'edit'])->name('multinotas.edit');
@@ -160,7 +159,7 @@ Route::get('/multinotas/guardarMultinota/{id}', [MultinotaController::class, 'gu
 Route::put('/multinotas/{id}/desactivar', [MultinotaController::class, 'desactivarMultinota'])->name('multinotas.desactivarMultinota');
 Route::get('/multinotas/crearNuevaMultinota', [MultinotaController::class, 'crearNuevaMultinota'])->name('multinotas.crearNuevaMultinota');
 
-//Usuarios
+// Usuarios
 Route::get('usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
 Route::get('usuarios/create', [UsuarioController::class, 'create'])->name('usuarios.create');
 Route::post('usuarios', [UsuarioController::class, 'store'])->name('usuarios.store');
@@ -173,7 +172,7 @@ Route::post('/usuario', [ContribuyenteMultinotaController::class, 'buscar'])->na
 Route::put('/usuario/{id}/actualizar-correo', [ContribuyenteMultinotaController::class, 'actualizarCorreo'])->name('contribuyente.actualizarCorreo');
 Route::post('/usuario/{id}/restablecer-clave', [ContribuyenteMultinotaController::class, 'restablecerClave'])->name('contribuyente.restablecerClave');
 
-//Roles
+// Roles
 Route::get('/roles/{id_rol}/permisos', [UsuarioController::class, 'obtenerPermisosPorRol'])->name('roles.permisos');
 Route::get('roles', [RolController::class, 'index'])->name('roles.index');
 Route::get('roles/create', [RolController::class, 'create'])->name('roles.create');
@@ -181,11 +180,11 @@ Route::post('roles', [RolController::class, 'store'])->name('roles.store');
 Route::get('/roles/{id}/edit', [RolController::class, 'edit'])->name('roles.edit');
 Route::put('/roles/{id}', [RolController::class, 'update'])->name('roles.update');
 
-//Limites
+// Limites
 Route::get('limite', [LimiteController::class, 'index'])->name('limites.index');
 Route::post('/guardar-limite', [LimiteController::class, 'guardarLimite'])->name('guardar.limite');
 
-//Cuestionarios
+// Cuestionarios
 Route::get('cuestionarios', [CuestionarioController::class, 'index'])->name('cuestionarios.index');
 Route::get('/cuestionarios/crear', [CuestionarioController::class, 'create'])->name('cuestionarios.create');
 Route::post('/cuestionarios', [CuestionarioController::class, 'store'])->name('cuestionarios.store');
@@ -194,20 +193,20 @@ Route::put('/cuestionarios/{id}', [CuestionarioController::class, 'update'])->na
 Route::put('/cuestionarios/{id}/activar', [CuestionarioController::class, 'activar'])->name('cuestionarios.activar');
 Route::put('/cuestionarios/{id}/desactivar', [CuestionarioController::class, 'desactivar'])->name('cuestionarios.desactivar');
 
-//Mail
+// Mail
 Route::get('/sistema', [ConfiguracionMailController::class, 'edit'])->name('configuracion.edit');
 Route::post('/sistema', [ConfiguracionMailController::class, 'update'])->name('configuracion.update');
 
-//Ingreso Externo
+// Ingreso Externo
 Route::get('/ingreso-externo', [IngresoExternoController::class, 'showLoginForm'])->name('ingreso-externo');
 Route::post('/ingreso-externo', [IngresoExternoController::class, 'login'])->name('ingreso-externo.login');
 Route::get('/bandeja-usuario-externo', [IngresoExternoController::class, 'showBandeja'])->name('bandeja-usuario-externo');
 
-//Contribuyente Multinota
+// Contribuyente Multinota
 Route::get('/cambiar-clave', [ContribuyenteMultinotaController::class, 'showChangePasswordForm'])->name('cambiar-clave');
 Route::post('/cambiar-clave', [ContribuyenteMultinotaController::class, 'changePassword'])->name('cambiar-clave.submit');
 
-//Administración Workflow
+// Administración Workflow
 Route::get('/estados', [AdministracionWorkflowController::class, 'index'])->name('estados.index');
 Route::get('/workflow/{id}', [AdministracionWorkflowController::class, 'crear'])->name('workflow.crear');
 Route::post('/workflow/guardar/{id}', [AdministracionWorkflowController::class, 'guardar'])->name('workflow.guardar');
@@ -217,16 +216,17 @@ Route::post('/workflow/editar/guardarEdicion/{id}', [AdministracionWorkflowContr
 Route::post('/workflow/editar/guardarBorrador/{id}', [AdministracionWorkflowController::class, 'guardarBorrador'])->name('workflow.guardarBorrador');
 Route::post('/workflow/editar/publicarBorrador/{id}', [AdministracionWorkflowController::class, 'publicarBorrador'])->name('workflow.publicarBorrador');
 
-//Navbar
+// Navbar
 Route::view('/navbar', [NavbarController::class, 'cargarElementos'])->name('navbar');
 
-//Bandeja Personal
+// Bandeja Personal
 Route::get('/bandeja-personal', [BandejaPersonalController::class, 'index'])->name('bandeja-personal.index');
 
 // Otros
 Route::get('/set-usuario-interno', [UsuarioController::class, 'setUsuarioInterno']);
-//Route::get('/clear-session', [UsuarioController::class, 'clearSession']); // Para limpiar la sesión
-Route::get('/clear-session', function() {
+// Route::get('/clear-session', [UsuarioController::class, 'clearSession']); // Para limpiar la sesión
+Route::get('/clear-session', function () {
     session()->forget('contribuyente_multinota');
+
     return redirect()->route('ingreso-externo');
 });

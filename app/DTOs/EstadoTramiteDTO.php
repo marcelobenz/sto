@@ -2,165 +2,196 @@
 
 namespace App\DTOs;
 
+use App\Enums\TipoEstadoEnum;
 use Illuminate\Support\Collection;
 
-use App\Enums\TipoEstadoEnum;
-use App\DTOs\UsuarioInternoDTO;
+class EstadoTramiteDTO
+{
+    private int $id;
 
-class EstadoTramiteDTO {
-  private int $id;
-  private ?int $idEstadoAnteriorParaWorkflow;
-  private string $nombre;
-  private TipoEstadoEnum $tipoEstado;
+    private ?int $idEstadoAnteriorParaWorkflow;
 
-  private int $puedeRechazar;
-  private int $puedePedirDocumentacion;
-  private int $puedeElegirCamino;
-  private int $tieneExpediente;
+    private string $nombre;
 
-  /** @var Collection<int, EstadoTramiteDTO> */
-  private Collection $estadosAnteriores;
+    private TipoEstadoEnum $tipoEstado;
 
-  /** @var Collection<int, EstadoTramiteDTO> */
-  private Collection $estadosPosteriores;
+    private int $puedeRechazar;
 
-  /** @var Collection<int, AsignableATramite> */
-  public Collection $asignables;
+    private int $puedePedirDocumentacion;
 
-  /** @var Collection<int, EstadoTramiteDTO> */
-  private Collection $nodosAnteriores;
+    private int $puedeElegirCamino;
 
-  private UsuarioInternoDTO $usuarioAsignado;
+    private int $tieneExpediente;
 
-  public function __construct(
-    string $id,
-    string $nombre,
-    TipoEstadoEnum $tipoEstado,
-    string $puedeRechazar,
-    string $puedePedirDocumentacion,
-    string $puedeElegirCamino,
-    string $tieneExpediente,
-    Collection $estadosAnteriores,
-    Collection $estadosPosteriores,
-    Collection $asignables,
-    Collection $nodosAnteriores,
-    ?int $idEstadoAnteriorParaWorkflow
-  ) {
-    $this->id = $id;
-    $this->nombre = $nombre;
-    $this->tipoEstado = $tipoEstado;
-    $this->puedeRechazar = $puedeRechazar;
-    $this->puedePedirDocumentacion = $puedePedirDocumentacion;
-    $this->puedeElegirCamino = $puedeElegirCamino;
-    $this->tieneExpediente = $tieneExpediente;
-    $this->estadosAnteriores = $estadosAnteriores;
-    $this->estadosPosteriores = $estadosPosteriores;
-    $this->asignables = $asignables;
-    $this->nodosAnteriores = $nodosAnteriores;
-    $this->idEstadoAnteriorParaWorkflow = $idEstadoAnteriorParaWorkflow;
-  }
+    /** @var Collection<int, EstadoTramiteDTO> */
+    private Collection $estadosAnteriores;
 
-  public function getId(): int {
-    return $this->id;
-  }
+    /** @var Collection<int, EstadoTramiteDTO> */
+    private Collection $estadosPosteriores;
 
-  public function setId(int $id): void {
-    $this->id = $id;
-  }
+    /** @var Collection<int, AsignableATramite> */
+    public Collection $asignables;
 
-  public function getIdEstadoAnteriorParaWorkflow(): int {
-    return $this->idEstadoAnteriorParaWorkflow;
-  }
+    /** @var Collection<int, EstadoTramiteDTO> */
+    private Collection $nodosAnteriores;
 
-  public function setIdEstadoAnteriorParaWorkflow(int $idEstadoAnteriorParaWorkflow): void {
-    $this->idEstadoAnteriorParaWorkflow = $idEstadoAnteriorParaWorkflow;
-  }
+    private UsuarioInternoDTO $usuarioAsignado;
 
-  public function getNombre(): string {
-    return $this->nombre;
-  }
+    public function __construct(
+        string $id,
+        string $nombre,
+        TipoEstadoEnum $tipoEstado,
+        string $puedeRechazar,
+        string $puedePedirDocumentacion,
+        string $puedeElegirCamino,
+        string $tieneExpediente,
+        Collection $estadosAnteriores,
+        Collection $estadosPosteriores,
+        Collection $asignables,
+        Collection $nodosAnteriores,
+        ?int $idEstadoAnteriorParaWorkflow
+    ) {
+        $this->id = $id;
+        $this->nombre = $nombre;
+        $this->tipoEstado = $tipoEstado;
+        $this->puedeRechazar = $puedeRechazar;
+        $this->puedePedirDocumentacion = $puedePedirDocumentacion;
+        $this->puedeElegirCamino = $puedeElegirCamino;
+        $this->tieneExpediente = $tieneExpediente;
+        $this->estadosAnteriores = $estadosAnteriores;
+        $this->estadosPosteriores = $estadosPosteriores;
+        $this->asignables = $asignables;
+        $this->nodosAnteriores = $nodosAnteriores;
+        $this->idEstadoAnteriorParaWorkflow = $idEstadoAnteriorParaWorkflow;
+    }
 
-  public function setNombre(string $nombre): void {
-    $this->nombre = $nombre;
-  }
+    public function getId(): int
+    {
+        return $this->id;
+    }
 
-  public function getTipoEstado(): TipoEstadoEnum {
-    return $this->tipoEstado;
-  }
+    public function setId(int $id): void
+    {
+        $this->id = $id;
+    }
 
-  public function setTipoEstado(TipoEstadoEnum $tipoEstado): void {
-    $this->tipoEstado = $tipoEstado;
-  }
+    public function getIdEstadoAnteriorParaWorkflow(): int
+    {
+        return $this->idEstadoAnteriorParaWorkflow;
+    }
 
-  public function getPuedeRechazar(): int {
-    return $this->puedeRechazar;
-  }
+    public function setIdEstadoAnteriorParaWorkflow(int $idEstadoAnteriorParaWorkflow): void
+    {
+        $this->idEstadoAnteriorParaWorkflow = $idEstadoAnteriorParaWorkflow;
+    }
 
-  public function setPuedeRechazar(int $puedeRechazar): void {
-    $this->puedeRechazar = $puedeRechazar;
-  }
+    public function getNombre(): string
+    {
+        return $this->nombre;
+    }
 
-  public function getPuedePedirDocumentacion(): int {
-    return $this->puedePedirDocumentacion;
-  }
+    public function setNombre(string $nombre): void
+    {
+        $this->nombre = $nombre;
+    }
 
-  public function setPuedePedirDocumentacion(int $puedePedirDocumentacion): void {
-    $this->puedePedirDocumentacion = $puedePedirDocumentacion;
-  }
+    public function getTipoEstado(): TipoEstadoEnum
+    {
+        return $this->tipoEstado;
+    }
 
-  public function getPuedeElegirCamino(): int {
-    return $this->puedeElegirCamino;
-  }
+    public function setTipoEstado(TipoEstadoEnum $tipoEstado): void
+    {
+        $this->tipoEstado = $tipoEstado;
+    }
 
-  public function setPuedeElegirCamino(int $puedeElegirCamino): void {
-    $this->puedeElegirCamino = $puedeElegirCamino;
-  }
+    public function getPuedeRechazar(): int
+    {
+        return $this->puedeRechazar;
+    }
 
-  public function getTieneExpediente(): int {
-    return $this->tieneExpediente;
-  }
+    public function setPuedeRechazar(int $puedeRechazar): void
+    {
+        $this->puedeRechazar = $puedeRechazar;
+    }
 
-  public function setTieneExpediente(int $tieneExpediente): void {
-    $this->tieneExpediente = $tieneExpediente;
-  }
+    public function getPuedePedirDocumentacion(): int
+    {
+        return $this->puedePedirDocumentacion;
+    }
 
-  public function getEstadosAnteriores(): Collection {
-    return $this->estadosAnteriores;
-  }
+    public function setPuedePedirDocumentacion(int $puedePedirDocumentacion): void
+    {
+        $this->puedePedirDocumentacion = $puedePedirDocumentacion;
+    }
 
-  public function setEstadosAnteriores(Collection $estadosAnteriores): void {
-    $this->estadosAnteriores = $estadosAnteriores;
-  }
+    public function getPuedeElegirCamino(): int
+    {
+        return $this->puedeElegirCamino;
+    }
 
-  public function getEstadosPosteriores(): Collection {
-    return $this->estadosPosteriores;
-  }
+    public function setPuedeElegirCamino(int $puedeElegirCamino): void
+    {
+        $this->puedeElegirCamino = $puedeElegirCamino;
+    }
 
-  public function setEstadosPosteriores(Collection $estadosPosteriores): void {
-    $this->estadosPosteriores = $estadosPosteriores;
-  }
+    public function getTieneExpediente(): int
+    {
+        return $this->tieneExpediente;
+    }
 
-  public function getAsignables(): Collection {
-    return $this->asignables;
-  }
+    public function setTieneExpediente(int $tieneExpediente): void
+    {
+        $this->tieneExpediente = $tieneExpediente;
+    }
 
-  public function setAsignables(Collection $asignables): void {
-    $this->asignables = $asignables;
-  }
+    public function getEstadosAnteriores(): Collection
+    {
+        return $this->estadosAnteriores;
+    }
 
-  public function getNodosAnteriores(): Collection {
-    return $this->nodosAnteriores;
-  }
+    public function setEstadosAnteriores(Collection $estadosAnteriores): void
+    {
+        $this->estadosAnteriores = $estadosAnteriores;
+    }
 
-  public function setNodosAnteriores(Collection $nodosAnteriores): void {
-    $this->nodosAnteriores = $nodosAnteriores;
-  }
+    public function getEstadosPosteriores(): Collection
+    {
+        return $this->estadosPosteriores;
+    }
 
-  public function getUsuarioAsignado(): UsuarioInternoDTO {
-    return $this->usuarioAsignado;
-  }
+    public function setEstadosPosteriores(Collection $estadosPosteriores): void
+    {
+        $this->estadosPosteriores = $estadosPosteriores;
+    }
 
-  public function setUsuarioAsignado(UsuarioInternoDTO $usuarioAsignado): void {
-    $this->usuarioAsignado = $usuarioAsignado;
-  }
+    public function getAsignables(): Collection
+    {
+        return $this->asignables;
+    }
+
+    public function setAsignables(Collection $asignables): void
+    {
+        $this->asignables = $asignables;
+    }
+
+    public function getNodosAnteriores(): Collection
+    {
+        return $this->nodosAnteriores;
+    }
+
+    public function setNodosAnteriores(Collection $nodosAnteriores): void
+    {
+        $this->nodosAnteriores = $nodosAnteriores;
+    }
+
+    public function getUsuarioAsignado(): UsuarioInternoDTO
+    {
+        return $this->usuarioAsignado;
+    }
+
+    public function setUsuarioAsignado(UsuarioInternoDTO $usuarioAsignado): void
+    {
+        $this->usuarioAsignado = $usuarioAsignado;
+    }
 }

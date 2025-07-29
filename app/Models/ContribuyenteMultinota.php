@@ -14,6 +14,4 @@ class ContribuyenteMultinota extends Model
     protected $table = 'contribuyente_multinota';
 
     protected $primaryKey = 'id_contribuyente_multinota';
-
-
 }

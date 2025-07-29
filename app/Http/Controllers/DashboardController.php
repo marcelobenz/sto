@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 
@@ -10,12 +9,10 @@ class DashboardController extends Controller
 {
     public function index()
     {
-
         $usuarioInterno = Session::get('usuario_interno');
-       if (!$usuarioInterno->rol || $usuarioInterno->rol->clave !== 'ADMIN') {
+        if (! $usuarioInterno->rol || $usuarioInterno->rol->clave !== 'ADMIN') {
             return redirect()->route('navbar')->with('error', 'No tienes el permiso para acceder.');
-        }       
-
+        }
 
         $totales = DB::select('
             SELECT SUM(cnt) AS sumatotal FROM (
@@ -44,6 +41,6 @@ class DashboardController extends Controller
             ];
         }
 
-        return view('dashboard.index', compact('chartData','totales'));
+        return view('dashboard.index', compact('chartData', 'totales'));
     }
 }

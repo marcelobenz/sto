@@ -2,7 +2,8 @@
 
 namespace App\Enums;
 
-enum TipoCaracterEnum: int {
+enum TipoCaracterEnum: int
+{
     case APODERADO = 33;
     case AUTORIZADO = 5;
     case DIRECTOR = 16;
@@ -13,7 +14,8 @@ enum TipoCaracterEnum: int {
     case TITULAR = 1;
     case VICEPRESIDENTE = 15;
 
-    public function descripcion(): string {
+    public function descripcion(): string
+    {
         return match ($this) {
             self::APODERADO => 'APODERADO',
             self::AUTORIZADO => 'AUTORIZADO',
@@ -27,12 +29,14 @@ enum TipoCaracterEnum: int {
         };
     }
 
-    public static function fromDescripcion(string $nombre): ?self {
+    public static function fromDescripcion(string $nombre): ?self
+    {
         foreach (self::cases() as $case) {
             if (strcasecmp($case->descripcion(), $nombre) === 0) {
                 return $case;
             }
         }
+
         return null;
     }
 }

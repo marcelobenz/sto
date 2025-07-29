@@ -61,7 +61,7 @@ return [
             'root' => storage_path('app/adjuntos'), // Carpeta donde se guardarán los adjuntos
             'visibility' => 'private',
         ],
-                
+
     ],
 
     /*

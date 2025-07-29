@@ -32,13 +32,14 @@ class UsuarioPermiso extends Model
     // Disable timestamps if you are managing them manually
     public $timestamps = false;
 
-    public static function getPermisosPorId($id) {
-        $res = DB::table("usuario_permiso")
-        ->where("id_usuario_interno", "=", $id)
-        ->get();
+    public static function getPermisosPorId($id)
+    {
+        $res = DB::table('usuario_permiso')
+            ->where('id_usuario_interno', '=', $id)
+            ->get();
 
         $permisos = $res->toArray();
-        
+
         return $permisos;
     }
 }

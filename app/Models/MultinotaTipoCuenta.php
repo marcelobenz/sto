@@ -5,7 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class MultinotaTipoCuenta extends Model {
+class MultinotaTipoCuenta extends Model
+{
     use HasFactory;
 
     // Define the table name if it's not the plural of the model name
@@ -22,7 +23,7 @@ class MultinotaTipoCuenta extends Model {
 
     // Define fillable attributes for mass assignment
     protected $fillable = [
-        'fecha_sistema', 'id_tipo_tramite_multinota', 'cod_tipo_cuenta'
+        'fecha_sistema', 'id_tipo_tramite_multinota', 'cod_tipo_cuenta',
     ];
 
     // Disable timestamps if you are managing them manually

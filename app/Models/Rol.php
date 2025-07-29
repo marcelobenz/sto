@@ -2,15 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Rol extends Model
 {
     use HasFactory;
 
-    
-    protected $table = 'rol'; 
+    protected $table = 'rol';
 
     // Si tu tabla tiene una columna primary key diferente a 'id', define aquí
     protected $primaryKey = 'id_rol';
@@ -27,7 +26,6 @@ class Rol extends Model
 
     // Define los atributos que deben ser tratados como fechas (si necesitas convertir automáticamente la fecha_sistema)
     protected $dates = ['fecha_sistema'];
-
 
     public function permisos()
     {

@@ -2,18 +2,30 @@
 
 namespace App\DTOs;
 
-class DomicilioDTO {
+class DomicilioDTO
+{
     private int $id;
+
     private string $pais;
+
     private string $provincia;
+
     private string $partido;
+
     private string $localidad;
+
     private string $latitud;
+
     private string $longitud;
+
     private string $calle;
+
     private string $numero;
+
     private string $piso;
+
     private string $departamento;
+
     private string $codigoPostal;
 
     public function __construct(
@@ -40,99 +52,123 @@ class DomicilioDTO {
         $this->departamento = $departamento;
     }
 
-    public function getId(): int {
+    public function getId(): int
+    {
         return $this->id;
     }
 
-    public function setId(int $id): void {
+    public function setId(int $id): void
+    {
         $this->id = $id;
     }
 
-    public function getPais(): string {
+    public function getPais(): string
+    {
         return $this->pais;
     }
 
-    public function setPais(string $pais): void {
+    public function setPais(string $pais): void
+    {
         $this->pais = $pais;
     }
-    
-    public function getProvincia(): string {
+
+    public function getProvincia(): string
+    {
         return $this->provincia;
     }
 
-    public function setProvincia(string $provincia): void {
+    public function setProvincia(string $provincia): void
+    {
         $this->provincia = $provincia;
     }
 
-    public function getPartido(): string {
+    public function getPartido(): string
+    {
         return $this->partido;
     }
 
-    public function setPartido(string $partido): void {
+    public function setPartido(string $partido): void
+    {
         $this->partido = $partido;
     }
 
-    public function getLocalidad(): string {
+    public function getLocalidad(): string
+    {
         return $this->localidad;
     }
 
-    public function setLocalidad(string $localidad): void {
+    public function setLocalidad(string $localidad): void
+    {
         $this->localidad = $localidad;
     }
 
-    public function getLatitud(): string {
+    public function getLatitud(): string
+    {
         return $this->latitud;
     }
 
-    public function setLatitud(string $latitud): void {
+    public function setLatitud(string $latitud): void
+    {
         $this->latitud = $latitud;
     }
 
-    public function getLongitud(): string {
+    public function getLongitud(): string
+    {
         return $this->longitud;
     }
 
-    public function setLongitud(string $longitud): void {
+    public function setLongitud(string $longitud): void
+    {
         $this->longitud = $longitud;
     }
 
-    public function getCalle(): string {
+    public function getCalle(): string
+    {
         return $this->calle;
     }
 
-    public function setCalle(string $calle): void {
+    public function setCalle(string $calle): void
+    {
         $this->calle = $calle;
     }
 
-    public function getNumero(): string {
+    public function getNumero(): string
+    {
         return $this->numero;
     }
 
-    public function setNumero(string $numero): void {
+    public function setNumero(string $numero): void
+    {
         $this->numero = $numero;
     }
 
-    public function getPiso(): string {
+    public function getPiso(): string
+    {
         return $this->piso;
     }
 
-    public function setPiso(string $piso): void {
+    public function setPiso(string $piso): void
+    {
         $this->piso = $piso;
     }
 
-    public function getDepartamento(): string {
+    public function getDepartamento(): string
+    {
         return $this->departamento;
     }
 
-    public function setDepartamento(string $departamento): void {
+    public function setDepartamento(string $departamento): void
+    {
         $this->departamento = $departamento;
     }
 
-    public function getCodigoPostal(): string {
+    public function getCodigoPostal(): string
+    {
         return $this->codigoPostal;
     }
 
-    public function setCodigoPostal(string $codigoPostal): void {
+    public function setCodigoPostal(string $codigoPostal): void
+    {
         $this->codigoPostal = $codigoPostal;
     }
 }

@@ -10,6 +10,7 @@ class Licencia extends Model
     use HasFactory;
 
     protected $table = 'licencia';
+
     protected $primaryKey = 'id_licencia';
 
     protected $fillable = [

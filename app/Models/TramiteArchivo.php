@@ -18,7 +18,7 @@ class TramiteArchivo extends Model
     protected $fillable = [
         'id_tramite',
         'id_archivo',
-        'fecha_alta'
+        'fecha_alta',
     ];
 
     /**
@@ -36,5 +36,4 @@ class TramiteArchivo extends Model
     {
         return $this->belongsTo(Archivo::class, 'id_archivo');
     }
-    
 }

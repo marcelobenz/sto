@@ -23,18 +23,20 @@ class ConfiguracionEstadoTramite extends Model
 
     // Define fillable attributes for mass assignment
     protected $fillable = [
-        'fecha_sistema', 'id_estado_tramite', 'id_proximo_estado', 'version', 'publico', 'id_tipo_tramite', 'id_tipo_tramite_multinota', 'activo', 'id_estado_tramite_anterior'
+        'fecha_sistema', 'id_estado_tramite', 'id_proximo_estado', 'version', 'publico', 'id_tipo_tramite', 'id_tipo_tramite_multinota', 'activo', 'id_estado_tramite_anterior',
     ];
-    
+
     protected $casts = [
         'fecha_ultima_actualizacion' => 'datetime',
     ];
-    
-    public function estadoTramite() {
-    	return $this->belongsTo(EstadoTramite::class, 'id_estado_tramite');
+
+    public function estadoTramite()
+    {
+        return $this->belongsTo(EstadoTramite::class, 'id_estado_tramite');
     }
 
-	public function tipoTramiteMultinota() {
+    public function tipoTramiteMultinota()
+    {
         return $this->belongsTo(TipoTramiteMultinota::class, 'id_tipo_tramite_multinota');
     }
 

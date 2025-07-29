@@ -20,7 +20,7 @@ class Archivo extends Model
         'tipo_contenido',
         'path_archivo',
         'fecha_alta',
-        'descripcion'
+        'descripcion',
     ];
 
     /**
@@ -30,8 +30,7 @@ class Archivo extends Model
     public function tramites()
     {
         return $this->belongsToMany(Tramite::class, 'tramite_archivo', 'id_archivo', 'id_tramite')
-                    ->withPivot('fecha_alta')
-                    ->as('relacion');
+            ->withPivot('fecha_alta')
+            ->as('relacion');
     }
-    
 }

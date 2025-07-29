@@ -2,140 +2,181 @@
 
 namespace App\DTOs;
 
-class PersonaFisicaDTO {
+class PersonaFisicaDTO
+{
     private string $cuit;
+
     private string $dni;
+
     private string $nombre;
+
     private string $apellido;
+
     private string $nacionalidad;
+
     private string $fechaNacimiento;
+
     private string $estadoCivil;
+
     private string $sexo;
+
     private string $correo;
+
     private string $telefono;
+
     private string $celular;
+
     private string $direccion;
-    
+
     public function __construct(
         private bool $debeCargarRepresentante = false,
         private bool $debePersistirseConTramite = false,
         private bool $edicionBloqueada = false,
         private bool $puedeIniciarTramite = false
     ) {}
-    
-    public function getTitular(): string {
-        return ($this->apellido . ', ' . $this->nombre);
-    } 
 
-    public function getCuit(): string {
+    public function getTitular(): string
+    {
+        return $this->apellido.', '.$this->nombre;
+    }
+
+    public function getCuit(): string
+    {
         return $this->cuit;
     }
 
-    public function setCuit(string $cuit): void {
+    public function setCuit(string $cuit): void
+    {
         $this->cuit = $cuit;
     }
 
-    public function getDni(): string {
+    public function getDni(): string
+    {
         return $this->dni;
     }
 
-    public function setDni(string $dni): void {
+    public function setDni(string $dni): void
+    {
         $this->dni = $dni;
     }
 
-    public function getNombre(): string {
+    public function getNombre(): string
+    {
         return $this->nombre;
     }
 
-    public function setNombre(string $nombre): void {
+    public function setNombre(string $nombre): void
+    {
         $this->nombre = $nombre;
     }
 
-    public function getApellido(): string {
+    public function getApellido(): string
+    {
         return $this->apellido;
     }
 
-    public function setApellido(string $apellido): void {
+    public function setApellido(string $apellido): void
+    {
         $this->apellido = $apellido;
     }
 
-    public function getNacionalidad(): string {
+    public function getNacionalidad(): string
+    {
         return $this->nacionalidad;
     }
 
-    public function setNacionalidad(string $nacionalidad): void {
+    public function setNacionalidad(string $nacionalidad): void
+    {
         $this->nacionalidad = $nacionalidad;
     }
 
-    public function getFechaNacimiento(): string {
+    public function getFechaNacimiento(): string
+    {
         return $this->fechaNacimiento;
     }
 
-    public function setFechaNacimiento(string $fechaNacimiento): void {
+    public function setFechaNacimiento(string $fechaNacimiento): void
+    {
         $this->fechaNacimiento = $fechaNacimiento;
     }
 
-    public function getEstadoCivil(): string {
+    public function getEstadoCivil(): string
+    {
         return $this->estadoCivil;
     }
 
-    public function setEstadoCivil(string $estadoCivil): void {
+    public function setEstadoCivil(string $estadoCivil): void
+    {
         $this->estadoCivil = $estadoCivil;
     }
 
-    public function getSexo(): string {
+    public function getSexo(): string
+    {
         return $this->sexo;
     }
 
-    public function setSexo(string $sexo): void {
+    public function setSexo(string $sexo): void
+    {
         $this->sexo = $sexo;
     }
 
-    public function getCorreo(): string {
+    public function getCorreo(): string
+    {
         return $this->correo;
     }
 
-    public function setCorreo(string $correo): void {
+    public function setCorreo(string $correo): void
+    {
         $this->correo = $correo;
     }
 
-    public function getTelefono(): string {
+    public function getTelefono(): string
+    {
         return $this->telefono;
     }
 
-    public function setTelefono(string $telefono): void {
+    public function setTelefono(string $telefono): void
+    {
         $this->telefono = $telefono;
     }
 
-    public function getCelular(): string {
+    public function getCelular(): string
+    {
         return $this->celular;
     }
 
-    public function setCelular(string $celular): void {
+    public function setCelular(string $celular): void
+    {
         $this->celular = $celular;
     }
 
-    public function getDireccion(): string {
+    public function getDireccion(): string
+    {
         return $this->direccion;
     }
 
-    public function setDireccion(string $direccion): void {
+    public function setDireccion(string $direccion): void
+    {
         $this->direccion = $direccion;
     }
 
-    public function getDebeCargarRepresentante(): bool {
+    public function getDebeCargarRepresentante(): bool
+    {
         return $this->debeCargarRepresentante;
     }
 
-    public function getDebePersistirseConTramite(): bool {
+    public function getDebePersistirseConTramite(): bool
+    {
         return $this->debePersistirseConTramite;
     }
-    
-    public function getEdicionBloqueada(): bool {
+
+    public function getEdicionBloqueada(): bool
+    {
         return $this->edicionBloqueada;
     }
-    
-    public function getPuedeIniciarTramite(): bool {
+
+    public function getPuedeIniciarTramite(): bool
+    {
         return $this->puedeIniciarTramite;
     }
 }

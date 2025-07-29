@@ -9,10 +9,8 @@ class ConfiguracionMailController extends Controller
 {
     public function edit()
     {
-       
         $configuracion_mail = ParametroMail::first();
-        
-        
+
         return view('sistema.edit', compact('configuracion_mail'));
     }
 
@@ -25,15 +23,12 @@ class ConfiguracionMailController extends Controller
             'clave' => 'required|string',
         ]);
 
-        
         $configuracion_mail = ParametroMail::first();
 
-        
-        if (!$configuracion_mail) {
-            $configuracion_mail = new ParametroMail();
+        if (! $configuracion_mail) {
+            $configuracion_mail = new ParametroMail;
         }
 
-        
         $configuracion_mail->host = $request->host;
         $configuracion_mail->puerto = $request->puerto;
         $configuracion_mail->usuario = $request->usuario;

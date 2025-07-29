@@ -2,39 +2,37 @@
 
 namespace App\Http\Controllers;
 
-use stdClass;
-use App\Models\TipoTramiteMultinota;
+use App\Models\Campo;
 use App\Models\Categoria;
 use App\Models\MensajeInicial;
-use App\Models\TipoTramiteMensajeInicial;
-use App\Models\MultinotaTipoCuenta;
 use App\Models\MultinotaSeccion;
 use App\Models\MultinotaServicio;
+use App\Models\MultinotaTipoCuenta;
 use App\Models\SeccionMultinota;
-use App\Models\Campo;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Str;
-use Illuminate\Http\Request;
-use Yajra\DataTables\DataTables;
+use App\Models\TipoTramiteMensajeInicial;
+use App\Models\TipoTramiteMultinota;
 use Carbon\Carbon;
-use DB;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
+use Yajra\DataTables\DataTables;
 
 class MultinotaController extends Controller
 {
-    public function index(Request $request) {
+    public function index(Request $request)
+    {
         $shouldRefreshData = false;
         $dataFiltrada = null;
 
         // Chequea si la data existe en la cache
-        if (!Cache::has('DATA_MULTINOTAS') || !Cache::has('CATEGORIAS') || !Cache::has('LAST_UPDATE_MULTINOTAS')) {
+        if (! Cache::has('DATA_MULTINOTAS') || ! Cache::has('CATEGORIAS') || ! Cache::has('LAST_UPDATE_MULTINOTAS')) {
             $shouldRefreshData = true; // No existe asi que tenemos que refrescarla
         } else {
             // Chequea si la data necesita ser recuperada de base de nuevo segun la fecha de ultima actualizacion
             $lastUpdate = Cache::get('LAST_UPDATE_MULTINOTAS');
             $lastMultinotaUpdate = TipoTramiteMultinota::max('fecha_ultima_actualizacion');
-            
+
             // Se convierte la fecha de ultima actualización de base y la fecha de la cache a una instancia de la librería Carbon
             $lastMultinotaUpdateUTC = Carbon::createFromFormat('Y-m-d H:i:s', $lastMultinotaUpdate, 'UTC');
             $lastUpdateUTC = Carbon::createFromFormat('Y-m-d H:i:s', $lastUpdate, 'UTC');
@@ -97,14 +95,14 @@ class MultinotaController extends Controller
             $categorias = Cache::get('CATEGORIAS');
         }
 
-        if(($request->has('nombre') && !empty($request->nombre))
-        || $request->has('categoria') && !empty($request->categoria)
-        || $request->has('publicas') && !empty($request->publicas)
-        || $request->has('mensajeInicial') && !empty($request->mensajeInicial)
-        || $request->has('expediente') && !empty($request->expediente)) {
+        if (($request->has('nombre') && ! empty($request->nombre))
+        || $request->has('categoria') && ! empty($request->categoria)
+        || $request->has('publicas') && ! empty($request->publicas)
+        || $request->has('mensajeInicial') && ! empty($request->mensajeInicial)
+        || $request->has('expediente') && ! empty($request->expediente)) {
             $dataFiltrada = Cache::get('DATA_MULTINOTAS');
 
-            if($request->has('nombre') && !empty($request->nombre)) {
+            if ($request->has('nombre') && ! empty($request->nombre)) {
                 $nombre = Str::lower($request->nombre);
 
                 $dataFiltrada = $dataFiltrada->filter(function ($d) use ($nombre) {
@@ -112,7 +110,7 @@ class MultinotaController extends Controller
                 });
             }
 
-            if($request->has('categoria') && !empty($request->categoria)) {
+            if ($request->has('categoria') && ! empty($request->categoria)) {
                 $idCategoria = intval($request->categoria);
 
                 $dataFiltrada = $dataFiltrada->filter(function ($d) use ($idCategoria) {
@@ -120,8 +118,8 @@ class MultinotaController extends Controller
                 });
             }
 
-            if($request->publicas != 'Todas') {
-                if($request->publicas == 'Públicas') {
+            if ($request->publicas != 'Todas') {
+                if ($request->publicas == 'Públicas') {
                     $dataFiltrada = $dataFiltrada->filter(function ($d) {
                         return $d->publico == 1;
                     });
@@ -132,8 +130,8 @@ class MultinotaController extends Controller
                 }
             }
 
-            if($request->mensajeInicial != 'Todas') {
-                if($request->mensajeInicial == 'Muestran mensaje inicial') {
+            if ($request->mensajeInicial != 'Todas') {
+                if ($request->mensajeInicial == 'Muestran mensaje inicial') {
                     $dataFiltrada = $dataFiltrada->filter(function ($d) {
                         return $d->muestra_mensaje == 1;
                     });
@@ -144,8 +142,8 @@ class MultinotaController extends Controller
                 }
             }
 
-            if($request->expediente != 'Todas') {
-                if($request->expediente == 'Llevan expediente') {
+            if ($request->expediente != 'Todas') {
+                if ($request->expediente == 'Llevan expediente') {
                     $dataFiltrada = $dataFiltrada->filter(function ($d) {
                         return $d->lleva_expediente == 1;
                     });
@@ -157,12 +155,12 @@ class MultinotaController extends Controller
             }
         }
 
-        if($dataFiltrada != null) {
+        if ($dataFiltrada != null) {
             return DataTables::of($dataFiltrada)
-                    ->addIndexColumn()
-                    ->make(true);
+                ->addIndexColumn()
+                ->make(true);
         }
-        
+
         if ($request->ajax()) {
             return DataTables::of($data)
                 ->addIndexColumn()
@@ -170,13 +168,14 @@ class MultinotaController extends Controller
         }
 
         $categorias = Cache::get('CATEGORIAS');
-        
+
         return view('multinotas.index', compact('categorias'));
     }
 
-    public function view($id) {
+    public function view($id)
+    {
         $data = Cache::get('DATA_MULTINOTAS');
-        if($data == null) {
+        if ($data == null) {
             return redirect()->route('multinotas.index');
         }
 
@@ -188,9 +187,10 @@ class MultinotaController extends Controller
         return view('multinotas.view', compact('multinotaSelected', 'seccionesAsociadas'));
     }
 
-    public function edit($id) {
+    public function edit($id)
+    {
         $data = Cache::get('DATA_MULTINOTAS');
-        if($data == null) {
+        if ($data == null) {
             return redirect()->route('multinotas.index');
         }
 
@@ -211,9 +211,10 @@ class MultinotaController extends Controller
         return view('multinotas.edit', compact('multinotaSelected', 'seccionesAsociadas', 'todasLasSecciones', 'subcategorias', 'categoriasPadre', 'codigos', 'multinotaServicios', 'isEditar'));
     }
 
-    public function crearNuevaMultinota() {
-        $multinotaSelected = new MultinotaController();
-        $multinotaSelected->id_tipo_tramite_multinota = 0; //ID dummy
+    public function crearNuevaMultinota()
+    {
+        $multinotaSelected = new MultinotaController;
+        $multinotaSelected->id_tipo_tramite_multinota = 0; // ID dummy
         $multinotaSelected->nombre_categoria_padre = null;
         $multinotaSelected->id_categoria = null;
         $multinotaSelected->codigo = null;
@@ -231,16 +232,16 @@ class MultinotaController extends Controller
         $seccionesAsociadas = [];
         $todasLasSecciones = MultinotaController::getTodasLasSecciones();
         Session::put('TODAS_LAS_SECCIONES', $todasLasSecciones);
-        
+
         $subcategorias = [];
         $categoriasPadre = MultinotaController::getCategoriasPadre();
         Session::put('CATEGORIAS_PADRE', $categoriasPadre);
-        
+
         $codigos = MultinotaController::getCodigosMultinotasActivas();
-        
+
         $multinotaServicios = MultinotaController::getTodosLosServicios();
 
-        //Se setean los datos de sesion en 'nulos'
+        // Se setean los datos de sesion en 'nulos'
         Session::put('MULTINOTA_SELECTED', $multinotaSelected);
         Session::put('SECCIONES_ASOCIADAS', []);
         Session::put('SUBCATEGORIAS', []);
@@ -250,28 +251,29 @@ class MultinotaController extends Controller
         return view('multinotas.edit', compact('multinotaSelected', 'seccionesAsociadas', 'todasLasSecciones', 'subcategorias', 'categoriasPadre', 'codigos', 'multinotaServicios', 'isEditar'));
     }
 
-    private static function buildMultinotaSelected($id, $data) {
+    private static function buildMultinotaSelected($id, $data)
+    {
         $categorias = Cache::get('CATEGORIAS');
         $multinotaSelected = null;
 
         foreach ($data as $d) {
-            if($d->id_tipo_tramite_multinota == $id) {
+            if ($d->id_tipo_tramite_multinota == $id) {
                 $multinotaSelected = $d;
                 Session::put('MULTINOTA_SELECTED', $multinotaSelected);
             }
         }
 
-        //Se recuperan nombres de categoría y subcategoría de la multinota
+        // Se recuperan nombres de categoría y subcategoría de la multinota
         foreach ($categorias as $c) {
-            if($c->id_categoria == $multinotaSelected->id_categoria) {
+            if ($c->id_categoria == $multinotaSelected->id_categoria) {
                 $multinotaSelected->nombre_subcategoria = $c->nombre;
                 Session::put('MULTINOTA_SELECTED', $multinotaSelected);
 
-                if($c->id_padre != null) {
+                if ($c->id_padre != null) {
                     $categoriaPadre = Categoria::where('id_categoria', $c->id_padre)
-                    ->get();
+                        ->get();
 
-                    if($categoriaPadre[0] != null) {
+                    if ($categoriaPadre[0] != null) {
                         $multinotaSelected->nombre_categoria_padre = $categoriaPadre[0]->nombre;
                         $multinotaSelected->id_categoria_padre = $categoriaPadre[0]->id_categoria;
                         Session::put('MULTINOTA_SELECTED', $multinotaSelected);
@@ -280,38 +282,38 @@ class MultinotaController extends Controller
             }
         }
 
-        //Se recuperan las categorias padre
+        // Se recuperan las categorias padre
         $categoriasPadre = MultinotaController::getCategoriasPadre();
 
         Session::put('CATEGORIAS_PADRE', $categoriasPadre);
 
-        //Se recupera el mensaje inicial de la multinota
+        // Se recupera el mensaje inicial de la multinota
         $result = MensajeInicial::join('tipo_tramite_mensaje_inicial as ttmi', 'mensaje_inicial.id_mensaje_inicial', '=', 'ttmi.id_mensaje_inicial')
-        ->where('ttmi.id_tipo_tramite_multinota', $id)
-        ->orderBy('mensaje_inicial.id_mensaje_inicial', 'desc')
-        ->limit(1)
-        ->select('mensaje_inicial.*')
-        ->first();
+            ->where('ttmi.id_tipo_tramite_multinota', $id)
+            ->orderBy('mensaje_inicial.id_mensaje_inicial', 'desc')
+            ->limit(1)
+            ->select('mensaje_inicial.*')
+            ->first();
 
         $multinotaSelected->mensaje_inicial = $result->mensaje_inicial;
         Session::put('MULTINOTA_SELECTED', $multinotaSelected);
 
-        //Se recuperan las secciones de la multinota
+        // Se recuperan las secciones de la multinota
         $secciones = SeccionMultinota::join('multinota_seccion as ms', 'seccion.id_seccion', '=', 'ms.id_seccion')
-        ->where('ms.id_tipo_tramite_multinota', $id)
-        ->orderBy('ms.orden')
-        ->select('seccion.*', 'ms.orden')
-        ->get();
+            ->where('ms.id_tipo_tramite_multinota', $id)
+            ->orderBy('ms.orden')
+            ->select('seccion.*', 'ms.orden')
+            ->get();
 
         // Array de secciones que se enviaran a la vista
         $seccionesAsociadas = [];
 
         foreach ($secciones as $s) {
             $campos = Campo::where('id_seccion', $s->id_seccion)
-            ->orderBy('orden')
-            ->get();
+                ->orderBy('orden')
+                ->get();
 
-            $seccion = new \stdClass();
+            $seccion = new \stdClass;
             $seccion->id_seccion = $s->id_seccion;
             $seccion->temporal = $s->temporal;
             $seccion->titulo = $s->titulo;
@@ -330,35 +332,38 @@ class MultinotaController extends Controller
         $multinotaServicios = MultinotaController::getTodosLosServicios();
 
         // Servicio asociado a la multinota
-        if($multinotaSelected->id_multinota_servicio != 0) {
+        if ($multinotaSelected->id_multinota_servicio != 0) {
             $multinotaSelected->nombre_servicio = MultinotaController::getNombreServicioPorId($multinotaSelected->id_multinota_servicio);
         } else {
             $multinotaSelected->nombre_servicio = 'No';
         }
 
-        return array($multinotaSelected, $seccionesAsociadas, $todasLasSecciones, $categoriasPadre, $multinotaServicios);
+        return [$multinotaSelected, $seccionesAsociadas, $todasLasSecciones, $categoriasPadre, $multinotaServicios];
     }
 
-    public static function getCodigosMultinotasActivas() {
+    public static function getCodigosMultinotasActivas()
+    {
         $codigos = TipoTramiteMultinota::where('baja_logica', 0)->pluck('codigo');
 
         return $codigos;
     }
 
-    public static function getCategoriasPadre() {
+    public static function getCategoriasPadre()
+    {
         $categoriasPadre = Categoria::from('categoria as c1')
-        ->join('categoria as c2', 'c1.id_padre', '=', 'c2.id_categoria')
-        ->whereNotNull('c1.id_padre')
-        ->where('c1.flag_activo', 1)
-        ->select('c1.id_padre', 'c2.nombre')
-        ->distinct()
-        ->get();
+            ->join('categoria as c2', 'c1.id_padre', '=', 'c2.id_categoria')
+            ->whereNotNull('c1.id_padre')
+            ->where('c1.flag_activo', 1)
+            ->select('c1.id_padre', 'c2.nombre')
+            ->distinct()
+            ->get();
 
         return $categoriasPadre;
     }
 
-    public static function getTodasLasSecciones() {
-        //Se recuperan todas las secciones multinota
+    public static function getTodasLasSecciones()
+    {
+        // Se recuperan todas las secciones multinota
         $secciones = SeccionMultinota::select('seccion.*')
             ->where('seccion.activo', true)
             ->where('seccion.temporal', false)
@@ -369,10 +374,10 @@ class MultinotaController extends Controller
 
         foreach ($secciones as $s) {
             $campos = Campo::where('id_seccion', $s->id_seccion)
-            ->orderBy('orden')
-            ->get();
+                ->orderBy('orden')
+                ->get();
 
-            $seccion = new \stdClass();
+            $seccion = new \stdClass;
             $seccion->id_seccion = $s->id_seccion;
             $seccion->temporal = $s->temporal;
             $seccion->titulo = $s->titulo;
@@ -384,17 +389,22 @@ class MultinotaController extends Controller
         return $todasLasSecciones;
     }
 
-    public static function getTodosLosServicios() {
+    public static function getTodosLosServicios()
+    {
         $multinotaServicios = MultinotaServicio::all();
+
         return $multinotaServicios;
     }
 
-    public static function getNombreServicioPorId($id) {
+    public static function getNombreServicioPorId($id)
+    {
         $nombreServicio = MultinotaServicio::where('id_multinota_servicio', (int) $id)->value('nombre');
+
         return $nombreServicio;
     }
 
-    public function refresh() {
+    public function refresh()
+    {
         $seccionesAsociadas = Session::get('SECCIONES_ASOCIADAS');
 
         return response()->json([
@@ -402,7 +412,8 @@ class MultinotaController extends Controller
         ]);
     }
 
-    public function agregarSeccion(Request $request) {
+    public function agregarSeccion(Request $request)
+    {
         $id = $request->post('id');
         $seccionesAsociadas = Session::get('SECCIONES_ASOCIADAS');
         $todasLasSecciones = Session::get('TODAS_LAS_SECCIONES');
@@ -414,21 +425,21 @@ class MultinotaController extends Controller
         $s = SeccionMultinota::where('id_seccion', $id)
             ->get();
 
-        if(count($seccionesAsociadas) == 0) {
+        if (count($seccionesAsociadas) == 0) {
             $maxOrden = -1;
         } else {
             $maxOrden = max(array_column($seccionesAsociadas, 'orden'));
         }
 
         if ($s) {
-            $seccion = new \stdClass();
+            $seccion = new \stdClass;
             $seccion->id_seccion = $s[0]->id_seccion;
             $seccion->temporal = $s[0]->temporal;
             $seccion->titulo = $s[0]->titulo;
             $seccion->campos = $campos;
             $seccion->orden = $maxOrden + 1;
 
-            $seccionesAsociadas[] = $seccion; 
+            $seccionesAsociadas[] = $seccion;
 
             Session::put('SECCIONES_ASOCIADAS', $seccionesAsociadas);
         }
@@ -440,7 +451,8 @@ class MultinotaController extends Controller
         return response()->json(['html' => $html]);
     }
 
-    public function quitarSeccion(Request $request) {
+    public function quitarSeccion(Request $request)
+    {
         $id = $request->post('id');
         $seccionesAsociadas = Session::get('SECCIONES_ASOCIADAS');
         $todasLasSecciones = Session::get('TODAS_LAS_SECCIONES');
@@ -471,13 +483,13 @@ class MultinotaController extends Controller
             ->get();
 
         if ($s) {
-            $seccion = new \stdClass();
+            $seccion = new \stdClass;
             $seccion->id_seccion = $s[0]->id_seccion;
             $seccion->temporal = $s[0]->temporal;
             $seccion->titulo = $s[0]->titulo;
             $seccion->campos = $campos;
 
-            $todasLasSecciones[] = $seccion; 
+            $todasLasSecciones[] = $seccion;
 
             Session::put('TODAS_LAS_SECCIONES', $todasLasSecciones);
         }
@@ -489,14 +501,15 @@ class MultinotaController extends Controller
         return response()->json(['html' => $html]);
     }
 
-    public function setearNuevoOrdenSeccion($array) {
+    public function setearNuevoOrdenSeccion($array)
+    {
         $seccionesAsociadas = Session::get('SECCIONES_ASOCIADAS');
 
         // Se guardan los IDs de las secciones multinota, parseados y en orden en un array
         $arrayIdsSeccionOrdenados = explode(',', $array);
 
         foreach ($seccionesAsociadas as $index => $s) {
-            if(count(Session::get('SECCIONES_ASOCIADAS')[$index]->campos) == 0) {
+            if (count(Session::get('SECCIONES_ASOCIADAS')[$index]->campos) == 0) {
                 array_splice($arrayIdsSeccionOrdenados, $index, 0, $s->id_seccion);
             }
         }
@@ -504,7 +517,7 @@ class MultinotaController extends Controller
         // Se reubican las secciones
         $seccionesOrdenadas = [];
         foreach ($arrayIdsSeccionOrdenados as $id) {
-            $seccionesOrdenadas[] = current(array_filter($seccionesAsociadas, fn($s) => $s->id_seccion == (int) $id));
+            $seccionesOrdenadas[] = current(array_filter($seccionesAsociadas, fn ($s) => $s->id_seccion == (int) $id));
         }
 
         // Se acomoda el atributo 'orden'
@@ -516,27 +529,28 @@ class MultinotaController extends Controller
         Session::put('SECCIONES_ASOCIADAS', $seccionesOrdenadas);
     }
 
-    public static function getSubcategoriasPorIdPadre($idCategoria) {
+    public static function getSubcategoriasPorIdPadre($idCategoria)
+    {
         $subcategorias = Categoria::where('flag_activo', 1)
-        ->where('id_padre', (int) $idCategoria)
-        ->orderBy('nombre')
-        ->get();
+            ->where('id_padre', (int) $idCategoria)
+            ->orderBy('nombre')
+            ->get();
 
         return $subcategorias;
     }
 
-    public function recargarSubcategorias($idCategoria) {
+    public function recargarSubcategorias($idCategoria)
+    {
         $multinotaSelected = Session::get('MULTINOTA_SELECTED');
         $isEditar = Session::get('IS_EDITAR');
 
-
-        if((int) $idCategoria == 0) {
+        if ((int) $idCategoria == 0) {
             $subcategorias = [];
         } else {
             $subcategorias = MultinotaController::getSubcategoriasPorIdPadre($idCategoria);
         }
 
-        //Se guardan las nuevas subcategorias asociadas a la categoria padre seleccionada
+        // Se guardan las nuevas subcategorias asociadas a la categoria padre seleccionada
         Session::put('SUBCATEGORIAS', $subcategorias);
 
         // Se renderiza el partial de las subcategorias con los datos actualizados
@@ -546,7 +560,8 @@ class MultinotaController extends Controller
         return response()->json(['html' => $html]);
     }
 
-    public function previsualizarCambiosMultinota(Request $request) {
+    public function previsualizarCambiosMultinota(Request $request)
+    {
         $multinotaSelected = Session::get('MULTINOTA_SELECTED');
         $seccionesAsociadas = Session::get('SECCIONES_ASOCIADAS');
         $categorias = Cache::get('CATEGORIAS');
@@ -555,7 +570,7 @@ class MultinotaController extends Controller
         // Se actualiza multinotaSelected
 
         // Codigo
-        if(!$isEditar) {
+        if (! $isEditar) {
             $multinotaSelected->codigo = $request->post('codigo');
         }
 
@@ -563,7 +578,7 @@ class MultinotaController extends Controller
         $multinotaSelected->nombre = $request->post('nombre');
 
         // ID y Nombre de servicio seleccionado
-        if((int) $request->post('servicio') != 0) {
+        if ((int) $request->post('servicio') != 0) {
             $multinotaSelected->id_multinota_servicio = $request->post('servicio');
             $multinotaSelected->nombre_servicio = MultinotaController::getNombreServicioPorId($request->post('servicio'));
         } else {
@@ -573,12 +588,12 @@ class MultinotaController extends Controller
 
         // Categoria y Subcategoria
         foreach ($categorias as $c) {
-            if($c->id_categoria == $request->post('categoria')) {
+            if ($c->id_categoria == $request->post('categoria')) {
                 $multinotaSelected->nombre_categoria_padre = $c->nombre;
                 Session::put('MULTINOTA_SELECTED', $multinotaSelected);
             }
 
-            if($c->id_categoria == $request->post('subcategoria')) {
+            if ($c->id_categoria == $request->post('subcategoria')) {
                 $multinotaSelected->nombre_subcategoria = $c->nombre;
                 $multinotaSelected->id_categoria = $c->id_categoria;
                 Session::put('MULTINOTA_SELECTED', $multinotaSelected);
@@ -586,21 +601,21 @@ class MultinotaController extends Controller
         }
 
         // Público
-        if($request->post('publico') == 'on') {
+        if ($request->post('publico') == 'on') {
             $multinotaSelected->publico = 1;
         } else {
             $multinotaSelected->publico = 0;
         }
 
         // Lleva documentación
-        if($request->post('llevaDocumentacion') == 'on') {
+        if ($request->post('llevaDocumentacion') == 'on') {
             $multinotaSelected->lleva_documentacion = 1;
         } else {
             $multinotaSelected->lleva_documentacion = 0;
         }
 
         // Muestra mensaje inicial
-        if($request->post('muestraMensaje') == 'on') {
+        if ($request->post('muestraMensaje') == 'on') {
             $multinotaSelected->muestra_mensaje = 1;
         } else {
             $multinotaSelected->muestra_mensaje = 0;
@@ -616,7 +631,8 @@ class MultinotaController extends Controller
         return response()->json(['html' => $html]);
     }
 
-    public function guardarMultinota($id) {
+    public function guardarMultinota($id)
+    {
         $multinotaSelected = Session::get('MULTINOTA_SELECTED');
         $seccionesAsociadas = Session::get('SECCIONES_ASOCIADAS');
         $categorias = Cache::get('CATEGORIAS');
@@ -627,7 +643,7 @@ class MultinotaController extends Controller
         // Mensaje inicial se guarda en mensaje_inicial
         MensajeInicial::create(['mensaje_inicial' => $multinotaSelected->mensaje_inicial]);
 
-        // Los demas datos de la multinota se guardan en tipo_tramite_multinota 
+        // Los demas datos de la multinota se guardan en tipo_tramite_multinota
         TipoTramiteMultinota::create([
             'nombre' => $multinotaSelected->nombre,
             'codigo' => $multinotaSelected->codigo,
@@ -643,9 +659,9 @@ class MultinotaController extends Controller
 
         // La recupero para saber el ID de la nueva multinota
         $res = TipoTramiteMultinota::select('id_tipo_tramite_multinota')
-        ->where('baja_logica', 0)
-        ->where('nombre', $multinotaSelected->nombre)
-        ->get();
+            ->where('baja_logica', 0)
+            ->where('nombre', $multinotaSelected->nombre)
+            ->get();
 
         $nuevoId = $res[0]->id_tipo_tramite_multinota;
 
@@ -659,7 +675,7 @@ class MultinotaController extends Controller
         ]);
 
         // La relacion entre la multinota y sus secciones se guarda en multinota_seccion, asi como el orden
-        
+
         // Se recorre el array de secciones para ir insertando una por una en base
         foreach ($seccionesAsociadas as $s) {
             MultinotaSeccion::create([
@@ -678,12 +694,14 @@ class MultinotaController extends Controller
         return view('multinotas.index', compact('categorias'));
     }
 
-    public function desactivarMultinota($id) {
+    public function desactivarMultinota($id)
+    {
         $multinota = TipoTramiteMultinota::find((int) $id);
         if ($multinota) {
-            $multinota->baja_logica = 1; 
+            $multinota->baja_logica = 1;
             $multinota->fecha_ultima_actualizacion = Carbon::now();
             $multinota->save();
+
             return response()->json(['message' => 'Multinota desactivada correctamente.'], 200);
         } else {
             return response()->json(['message' => 'Multinota no encontrada.'], 404);

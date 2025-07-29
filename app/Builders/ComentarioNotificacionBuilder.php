@@ -5,29 +5,36 @@ namespace App\Builders;
 use App\Notificaciones\ComentarioNotificacion;
 use App\Notificaciones\NotificadorComentariosMail;
 
-class ComentarioNotificacionBuilder {
-  private string $comentario = '';
-  private bool $notificaContribuyente = false;
+class ComentarioNotificacionBuilder
+{
+    private string $comentario = '';
 
-  public function comentario(string $comentario): self {
-    $this->comentario = $comentario;
-    return $this;
-  }
+    private bool $notificaContribuyente = false;
 
-  public function notificaContribuyente(bool $flag): self {
-    $this->notificaContribuyente = $flag;
-    return $this;
-  }
+    public function comentario(string $comentario): self
+    {
+        $this->comentario = $comentario;
 
-  public function build(): ComentarioNotificacion {
-    if (trim($this->comentario) === '') {
-      throw new \Exception('El comentario no puede estar vacío');
+        return $this;
     }
 
-    $observers = $this->notificaContribuyente
-      ? [new NotificadorComentariosMail()]
-      : [];
+    public function notificaContribuyente(bool $flag): self
+    {
+        $this->notificaContribuyente = $flag;
 
-    return new ComentarioNotificacion($this->comentario, $observers, $this->notificaContribuyente);
-  }
+        return $this;
+    }
+
+    public function build(): ComentarioNotificacion
+    {
+        if (trim($this->comentario) === '') {
+            throw new \Exception('El comentario no puede estar vacío');
+        }
+
+        $observers = $this->notificaContribuyente
+          ? [new NotificadorComentariosMail]
+          : [];
+
+        return new ComentarioNotificacion($this->comentario, $observers, $this->notificaContribuyente);
+    }
 }

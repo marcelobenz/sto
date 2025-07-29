@@ -140,7 +140,7 @@ return new class extends Migration
             'tramite_pago_pago_doble',
             'usuario_categoria',
             'usuario',
-            'usuario_permiso'
+            'usuario_permiso',
         ];
 
         foreach ($tables as $table) {

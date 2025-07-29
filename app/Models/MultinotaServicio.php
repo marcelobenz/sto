@@ -5,7 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class MultinotaServicio extends Model {
+class MultinotaServicio extends Model
+{
     use HasFactory;
 
     // Define the table name if it's not the plural of the model name
@@ -22,7 +23,7 @@ class MultinotaServicio extends Model {
 
     // Define fillable attributes for mass assignment
     protected $fillable = [
-        'nombre', 'url'
+        'nombre', 'url',
     ];
 
     // Disable timestamps if you are managing them manually

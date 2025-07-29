@@ -4,11 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
-
-use App\Models\CategoriaUsuario;
-use App\Models\GrupoInterno;
-use App\Models\Rol;
 
 class UsuarioInterno extends Model
 {
@@ -48,15 +43,18 @@ class UsuarioInterno extends Model
     // Disable timestamps if you are managing them manually
     public $timestamps = false;
 
-    public function categoria() {
+    public function categoria()
+    {
         return $this->belongsTo(CategoriaUsuario::class, 'id_categoria_usuario');
     }
 
-    public function grupoInterno() {
+    public function grupoInterno()
+    {
         return $this->belongsTo(GrupoInterno::class, 'id_grupo_interno');
     }
 
-    public function oficina() {
+    public function oficina()
+    {
         return $this->hasOneThrough(
             Oficina::class,
             GrupoInterno::class,
@@ -67,12 +65,14 @@ class UsuarioInterno extends Model
         );
     }
 
-    public function rol() {
+    public function rol()
+    {
         return $this->belongsTo(Rol::class, 'id_rol', 'id_rol');
     }
 
-    public function hasPermission($permission) {
-        if (!$this->relationLoaded('rol')) {
+    public function hasPermission($permission)
+    {
+        if (! $this->relationLoaded('rol')) {
             $this->load('rol.permisos');
         }
 
@@ -81,7 +81,8 @@ class UsuarioInterno extends Model
     }
 
     // Use the permisos relation from rol
-    public function permisos() {
+    public function permisos()
+    {
         return $this->rol?->permisos ?? collect();
     }
 }

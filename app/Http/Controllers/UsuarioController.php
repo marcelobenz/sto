@@ -2,61 +2,52 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Rol;
+use App\Models\UsuarioInterno;
+use DB;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Yajra\DataTables\DataTables;
-use App\Models\UsuarioInterno;
-use App\Models\Rol;
-use DB;
-use Log;
 
 class UsuarioController extends Controller
 {
     public function index(Request $request)
     {
         $usuarioInterno = Session::get('usuario_interno');
-        if(!$usuarioInterno->hasPermission('CONFIGURAR_USUARIOS')){
+        if (! $usuarioInterno->hasPermission('CONFIGURAR_USUARIOS')) {
             return redirect()->route('navbar');
         }
         // Realizar la consulta usando Eloquent
         if ($request->ajax()) {
             $data = DB::table('usuario_interno as ui')
-            ->join('grupo_interno as gi', 'ui.id_grupo_interno', '=', 'gi.id_grupo_interno')
-            ->join('oficina as o', 'gi.id_oficina', '=', 'o.id_oficina')
-            ->select(
-                'ui.id_usuario_interno',
-                'ui.legajo',
-                'ui.nombre',
-                'ui.apellido',
-                'ui.correo_municipal',
-                'gi.descripcion as grupo_descripcion',
-                'o.descripcion as oficina_descripcion'
-            )
-            ->get();
+                ->join('grupo_interno as gi', 'ui.id_grupo_interno', '=', 'gi.id_grupo_interno')
+                ->join('oficina as o', 'gi.id_oficina', '=', 'o.id_oficina')
+                ->select(
+                    'ui.id_usuario_interno',
+                    'ui.legajo',
+                    'ui.nombre',
+                    'ui.apellido',
+                    'ui.correo_municipal',
+                    'gi.descripcion as grupo_descripcion',
+                    'o.descripcion as oficina_descripcion'
+                )
+                ->get();
 
             return DataTables::of($data)
-            ->addIndexColumn()
-            ->make(true);
-    }
+                ->addIndexColumn()
+                ->make(true);
+        }
 
         // Pasar los resultados a la vista
         return view('usuarios.index');
     }
 
-
-
-
     public function create()
     {
         $roles = Rol::all();  // Obtiene todos los roles
+
         return view('usuarios.create', compact('roles'));  // Pasa los roles a la vista
     }
-    
-
-
-
-
 
     public function store(Request $request)
     {
@@ -70,7 +61,7 @@ class UsuarioController extends Controller
             'dni' => 'required|string|max:255',
             'id_rol' => 'required|exists:rol,id_rol',  // Asegúrate de que el rol existe
         ]);
-    
+
         // Crea un nuevo usuario con los datos validados
         $usuario = new UsuarioInterno($validatedData);
         $usuario->legajo = $request->input('legajo');
@@ -84,7 +75,7 @@ class UsuarioController extends Controller
         $usuario->apellido = $request->input('apellido');
         $usuario->id_rol = $request->input('id_rol');  // Asignar el rol seleccionado
         $usuario->save();
-    
+
         return redirect()->route('usuarios.index')->with('success', 'Usuario creado correctamente.');
     }
 
@@ -93,7 +84,7 @@ class UsuarioController extends Controller
         // Asume que el modelo Rol tiene una relación 'permisos'
         $rol = Rol::with('permisos')->find($id_rol);
 
-        if (!$rol) {
+        if (! $rol) {
             return response()->json(['error' => 'Rol no encontrado'], 404);
         }
 
@@ -103,10 +94,10 @@ class UsuarioController extends Controller
     public function edit($id)
     {
         $usuario = UsuarioInterno::findOrFail($id);
-        $roles = Rol::all(); 
+        $roles = Rol::all();
+
         return view('usuarios.edit', compact('usuario', 'roles'));
     }
-
 
     public function update(Request $request, $id)
     {
@@ -134,11 +125,9 @@ class UsuarioController extends Controller
 
     public function setUsuarioInterno()
     {
-    
         $usuarioInterno = UsuarioInterno::with('rol.permisos')
-                            ->where('legajo', 20299575085) 
-                            ->first();
-
+            ->where('legajo', 20299575085)
+            ->first();
 
         if ($usuarioInterno) {
             Session::put('usuario_interno', $usuarioInterno); // Guardar en la sesión
@@ -152,7 +141,7 @@ class UsuarioController extends Controller
     public function clearSession()
     {
         Session::forget('usuario_interno'); // Limpiar la sesión
+
         return redirect('/');
     }
-
 }

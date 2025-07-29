@@ -9,7 +9,8 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up() {
+    public function up()
+    {
         // historial_tramite
         Schema::table('historial_tramite', function (Blueprint $table) {
             $table->dropColumn('id_tramite');
@@ -41,7 +42,8 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-    public function down(): void {
+    public function down(): void
+    {
         // Reverse all the changes
         Schema::table('historial_tramite', function (Blueprint $table) {
             $table->dropForeign('historial_tramite_ibfk_4');

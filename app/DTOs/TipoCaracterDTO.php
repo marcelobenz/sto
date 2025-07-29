@@ -2,8 +2,10 @@
 
 namespace App\DTOs;
 
-class TipoCaracterDTO {
+class TipoCaracterDTO
+{
     private int $codigo;
+
     private string $nombre;
 
     public function __construct(
@@ -14,19 +16,23 @@ class TipoCaracterDTO {
         $this->nombre = $nombre;
     }
 
-    public function getCodigo(): int {
+    public function getCodigo(): int
+    {
         return $this->codigo;
     }
 
-    public function setCodigo(int $codigo): void {
+    public function setCodigo(int $codigo): void
+    {
         $this->codigo = $codigo;
     }
 
-    public function getNombre(): string {
+    public function getNombre(): string
+    {
         return $this->nombre;
     }
 
-    public function setNombre(string $nombre): void {
+    public function setNombre(string $nombre): void
+    {
         $this->nombre = $nombre;
     }
 }

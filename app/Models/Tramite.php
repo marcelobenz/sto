@@ -50,8 +50,7 @@ class Tramite extends Model
     public function archivos()
     {
         return $this->belongsToMany(Archivo::class, 'tramite_archivo', 'id_tramite', 'id_archivo')
-                    ->withPivot('fecha_alta')
-                    ->as('relacion');
+            ->withPivot('fecha_alta')
+            ->as('relacion');
     }
-        
 }

@@ -10,7 +10,9 @@ class Pregunta extends Model
     use HasFactory;
 
     protected $table = 'pregunta';
+
     protected $primaryKey = 'id_pregunta';
+
     public $timestamps = false;
 
     protected $fillable = [
@@ -21,10 +23,9 @@ class Pregunta extends Model
         'flag_detalle_no',
         'flag_finalizacion_si',
         'flag_rechazo_no',
-        'flag_baja'
+        'flag_baja',
     ];
 
-   
     public function cuestionario()
     {
         return $this->belongsTo(Cuestionario::class, 'id_cuestionario');

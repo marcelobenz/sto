@@ -23,10 +23,10 @@ class Oficina extends Model
 
     // Define fillable attributes for mass assignment
     protected $fillable = [
-      'fecha_sistema',
-      'fecha_update',
-      'codigo',
-      'descripcion'
+        'fecha_sistema',
+        'fecha_update',
+        'codigo',
+        'descripcion',
     ];
 
     // Disable timestamps if you are managing them manually

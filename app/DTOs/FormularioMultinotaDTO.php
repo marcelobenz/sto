@@ -5,19 +5,26 @@ namespace App\DTOs;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
-use App\Models\SeccionMultinota;
-
-class FormularioMultinotaDTO {
+class FormularioMultinotaDTO
+{
     public string $nombre;
+
     public string $categoria;
+
     public ?array $cuentas = null;
+
     public string $fechaActual;
+
     public bool $llevaMensaje;
+
     public array $pasosFormulario;
+
     public array $tiposCuenta;
+
     public Collection $secciones;
 
-    public function __construct($multinota, $secciones, $cuentas, $pasos, $llevaMensaje) {
+    public function __construct($multinota, $secciones, $cuentas, $pasos, $llevaMensaje)
+    {
         $this->nombre = strtoupper($multinota->nombre);
         $this->categoria = $multinota->categoria->nombre;
         $this->secciones = $secciones;
@@ -28,9 +35,10 @@ class FormularioMultinotaDTO {
         $this->tiposCuenta = $multinota->tiposDeCuenta ?? [];
     }
 
-    public function getOrdenActual(): int {
+    public function getOrdenActual(): int
+    {
         foreach ($this->pasosFormulario as $paso) {
-            if (!$paso['completado']) {
+            if (! $paso['completado']) {
                 return $paso['orden'];
             }
         }
@@ -38,7 +46,8 @@ class FormularioMultinotaDTO {
         return count($this->pasosFormulario); // fallback to last
     }
 
-    public function dimensionBarraProgreso(): float {
+    public function dimensionBarraProgreso(): float
+    {
         $total = count($this->pasosFormulario ?? 0);
         $actual = $this->getOrdenActual();
 
@@ -49,16 +58,19 @@ class FormularioMultinotaDTO {
         return (($actual * 100.0) - 50.0) / $total;
     }
 
-    public function estilosPaso($orden): string {
-        if ($this->getOrdenActual() === $orden)
-            return "active";
-        else if ($this->getOrdenActual() > $orden)
-            return "activated";
-        else
-            return "";
+    public function estilosPaso($orden): string
+    {
+        if ($this->getOrdenActual() === $orden) {
+            return 'active';
+        } elseif ($this->getOrdenActual() > $orden) {
+            return 'activated';
+        } else {
+            return '';
+        }
     }
 
-    public function dimensionPaso(): float {
+    public function dimensionPaso(): float
+    {
         $total = count($this->pasosFormulario ?? 0);
 
         if ($total === 0) {
@@ -68,8 +80,10 @@ class FormularioMultinotaDTO {
         return 100.0 / $total;
     }
 
-    public function muestro($orden): bool {
+    public function muestro($orden): bool
+    {
         $ordenActual = $this->getOrdenActual();
+
         return $ordenActual == $orden;
     }
 }

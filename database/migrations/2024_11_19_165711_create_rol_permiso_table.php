@@ -22,6 +22,7 @@ return new class extends Migration
             $table->foreign('id_permiso')->references('id_permiso')->on('permiso')->onDelete('cascade');
         });
     }
+
     /**
      * Reverse the migrations.
      */

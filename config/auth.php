@@ -35,12 +35,12 @@ return [
     |
     */
 
-   'guards' => [
-    'web' => [
-        'driver' => 'session',
-        'provider' => 'usuarios_internos',
+    'guards' => [
+        'web' => [
+            'driver' => 'session',
+            'provider' => 'usuarios_internos',
+        ],
     ],
-],
 
     /*
     |--------------------------------------------------------------------------
@@ -59,12 +59,12 @@ return [
     |
     */
 
-   'providers' => [
-    'usuarios_internos' => [
-        'driver' => 'eloquent',
-        'model' => App\Models\UsuarioInterno::class,
+    'providers' => [
+        'usuarios_internos' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\UsuarioInterno::class,
+        ],
     ],
-],
 
     /*
     |--------------------------------------------------------------------------

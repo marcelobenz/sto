@@ -5,7 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class MensajeInicial extends Model {
+class MensajeInicial extends Model
+{
     use HasFactory;
 
     // Define the table name if it's not the plural of the model name
@@ -22,7 +23,7 @@ class MensajeInicial extends Model {
 
     // Define fillable attributes for mass assignment
     protected $fillable = [
-        'mensaje_inicial', 'fecha_alta'
+        'mensaje_inicial', 'fecha_alta',
     ];
 
     // Disable timestamps if you are managing them manually

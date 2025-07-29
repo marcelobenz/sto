@@ -2,8 +2,10 @@
 
 namespace App\DTOs;
 
-class DocumentoDTO {
+class DocumentoDTO
+{
     private string $tipo;
+
     private string $numero;
 
     public function __construct(
@@ -14,19 +16,23 @@ class DocumentoDTO {
         $this->tipo = $tipo;
     }
 
-    public function getTipo(): string {
+    public function getTipo(): string
+    {
         return $this->tipo;
     }
 
-    public function setTipo(string $tipo): void {
+    public function setTipo(string $tipo): void
+    {
         $this->tipo = $tipo;
     }
 
-    public function getNumero(): string {
+    public function getNumero(): string
+    {
         return $this->numero;
     }
 
-    public function setNumero(string $numero): void {
+    public function setNumero(string $numero): void
+    {
         $this->numero = $numero;
     }
 }

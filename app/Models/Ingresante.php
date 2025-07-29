@@ -2,31 +2,33 @@
 
 namespace App\Models;
 
+use App\Http\Controllers\UsuarioInternoController;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Session;
-use App\Http\Controllers\UsuarioInternoController;
-use \stdClass;
+use stdClass;
 
 class Ingresante extends Model
 {
-	private String $cuit;
-  
-    public function __construct(String $cuit) {
+    private string $cuit;
+
+    public function __construct(string $cuit)
+    {
         $this->cuit = $cuit;
     }
 
-    public function ingresar() {
+    public function ingresar()
+    {
         $usuarioSession = UsuarioInternoController::getUsuarioSessionPorCuit($this->cuit);
 
         if ($usuarioSession === null) {
-            throw new Exception("El usuario ingresado es incorrecto");
+            throw new Exception('El usuario ingresado es incorrecto');
         }
 
-        if ($usuarioSession->getEstado() !== 1){
-            throw new Exception("El usuario ingresado no esta activo");
+        if ($usuarioSession->getEstado() !== 1) {
+            throw new Exception('El usuario ingresado no esta activo');
         }
 
-        $object = new stdClass();
+        $object = new stdClass;
 
         $object->id = $usuarioSession->getId();
         $object->legajo = $usuarioSession->getLegajo();
@@ -39,7 +41,5 @@ class Ingresante extends Model
         $object->limite = $usuarioSession->getLimite();
 
         Session::put('USUARIO', $object);
-
-        return;
     }
 }

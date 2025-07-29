@@ -5,9 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-use App\Models\Oficina;
-
-class GrupoInterno extends Model {
+class GrupoInterno extends Model
+{
     use HasFactory;
 
     protected $table = 'grupo_interno';
@@ -16,11 +15,13 @@ class GrupoInterno extends Model {
 
     protected $fillable = ['descripcion'];
 
-    public function usuarios() {
+    public function usuarios()
+    {
         return $this->hasMany(UsuarioInterno::class, 'id_grupo_interno', 'id_grupo_interno');
     }
 
-    public function oficina() {
+    public function oficina()
+    {
         return $this->belongsTo(Oficina::class, 'id_oficina');
     }
 }

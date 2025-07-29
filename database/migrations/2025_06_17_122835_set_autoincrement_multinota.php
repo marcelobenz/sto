@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -9,7 +8,8 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void {
+    public function up(): void
+    {
         // Step 1: Drop foreign keys that reference id_tramite
         Schema::table('multinota_campo_valor', function ($table) {
             $table->dropForeign('multinota_campo_valor_ibfk_1');
@@ -35,7 +35,8 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-    public function down(): void {
+    public function down(): void
+    {
         // Reverse: drop FK, remove auto_increment, re-add FK
 
         Schema::table('multinota_campo_valor', function ($table) {

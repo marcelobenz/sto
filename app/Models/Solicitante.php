@@ -5,9 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-use App\Models\TramiteEstadoTramite;
-
-class Solicitante extends Model {
+class Solicitante extends Model
+{
     use HasFactory;
 
     // Define the table name if it's not the plural of the model name
@@ -24,7 +23,7 @@ class Solicitante extends Model {
     // Define fillable attributes for mass assignment
     protected $fillable = [
         'nombre', 'documento', 'telefono', 'correo', 'fecha_alta', 'fecha_modificacion',
-        'id_tipo_documento', 'apellido', 'id_direccion'
+        'id_tipo_documento', 'apellido', 'id_direccion',
     ];
 
     // Disable timestamps if you are managing them manually

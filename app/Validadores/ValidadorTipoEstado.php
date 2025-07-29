@@ -2,8 +2,8 @@
 
 namespace App\Validadores;
 
-use App\Interfaces\ValidadorEstado;
 use App\Builders\EstadoBuilder;
+use App\Interfaces\ValidadorEstado;
 use Exception;
 
 class ValidadorTipoEstado implements ValidadorEstado
