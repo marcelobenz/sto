@@ -68,9 +68,7 @@
         </style>
         @stack("styles")
     </head>
-    <body
-        class="font-sans antialiased min-h-screen flex flex-col bg-gray-100 dark:bg-gray-900"
-    >
+    <body class="font-sans antialiased min-h-screen flex flex-col bg-gray-100">
         <header
             class="sticky top-0 z-10 h-16 shrink-0 shadow-[0_2px_4px_rgba(0,0,0,0.1)]"
         >
