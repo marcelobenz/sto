@@ -201,13 +201,17 @@ Route::post('/sistema', [ConfiguracionMailController::class, 'update'])->name('c
 //Ingreso Externo
 Route::get('/ingreso-externo', [IngresoExternoController::class, 'showLoginForm'])->name('ingreso-externo');
 Route::post('/ingreso-externo', [IngresoExternoController::class, 'login'])->name('ingreso-externo.login');
-Route::get('/bandeja-usuario-externo', [IngresoExternoController::class, 'showBandeja'])->name('bandeja-usuario-externo');
 
 //Contribuyente Multinota
+Route::get('/ingreso-externo/registro', [IngresoExternoController::class, 'registro'])->name('ingreso-externo.registro');
+Route::post('/ingreso-externo/registrar', [IngresoExternoController::class, 'registrar'])->name('registro-externo.registrar');
+Route::get('/bandeja-usuario-externo', [IngresoExternoController::class, 'bandejaExterna'])->name('bandeja-usuario-externo');
 Route::get('/cambiar-clave', [ContribuyenteMultinotaController::class, 'showChangePasswordForm'])->name('cambiar-clave');
 Route::post('/cambiar-clave', [ContribuyenteMultinotaController::class, 'changePassword'])->name('cambiar-clave.submit');
 
 //Administración Workflow
+Route::get('/perfil-externo', [ContribuyenteMultinotaController::class, 'perfil'])->name('perfil-externo');
+Route::post('/perfil-externo', [ContribuyenteMultinotaController::class, 'actualizarPerfil'])->name('perfil-externo.actualizarPerfil');
 Route::get('/estados', [AdministracionWorkflowController::class, 'index'])->name('estados.index');
 Route::get('/workflow/{id}', [AdministracionWorkflowController::class, 'crear'])->name('workflow.crear');
 Route::post('/workflow/guardar/{id}', [AdministracionWorkflowController::class, 'guardar'])->name('workflow.guardar');

@@ -25,6 +25,17 @@ class ContribuyenteMultinotaController extends Controller
         return view('externo.cambiar-clave');
     }
 
+    public function perfil()
+{
+    $contribuyente = Session::get('contribuyente_multinota');
+
+    if (!$contribuyente) {
+        return redirect()->route('login-externo')->withErrors(['error' => 'Debes iniciar sesión para acceder al perfil.']);
+    }
+
+    return view('externo.perfil-externo', ['usuario' => $contribuyente]);
+}
+
    
     public function buscar(Request $request)
     {
@@ -82,50 +93,82 @@ class ContribuyenteMultinotaController extends Controller
 }
 
 
-	public function changePassword(Request $request) {
-	    Log::info('Inicio del proceso de cambio de contraseña.');
-	
-	    $request->validate([
-	        'current_password' => 'required|string',
-	        'new_password' => 'required|string|min:8|confirmed', 
-	    ]);
-	    Log::info('Solicitud validada correctamente.');
-	
-	   
-	    $contribuyente = Session::get('contribuyente_multinota');
-	    Log::info('Contribuyente obtenido de la sesión: ', ['contribuyente' => $contribuyente]);
-	    Log::info('Tipo de objeto en la sesión: ', ['tipo' => get_class($contribuyente)]);
-	
-	    
-	    if (!$contribuyente) {
-	        Log::warning('El contribuyente no está autenticado.');
-	        return back()->withErrors(['error' => 'Usuario no autenticado.']);
-	    }
-	
-	    
-	    if (!($contribuyente instanceof ContribuyenteMultinota)) {
-	        Log::error('El objeto contribuyente no es una instancia válida de ContribuyenteMultinota.');
-	        return back()->withErrors(['error' => 'El usuario no es válido.']);
-	    }
-	
-	    
-	    if (!Hash::check($request->current_password, $contribuyente->clave)) {
-	        Log::warning('La contraseña actual proporcionada es incorrecta.');
-	        return back()->withErrors(['current_password' => 'La contraseña actual es incorrecta.']);
-	    }
-	
-	    
-	    $contribuyente->clave = Hash::make($request->new_password);
-	    $contribuyente->save();  
-	    Log::info('Contraseña actualizada correctamente para el contribuyente: ', ['cuit' => $contribuyente->cuit]);
-	
-	    
-	    $contribuyente->clave = null; // Limpiar la clave antes de guardar
-	    Session::put('contribuyente_multinota', $contribuyente);
-	    Log::info('Clave del contribuyente eliminada de la sesión antes de guardarla.');
-	
-	    
-	    Log::info('Proceso de cambio de contraseña finalizado exitosamente.');
-	    return redirect()->route('bandeja-usuario-externo')->with('success', 'Contraseña cambiada con éxito.');
-	}
+public function changePassword(Request $request)
+{
+    
+    Log::info('Inicio del proceso de cambio de contraseña.');
+
+    $request->validate([
+        'current_password' => 'required|string',
+        'new_password' => 'required|string|min:8|confirmed', 
+    ]);
+    Log::info('Solicitud validada correctamente.');
+
+   
+    $contribuyente = Session::get('contribuyente_multinota');
+    Log::info('Contribuyente obtenido de la sesión: ', ['contribuyente' => $contribuyente]);
+    Log::info('Tipo de objeto en la sesión: ', ['tipo' => get_class($contribuyente)]);
+
+    
+    if (!$contribuyente) {
+        Log::warning('El contribuyente no está autenticado.');
+        return back()->withErrors(['error' => 'Usuario no autenticado.']);
+    }
+
+    
+    if (!($contribuyente instanceof ContribuyenteMultinota)) {
+        Log::error('El objeto contribuyente no es una instancia válida de ContribuyenteMultinota.');
+        return back()->withErrors(['error' => 'El usuario no es válido.']);
+    }
+
+    
+    if (!Hash::check($request->current_password, $contribuyente->clave)) {
+        Log::warning('La contraseña actual proporcionada es incorrecta.');
+        return back()->withErrors(['current_password' => 'La contraseña actual es incorrecta.']);
+    }
+
+    
+    $contribuyente->clave = Hash::make($request->new_password);
+    $contribuyente->save();  
+    Log::info('Contraseña actualizada correctamente para el contribuyente: ', ['cuit' => $contribuyente->cuit]);
+
+    
+    $contribuyente->clave = null; // Limpiar la clave antes de guardar
+    Session::put('contribuyente_multinota', $contribuyente);
+    Log::info('Clave del contribuyente eliminada de la sesión antes de guardarla.');
+
+    
+    Log::info('Proceso de cambio de contraseña finalizado exitosamente.');
+    return redirect()->route('bandeja-usuario-externo')->with('success', 'Contraseña cambiada con éxito.');
+}
+
+
+public function actualizarPerfil(Request $request){
+  $request->validate([
+    'cuit' => 'required|string|max:255',
+    'nombre' => 'required|string|max:255',
+    'apellido' => 'required|string|max:255',
+    'telefono1' => 'nullable|string|max:20',
+    'telefono2' => 'nullable|string|max:20',
+    'correo' => 'required|email',
+]);
+
+    $contribuyente = ContribuyenteMultinota::findOrFail($request->id_contribuyente_multinota);
+    $contribuyente->cuit = $request->cuit;
+    $contribuyente->nombre = $request->nombre;
+    $contribuyente->apellido = $request->apellido;
+    $contribuyente->telefono1 = $request->telefono1;
+    $contribuyente->telefono2 = $request->telefono2;
+    $contribuyente->correo = $request->correo;
+    $contribuyente->save();
+
+    Session::put('contribuyente_multinota', $contribuyente);
+
+    return redirect()->route('bandeja-usuario-externo')->with('success', 'Perfil actualizado correctamente.');
+
+}
+
+
+
+
 }

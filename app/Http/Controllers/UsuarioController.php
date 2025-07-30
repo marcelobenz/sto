@@ -129,13 +129,15 @@ class UsuarioController extends Controller
             'id_rol' => $request->id_rol,
         ]);
 
-        return redirect()->route('usuarios.index')->with('success', 'Usuario actualizado correctamente');
-    }
+  
 
-    public function setUsuarioInterno()
+    return redirect()->route('usuarios.index')->with('success', 'Usuario actualizado correctamente');
+}
+
+
+public function setUsuarioInterno()
     {
-    
-        $usuarioInterno = UsuarioInterno::with('rol.permisos')
+         $usuarioInterno = UsuarioInterno::with('rol.permisos')
                             ->where('legajo', 20299575085) 
                             ->first();
 
@@ -148,6 +150,8 @@ class UsuarioController extends Controller
         // Redirigir a la página principal del sistema
         return redirect('/dashboard');
     }
+
+
 
     public function clearSession()
     {

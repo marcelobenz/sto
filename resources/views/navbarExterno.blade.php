@@ -3,87 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Tramites Online</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>Sistema de Trámites Online</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
 
     @yield('heading')
 </head>
+<body class="bg-gray-100 text-gray-900">
 
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        @if(session('error'))
-        <div id='success-alert' class="alert alert-danger mb-0 ml-3">
-            {{ session('error') }}
-        </div>
-        @endif
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/dashboard">Principal</a>
-                        </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="bandejasDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Bandejas
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="bandejasDropdown">
-                        <a class="dropdown-item" href="#">Bandeja Personal</a>
-                        <a class="dropdown-item" href="#">Trámites en Curso</a>
-                        <a class="dropdown-item" href="tramites">Todos los Trámites</a>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Formularios</a>
-                </li>
-            </ul>
+  <nav class="bg-gray-800 text-white px-4 py-3 fixed top-0 left-0 right-0 z-50">
+    <div class="w-full flex justify-between items-center">
+        <div class="flex items-center space-x-6 pl-44">
+            <a href="/dashboard" class="text-white hover:text-gray-300 font-semibold">Principal</a>
+
+            <a href="{{ route('bandeja-usuario-externo') }}" class="text-white hover:text-gray-300 font-semibold">
+                Bandeja
+            </a>
+
+            <a href="#" class="text-white hover:text-gray-300 font-semibold">Formularios</a>
         </div>
 
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <img src="https://via.placeholder.com/30" alt="Avatar" class="avatar-img">
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
-                    @if(Session::has('contribuyente_multinota'))
-                    @php
-                        $contribuyente = Session::get('contribuyente_multinota');
-                    @endphp
-                    <span class="dropdown-item-text">
-                    <strong>{{ $contribuyente->nombre }} {{ $contribuyente->apellido }}</strong><br>
-                    CUIT: {{ $contribuyente->cuit }}<br>
-                    </span>
-                    @else
-                    <span class="dropdown-item-text">No estás autenticado</span>
-                    @endif
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="#">Perfil</a>
-                    <a class="dropdown-item" href="cambiar-clave">Cambiar Clave</a>
-                    <a class="dropdown-item" href="/clear-session">Salir</a>
+
+            <div class="flex items-center space-x-4">
+                @if(session('error'))
+                    <div id="success-alert" class="bg-red-600 text-white text-sm px-4 py-2 rounded">
+                        {{ session('error') }}
                     </div>
-                </li>
-            </ul>
+                @endif
+
+                <x-notificaciones />
+
+                <div x-data="{ open: false }" class="relative">
+                    <button @click="open = !open" class="focus:outline-none">
+                        <img src="https://via.placeholder.com/30" alt="Avatar" class="rounded-full w-8 h-8">
+                    </button>
+
+                    <div x-show="open" x-cloak @click.outside="open = false"
+                         class="absolute right-0 mt-2 w-56 bg-white text-gray-800 rounded-md shadow-md z-50 py-2 text-sm">
+                        @if(Session::has('contribuyente_multinota'))
+                            @php $contribuyente = Session::get('contribuyente_multinota'); @endphp
+                            <div class="px-4 py-2 border-b border-gray-200">
+                                <strong>{{ $contribuyente->nombre }} {{ $contribuyente->apellido }}</strong><br>
+                                CUIT: {{ $contribuyente->cuit }}
+                            </div>
+                        @else
+                            <div class="px-4 py-2 text-gray-500">No estás autenticado</div>
+                        @endif
+
+                        <a href="perfil-externo" class="block px-4 py-2 hover:bg-gray-100">Perfil</a>
+                        <a href="cambiar-clave" class="block px-4 py-2 hover:bg-gray-100">Cambiar Clave</a>
+                        <a href="/clear-session" class="block px-4 py-2 hover:bg-gray-100">Salir</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </nav>
 
-    <div>
+    <!-- Contenido -->
+    <div class="pt-20 px-4 max-w-7xl mx-auto">
         @yield('contenidoPrincipal')
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Scripts -->
     <script>
-    // Esperar 5 segundos y luego ocultar el mensaje
-    setTimeout(function() {
-        var alert = document.getElementById('success-alert');
-        if (alert) {
-            alert.style.display = 'none';
-        }
-    }, 5000); // 5000 milisegundos = 5 segundos
-</script>
+        setTimeout(function () {
+            const alert = document.getElementById('success-alert');
+            if (alert) alert.style.display = 'none';
+        }, 5000);
+    </script>
+
     @yield('scripting')
 
 </body>
