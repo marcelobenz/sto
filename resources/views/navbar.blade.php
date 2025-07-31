@@ -89,7 +89,7 @@
                                 <span class="dropdown-item-text">No estás autenticado</span>
                             @endif
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="#">Perfil</a>
+                            <a class="dropdown-item" href="{{ route('perfil') }}">Perfil</a>
                             <a class="dropdown-item" href="/clear-session">Salir</a>
                         </div>
                     </li>
@@ -159,7 +159,7 @@
                             <span class="dropdown-item-text">No estás autenticado</span>
                         @endif
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Perfil</a>
+                        <a class="dropdown-item" href="{{ route('perfil') }}">Perfil</a>
                         <a class="dropdown-item" href="/clear-session">Salir</a>
                     </div>
                 </li>

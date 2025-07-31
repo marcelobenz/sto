@@ -135,6 +135,23 @@ public function update(Request $request, $id)
 }
 
 
+    public function perfil(Request $request){
+        $usuario = Session::get('usuario_interno'); 
+        return view('usuarios.perfil', compact('usuario'));
+    }
+
+    public function actualizarPerfil(Request $request)
+    {
+        $usuario = UsuarioInterno::findOrFail($request->id_usuario_interno);
+
+        $usuario->update($request->only([
+            'legajo', 'nombre', 'apellido', 'cuit', 'correo_municipal', 'dni'
+        ]));
+
+        return back()->with('success', 'Perfil actualizado correctamente.');
+    }
+
+
     public function setUsuarioInterno()
     {
     

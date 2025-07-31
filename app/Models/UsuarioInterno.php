@@ -10,7 +10,7 @@ class UsuarioInterno extends Model
     use HasFactory;
 
     protected $table = 'usuario_interno';
-    protected $primaryKey = 'id_usuario_interno'; // Si la clave primaria no es 'id'
+    protected $primaryKey = 'id_usuario_interno';
 
     public $timestamps = false;
 
@@ -47,7 +47,6 @@ class UsuarioInterno extends Model
             $this->load('rol.permisos');
         }
 
-        // Verifica si el rol tiene permisos y si contiene el permiso requerido
         return $this->rol && $this->rol->permisos->contains('permiso_clave', $permission);
     }
 }
