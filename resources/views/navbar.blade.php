@@ -56,7 +56,7 @@
                         </a>
                         <div class="dropdown-menu" aria-labelledby="bandejasDropdown">
                             <a class="dropdown-item" href="#">Bandeja Personal</a>
-                            <a class="dropdown-item" href="#">Trámites en Curso</a>
+                            <a class="dropdown-item" href="{{ route('tramites.enCurso') }}">Trámites en Curso</a>
                             <a class="dropdown-item" href="{{ route('tramites.index') }}">Todos los Trámites</a>
                         </div>
                     </li>
@@ -167,6 +167,7 @@
             </div>
         </nav>
         <div>
+            @yield('contenidoPrincipal')
         </div>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.8/jquery.inputmask.min.js"></script>
