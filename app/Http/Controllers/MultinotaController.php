@@ -403,7 +403,7 @@ class MultinotaController extends Controller
     }
 
     public function agregarSeccion(Request $request) {
-        $id = $request->post('id');
+        $id = (int) $request->post('id');
         $seccionesAsociadas = Session::get('SECCIONES_ASOCIADAS');
         $todasLasSecciones = Session::get('TODAS_LAS_SECCIONES');
 
@@ -412,7 +412,7 @@ class MultinotaController extends Controller
             ->get();
 
         $s = SeccionMultinota::where('id_seccion', $id)
-            ->get();
+            ->first();
 
         if(count($seccionesAsociadas) == 0) {
             $maxOrden = -1;
@@ -420,11 +420,12 @@ class MultinotaController extends Controller
             $maxOrden = max(array_column($seccionesAsociadas, 'orden'));
         }
 
+        // Se agrega seccion al array de secciones asociadas
         if ($s) {
             $seccion = new \stdClass();
-            $seccion->id_seccion = $s[0]->id_seccion;
-            $seccion->temporal = $s[0]->temporal;
-            $seccion->titulo = $s[0]->titulo;
+            $seccion->id_seccion = $s->id_seccion;
+            $seccion->temporal = $s->temporal;
+            $seccion->titulo = $s->titulo;
             $seccion->campos = $campos;
             $seccion->orden = $maxOrden + 1;
 
@@ -432,6 +433,18 @@ class MultinotaController extends Controller
 
             Session::put('SECCIONES_ASOCIADAS', $seccionesAsociadas);
         }
+
+        // Se quita seccion del array de secciones activas totales
+        $nuevasSeccionesTotales = array_filter($todasLasSecciones, function ($s) use ($id) {
+            return $s->id_seccion !== $id; // Se quita elemento con id_seccion seleccionado
+        });
+
+        // Se reindexa array
+        $nuevasSeccionesTotales = array_values($nuevasSeccionesTotales);
+
+        Session::put('TODAS_LAS_SECCIONES', $nuevasSeccionesTotales);
+
+        $todasLasSecciones = $nuevasSeccionesTotales;
 
         // Render the partial view with updated data
         $html = view('partials.secciones-container', compact('seccionesAsociadas', 'todasLasSecciones'))->render();
@@ -441,7 +454,7 @@ class MultinotaController extends Controller
     }
 
     public function quitarSeccion(Request $request) {
-        $id = $request->post('id');
+        $id = (int) $request->post('id');
         $seccionesAsociadas = Session::get('SECCIONES_ASOCIADAS');
         $todasLasSecciones = Session::get('TODAS_LAS_SECCIONES');
 
@@ -468,13 +481,13 @@ class MultinotaController extends Controller
             ->get();
 
         $s = SeccionMultinota::where('id_seccion', $id)
-            ->get();
+            ->first();
 
-        if ($s) {
+        if ($s && $s->activo != 0) {
             $seccion = new \stdClass();
-            $seccion->id_seccion = $s[0]->id_seccion;
-            $seccion->temporal = $s[0]->temporal;
-            $seccion->titulo = $s[0]->titulo;
+            $seccion->id_seccion = $s->id_seccion;
+            $seccion->temporal = $s->temporal;
+            $seccion->titulo = $s->titulo;
             $seccion->campos = $campos;
 
             $todasLasSecciones[] = $seccion; 
