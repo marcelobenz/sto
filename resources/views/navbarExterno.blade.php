@@ -77,7 +77,7 @@
         }, 5000);
     </script>
 
-    @yield('scripting')
+    @stack('scripts')
 
 </body>
 </html>

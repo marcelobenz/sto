@@ -60,29 +60,41 @@
 
 <script>
     $(document).ready(function() {
-        $('#tramitesTable').DataTable({
-            "processing": true,
-            "serverSide": true,
-            "ajax": "{{ route('bandeja-usuario-externo') }}",
-            "columns": [
-                { "data": "id_tramite" },
-                { "data": "nombre_categoria" },
-                { "data": "fecha_alta" },
-                { "data": "fecha_modificacion" },
-                { "data": "correo" },
-                { "data": "cuit_contribuyente" }
-            ],
-            "language": {
-                "paginate": {
-                    "previous": "<",
-                    "next": ">"
-                },
-                "processing": "<div id='custom-processing'>Cargando, por favor espera...</div>"
+      $('#tramitesTable').DataTable({
+    processing: true,
+    serverSide: true,
+    ajax: function(data, callback, settings) {
+        $.ajax({
+            url: "{{ route('bandeja-usuario-externo') }}",
+            type: 'GET',
+            data: data,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest' 
             },
-            "lengthMenu": [10, 25, 50],
-            "pageLength": 10,
-            "order": [[ 2, "desc" ]] // Ordena por fecha de alta descendente por defecto
+            success: function(response) {
+                callback(response);
+            }
         });
+    },
+    columns: [
+        { data: 'id_tramite' },
+        { data: 'nombre_categoria' },
+        { data: 'fecha_alta' },
+        { data: 'fecha_modificacion' },
+        { data: 'correo' },
+        { data: 'cuit_contribuyente' }
+    ],
+    language: {
+        paginate: {
+            previous: "<",
+            next: ">"
+        },
+        processing: "<div id='custom-processing'>Cargando, por favor espera...</div>"
+    },
+    lengthMenu: [10, 25, 50],
+    pageLength: 10,
+    order: [[2, 'desc']]
+});
     });
 </script>
 @endpush

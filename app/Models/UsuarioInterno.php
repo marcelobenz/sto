@@ -42,8 +42,6 @@ class UsuarioInterno extends Model
         'id_rol',
     ];
 
-    // Disable timestamps if you are managing them manually
-    public $timestamps = false;
 
     public function categoria() {
         return $this->belongsTo(CategoriaUsuario::class, 'id_categoria_usuario');

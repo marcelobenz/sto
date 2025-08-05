@@ -10,6 +10,15 @@
     <div class="bg-white shadow-xl rounded-xl p-8 w-full max-w-sm text-center space-y-6">
         <h3 class="text-2xl font-bold text-blue-700">Ingreso Externo</h3>
 
+ @if ($errors->any())
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded text-sm">
+            @foreach ($errors->all() as $error)
+                <div>{{ $error }}</div>
+            @endforeach
+        </div>
+    @endif
+
+
         <form method="POST" action="{{ route('ingreso-externo.login') }}" class="space-y-5">
             @csrf
 
