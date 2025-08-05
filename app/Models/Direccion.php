@@ -22,6 +22,8 @@ class Direccion extends Model
         'latitud',
         'longitud',
         'fecha_alta',
+        'piso',
+        'departamento'
     ];
 
      public $timestamps = false;

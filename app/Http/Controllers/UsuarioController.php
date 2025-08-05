@@ -89,45 +89,45 @@ class UsuarioController extends Controller
     }
 
     public function obtenerPermisosPorRol($id_rol)
-{
-    // Asume que el modelo Rol tiene una relación 'permisos'
-    $rol = Rol::with('permisos')->find($id_rol);
+    {
+        // Asume que el modelo Rol tiene una relación 'permisos'
+        $rol = Rol::with('permisos')->find($id_rol);
 
-    if (!$rol) {
-        return response()->json(['error' => 'Rol no encontrado'], 404);
+        if (!$rol) {
+            return response()->json(['error' => 'Rol no encontrado'], 404);
+        }
+
+        return response()->json($rol->permisos);
     }
 
-    return response()->json($rol->permisos);
-}
-
-public function edit($id)
-{
-    $usuario = UsuarioInterno::findOrFail($id);
-    $roles = Rol::all(); 
-    return view('usuarios.edit', compact('usuario', 'roles'));
-}
+    public function edit($id)
+    {
+        $usuario = UsuarioInterno::findOrFail($id);
+        $roles = Rol::all(); 
+        return view('usuarios.edit', compact('usuario', 'roles'));
+    }
 
 
-public function update(Request $request, $id)
-{
-    $request->validate([
-        'legajo' => 'required|string|max:255',
-        'nombre' => 'required|string|max:255',
-        'apellido' => 'required|string|max:255',
-        'correo_municipal' => 'required|email|max:255',
-        'dni' => 'required|numeric',
-        'id_rol' => 'required|exists:rol,id_rol',
-    ]);
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'legajo' => 'required|string|max:255',
+            'nombre' => 'required|string|max:255',
+            'apellido' => 'required|string|max:255',
+            'correo_municipal' => 'required|email|max:255',
+            'dni' => 'required|numeric',
+            'id_rol' => 'required|exists:rol,id_rol',
+        ]);
 
-    $usuario = UsuarioInterno::findOrFail($id);
-    $usuario->update([
-        'legajo' => $request->legajo,
-        'nombre' => $request->nombre,
-        'apellido' => $request->apellido,
-        'correo_municipal' => $request->correo_municipal,
-        'dni' => $request->dni,
-        'id_rol' => $request->id_rol,
-    ]);
+        $usuario = UsuarioInterno::findOrFail($id);
+        $usuario->update([
+            'legajo' => $request->legajo,
+            'nombre' => $request->nombre,
+            'apellido' => $request->apellido,
+            'correo_municipal' => $request->correo_municipal,
+            'dni' => $request->dni,
+            'id_rol' => $request->id_rol,
+        ]);
 
   
 
@@ -152,10 +152,12 @@ public function update(Request $request, $id)
     }
 
 
-    public function setUsuarioInterno()
+public function setUsuarioInterno()
     {
-    
-        $usuarioInterno = UsuarioInterno::with('rol.permisos')->find(16); // Cargar relaciones
+         $usuarioInterno = UsuarioInterno::with('rol.permisos')
+                            ->where('legajo', 20299575085) 
+                            ->first();
+
 
         if ($usuarioInterno) {
             Session::put('usuario_interno', $usuarioInterno); // Guardar en la sesión
@@ -165,11 +167,13 @@ public function update(Request $request, $id)
         // Redirigir a la página principal del sistema
         return redirect('/dashboard');
     }
-public function clearSession()
-{
-    Session::forget('usuario_interno'); // Limpiar la sesión
-    return redirect('/');
-}
 
+
+
+    public function clearSession()
+    {
+        Session::forget('usuario_interno'); // Limpiar la sesión
+        return redirect('/');
+    }
 
 }

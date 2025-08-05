@@ -5,8 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class TipoTramiteMultinota extends Model
-{
+class TipoTramiteMultinota extends Model {
     use HasFactory;
 
     // Define the table name if it's not the plural of the model name
@@ -23,7 +22,13 @@ class TipoTramiteMultinota extends Model
 
     // Define fillable attributes for mass assignment
     protected $fillable = [
-        'nombre', 'codigo', 'id_categoria' ,'baja_logica',
+        'nombre', 'codigo', 'id_categoria', 'publico', 'nivel', 'muestra_mensaje', 'lleva_expediente', 
+        'baja_logica', 'fecha_alta', 'fecha_ultima_actualizacion', 'codigo_crm', 'lleva_documentacion',
+        'id_multinota_servicio'
+    ];
+
+    protected $casts = [
+        'fecha_ultima_actualizacion' => 'datetime',
     ];
 
     // Disable timestamps if you are managing them manually

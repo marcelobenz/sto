@@ -79,10 +79,9 @@
         </div>
     </div>
 </div>
-
 @endsection
 
-@section('scripting')
+@push('scripts')
 <script>
    $(document).ready(function() {
     console.log("DOM completamente cargado con jQuery"); 
@@ -196,4 +195,4 @@
     });
 });
 </script>
-@endsection
+@endpush

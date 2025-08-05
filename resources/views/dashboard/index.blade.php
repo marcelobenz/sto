@@ -121,7 +121,7 @@
 
 @endsection
 
-@section('scripting')
+@push('scripts')
 <script>
     var chartData = {!! json_encode($chartData) !!}; // Convertir PHP a JSON directamente
 
@@ -198,4 +198,4 @@
         }
     });
 </script>
-@endsection
+@endpush

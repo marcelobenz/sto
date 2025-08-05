@@ -87,9 +87,7 @@
     </div>
 @endsection
 
-@section('scripting')
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
+@push('scripts')
 <script>
     $(document).ready(function() {
         // Función para cargar los permisos del rol seleccionado
@@ -138,4 +136,4 @@
         });
     });
 </script>
-@endsection
+@endpush
