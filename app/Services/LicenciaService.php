@@ -6,8 +6,18 @@ use Illuminate\Support\Carbon;
 
 use App\DTOs\UsuarioInternoDTO;
 use App\Models\Licencia;
+use App\Repositories\LicenciaRepository;
+
 
 class LicenciaService {
+
+ protected $licenciaRepository;
+
+    public function __construct(LicenciaRepository $licenciaRepository)
+    {
+        $this->licenciaRepository = $licenciaRepository;
+    }
+
   public function estaDeLicencia(UsuarioInternoDTO $usuario): bool {
     return Licencia::where('id_usuario_interno', $usuario->id)
       ->whereDate('fecha_inicio', '<=', Carbon::today())
@@ -40,4 +50,20 @@ class LicenciaService {
 
     return $licenciasFiltradas->isNotEmpty();
   }
+
+  public function obtenerDatosParaFormulario($idUsuario)
+    {
+        $usuario = $this->licenciaRepository->findUsuarioById($idUsuario);
+        $historial = $this->licenciaRepository->getHistorialLicenciasUsuario($idUsuario);
+
+        return compact('usuario', 'historial');
+    }
+
+    public function guardarLicencia($idUsuario, array $data)
+    {
+        $data['id_usuario_interno'] = $idUsuario;
+        return $this->licenciaRepository->createLicencia($data);
+    }
+
+
 }
