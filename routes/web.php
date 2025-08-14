@@ -13,6 +13,7 @@ use App\Http\Controllers\CuestionarioController;
 use App\Http\Controllers\ComentarioController;
 use App\Http\Controllers\ArchivoController;
 use App\Http\Controllers\ReporteController;
+use App\Http\Controllers\ConsultaController;
 
 
 /*
@@ -34,8 +35,12 @@ Route::get('/', function () {
     return view('navbar');
 });*/
 
-Route::get('/consulta-tramite', [TramiteController::class, 'mostrarVistaConsulta'])->name('consulta-tramite');
-Route::post('/consultar-tramite', [TramiteController::class, 'consultar']);
+Route::get('/consulta', [ConsultaController::class, 'formulario']);
+Route::post('/consultar-tramite', [ConsultaController::class, 'consultar'])->name('consultar-tramite');
+
+//Route::get('/consulta-tramite', [TramiteController::class, 'mostrarVistaConsulta'])->name('consulta-tramite');
+//Route::post('/consultar-tramite', [TramiteController::class, 'consultar']);
+
 Route::post('/tramites/darDeBaja', [TramiteController::class, 'darDeBaja'])->name('tramites.darDeBaja');
 Route::get('/reporte/constancia/{idTramite}', [ReporteController::class, 'generarPDF'])->name('reporte.constancia');
 Route::post('/archivo/subir', [ArchivoController::class, 'subirArchivo'])->name('archivo.subir');

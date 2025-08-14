@@ -1,0 +1,63 @@
+Tablas y relaciones principales:
+
+        Tabla tramite:
+        - id_tramite (PK)
+        - fecha_alta, fecha_modificacion
+        - id_estado, id_tipo_tramite, id_usuario_interno, id_prioridad
+        - flag_rechazado, flag_cancelado
+
+        Tabla tipo_tramite:
+        - id_tipo_tramite (PK), nombre, id_categoria
+
+        Tabla multinota:
+        - id_tramite (FK), id_tipo_tramite_multinota (FK), id_mensaje_inicial (FK)
+        - informacion_adicional, cuenta, dominio, fecha_alta
+
+        Tabla tipo_tramite_multinota:
+        - id_tipo_tramite_multinota (PK), nombre, codigo, id_categoria
+
+        Tabla multinota_campo_valor:
+        - id_multinota_campo_valor (PK)
+        - id_tramite (FK)
+        - id_campo
+        - valor
+        - fecha_alta
+
+        Tabla multinota_seccion_valor:
+        - id_multinota_seccion_valor (PK)
+        - id_tramite (FK), id_seccion, id_campo, valor, fecha_sistema
+
+        Tabla tramite_estado_tramite:
+        - id (PK), id_tramite (FK), id_estado_tramite (FK), activo (0 o 1), fecha_alta
+
+        Tabla estado_tramite:
+        - id_estado_tramite (PK), nombre, tipo, puede_rechazar, puede_pedir_documentacion
+
+        Tabla configuracion_estado_tramite:
+        - id_estado_tramite (FK), id_proximo_estado, id_tipo_tramite_multinota
+        - id_estado_tramite_anterior
+
+        Tabla id_usuario_interno
+        - id_usuario_interno (PK), nombre, apellido, legajo, cuit, dni, correo_municipal
+
+        Relaciones clave:
+        - tramite.id_tramite = multinota.id_tramite
+        - tramite.id_tipo_tramite = tipo_tramite.id_tipo_tramite
+        - tramite_estado_tramite.id_tramite = tramite.id_tramite
+        - tramite_estado_tramite.id_estado_tramite = estado_tramite.id_estado_tramite
+        - tramite_estado_tramite.id_usuario_interno = usuario_interno.id_usuario_interno
+        - multinota.id_tramite = multinota_campo_valor.id_tramite
+        - multinota.id_tramite = multinota_seccion_valor.id_tramite
+        - multinota.id_tipo_tramite_multinota = tipo_tramite_multinota.id_tipo_tramite_multinota
+
+        Notas:
+        - Cada trámite puede tener múltiples valores en multinota_campo_valor y multinota_seccion_valor
+        - El estado actual de un tramite está dado por la relacion entre la tabla tramite_estado_tramite y la tabla estado_tramite y activo=1
+        - Los campos de multinota almacenan información como nombre, DNI, dominio, motivo, etc.
+        - Cuando pregunten por trámites en estado Finlizado hay que buscar en estado_tramite.nombre="A Finalizar"
+        - Un usuario puede tener asignado n tramites y se relacionan a traves de 
+
+        Notas adicionales importantes:
+        - El estado actual de un trámite se obtiene desde la tabla tramite_estado_tramite, usando el registro donde activo = 1
+        - Luego, se busca el nombre del estado en la tabla estado_tramite usando la columna id_estado_tramite
+        - NO existe una tabla llamada "estado". Sólo se usa estado_tramite.

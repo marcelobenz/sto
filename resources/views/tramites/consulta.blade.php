@@ -69,7 +69,7 @@ if ('webkitSpeechRecognition' in window) {
 function enviarConsulta() {
     let pregunta = preguntaInput.value;
 
-    fetch('/consultar-tramite', {
+    fetch("{{ route('consultar-tramite') }}", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -77,36 +77,51 @@ function enviarConsulta() {
         },
         body: JSON.stringify({ pregunta: pregunta })
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.tipo === 'redirect') {
-            // 🔄 **Redirigir al listado con el filtro aplicado**
-            window.location.href = data.url;
-        } else {
-            // 📢 **Mostrar la respuesta en el chat**
-            respuestaDiv.innerHTML = data.respuesta;
-            respuestaDiv.style.display = 'block';
-
-            // 🔊 **Leer la respuesta en voz alta**
-            hablarRespuesta(data.respuesta);
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => {
+                throw new Error(text);
+            });
         }
+        return response.json();
+    })
+    .then(data => {
+        respuestaDiv.innerHTML = data.respuesta;
+        respuestaDiv.style.display = 'block';
+        hablarRespuesta(data.resumen || 'Consulta completada');
     })
     .catch(error => {
-        respuestaDiv.innerHTML = "Error al consultar el trámite.";
+        console.error("Detalle del error:", error.message);
+        respuestaDiv.innerHTML = "⚠️ Error al consultar el trámite:<br><pre>" + error.message + "</pre>";
         respuestaDiv.style.display = 'block';
     });
 }
 
-
-// 🔊 **FUNCIÓN PARA HABLAR LA RESPUESTA**
+// 🔊 FUNCIÓN PARA HABLAR LA RESPUESTA
 function hablarRespuesta(texto) {
     if ('speechSynthesis' in window) {
-        let utterance = new SpeechSynthesisUtterance(texto);
-        utterance.lang = 'es-ES'; // 🟢 Español
+        // 🧽 1. Limpiar el HTML para evitar que lea tags como <table>, <td>, etc.
+        const div = document.createElement("div");
+        div.innerHTML = texto;
+        const textoLimpio = div.textContent || div.innerText || "";
+
+        // 🗣️ 2. Crear y configurar el mensaje
+        const utterance = new SpeechSynthesisUtterance(textoLimpio);
+        utterance.lang = 'es-ES';
+
+        // (opcional) Forzar una voz específica en español si disponible
+        const voces = window.speechSynthesis.getVoices();
+        const vozEsp = voces.find(v => v.lang.startsWith('es') && v.name.toLowerCase().includes('spanish'));
+        if (vozEsp) {
+            utterance.voice = vozEsp;
+        }
+
+        // ▶️ 3. Hablar
         speechSynthesis.speak(utterance);
     } else {
         console.warn("Tu navegador no soporta síntesis de voz.");
     }
 }
+
 </script>
 @endsection
