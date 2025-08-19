@@ -115,15 +115,19 @@ class TramiteRepository
             ->select(
                 'ttm.nombre',
                 'm.fecha_alta',
+                'ui.legajo as legajo',
                 'ui.nombre as nombre_usuario',
                 'ui.apellido as apellido_usuario',
                 'et.nombre as estado_actual',
                 't.flag_cancelado',
                 't.flag_rechazado',
-                'p.nombre as prioridad'
+                'p.nombre as prioridad',
+                'tet.id_estado_tramite as id_estado_tramite'
             )
             ->where('m.id_tramite', $idTramite)
             ->first();
+
+            //dd( $tramiteInfo);
 
         if ($tramiteInfo) {
             $tramiteInfo = $this->formatTramiteInfo($tramiteInfo);
@@ -162,6 +166,7 @@ class TramiteRepository
         unset($tramiteInfo->flag_cancelado);
         unset($tramiteInfo->flag_rechazado);
 
+        
         return $tramiteInfo;
     }
 
@@ -279,5 +284,34 @@ class TramiteRepository
             Log::error('Error al tomar trámite: ' . $e->getMessage());
             return false;
         }
+    }
+
+
+
+    public function getUltimoEstadoTramite($idTramite)
+    {
+        return DB::table('tramite_estado_tramite as tet')
+            ->where('tet.id_tramite', $idTramite)
+            ->orderByDesc('tet.fecha_sistema')
+            ->first();
+    }
+
+   
+ public function getSiguienteEstado($idEstadoActual)
+{
+    return DB::table('configuracion_estado_tramite as cet')
+        ->where('cet.id_estado_tramite', $idEstadoActual)
+        ->where('cet.activo', 1)
+        ->value('cet.id_proximo_estado'); 
+}
+
+    
+    public function crearEstadoTramite($idTramite, $idEstadoTramite)
+    {
+        return DB::table('tramite_estado_tramite')->insert([
+            'id_tramite' => $idTramite,
+            'id_estado_tramite' => $idEstadoTramite,
+            'fecha_sistema' => now()
+        ]);
     }
 }

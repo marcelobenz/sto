@@ -60,7 +60,17 @@
             <div class="ms-3 d-flex gap-1">
                 <button class="btn btn-warning" title="Reasignar"><i class="fas fa-random"></i></button>
                 <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalCambiarPrioridad" title="Cambiar prioridad"><i class="fas fa-exclamation"></i></button>
+                 @if(Session::has('usuario_interno') && isset($tramiteInfo->legajo))
+                    @php
+                        $usuarioSesion = Session::get('usuario_interno');
+                    @endphp
+                @if($usuarioSesion->legajo != $tramiteInfo->legajo)
                 <button class="btn btn-primary" onclick="tomarTramite({{ $idTramite }})" title="Tomar"><i class="fas fa-sign-out-alt"></i></button>
+                @endif
+                @if($usuarioSesion->legajo == $tramiteInfo->legajo)
+                <button class="btn btn-success" onclick="avanzarEstado({{ $idTramite }})" title="Avanzar Estado"><i class="fas fa-arrow-right"></i></button>
+                @endif
+                @endif
                 <button class="btn btn-danger" onclick="darDeBajaTramite({{ $idTramite }})" title="Dar de baja"><i class="fas fa-ban"></i></button>
                 <button class="btn btn-danger" onclick="window.open('{{ route('reporte.constancia', ['idTramite' => $idTramite]) }}', '_blank')" title="Imprimir"><i class="fas fa-print"></i></button>
             </div>
@@ -236,6 +246,8 @@
 
 @push('scripts')
 <script>
+
+    console.log('Información del trámite:', @json($tramiteInfo));
     $(document).ready(function () {
         setTimeout(function () {
             $(".alert").fadeOut(500, function () {
@@ -265,6 +277,25 @@
     function tomarTramite(idTramite) {
         if (confirm("¿Estás seguro de que deseas tomar este trámite?")) {
             fetch("{{ route('tramites.tomarTramite') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                body: JSON.stringify({ idTramite })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) location.reload();
+                    else alert("Error: " + data.message);
+                });
+        }
+    }
+
+
+   function avanzarEstado(idTramite) {
+        if (confirm("¿Estás seguro de que deseas avanzar de estado este trámite?")) {
+            fetch("{{ route('tramites.avanzarEstado') }}", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

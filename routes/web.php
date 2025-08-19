@@ -90,6 +90,7 @@ Route::get('/tramites/en-curso', [TramiteController::class, 'enCurso'])->name('t
 Route::post('/tramites/tomarTramite', [TramiteController::class, 'tomarTramite'])->name('tramites.tomarTramite');
 Route::post('/tramites/cambiar-prioridad', [TramiteController::class, 'cambiarPrioridad'])->name('tramites.cambiarPrioridad');
 Route::post('/tramites/darDeBaja', [TramiteController::class, 'darDeBaja'])->name('tramites.darDeBaja');
+Route::post('/tramites/avanzarEstado', [TramiteController::class, 'avanzarEstado'])->name('tramites.avanzarEstado');
 
 //Estado Trámite
 Route::get('/estadoTramite/tienePermiso/{multinota}', [EstadoTramiteController::class, 'tienePermiso'])->name('estadoTramite.tienePermiso');
@@ -225,7 +226,7 @@ Route::post('/workflow/editar/guardarBorrador/{id}', [AdministracionWorkflowCont
 Route::post('/workflow/editar/publicarBorrador/{id}', [AdministracionWorkflowController::class, 'publicarBorrador'])->name('workflow.publicarBorrador');
 
 //Navbar
-Route::view('/navbar', [NavbarController::class, 'cargarElementos'])->name('navbar');
+//Route::view('/navbar', [NavbarController::class, 'cargarElementos'])->name('navbar');
 
 //Bandeja Personal
 Route::get('/bandeja-personal', [BandejaPersonalController::class, 'index'])->name('bandeja-personal.index');

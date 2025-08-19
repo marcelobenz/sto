@@ -8,6 +8,8 @@ use App\Enums\TipoEstadoEnum;
 use App\Repositories\TramiteRepository;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\DB;
+
 
 class TramiteService {
       protected $tramiteRepository;
@@ -62,6 +64,23 @@ class TramiteService {
         $idUsuario = Session::get('usuario_interno')->id_usuario_interno;
         return $this->tramiteRepository->tomarTramite($idTramite, $idUsuario);
     }
+
+public function avanzarEstado($idTramite)
+{
+    return DB::transaction(function () use ($idTramite) {
+        $estadoActual = $this->tramiteRepository->getUltimoEstadoTramite($idTramite);
+        if (!$estadoActual) {
+            return false;
+        }
+
+        $siguienteEstado = $this->tramiteRepository->getSiguienteEstado($estadoActual->id_estado_tramite);
+        if (!$siguienteEstado) {
+            return false;
+        }
+
+        return $this->tramiteRepository->crearEstadoTramite($idTramite, $siguienteEstado);
+    });
+}
 
 
   public function cantidadDeTramites(int $usuarioId): int {

@@ -65,6 +65,12 @@ class TramiteController extends Controller
         return response()->json(['success' => $success]);
     }
 
+     public function avanzarEstado(Request $request)
+    {
+        $success = $this->tramiteService->avanzarEstado($request->input('idTramite'));
+        return response()->json(['success' => $success]);
+    }
+
     public function enCurso()
     {
         return view('tramites.index', [
