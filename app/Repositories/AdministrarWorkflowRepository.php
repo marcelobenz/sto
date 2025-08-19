@@ -64,26 +64,58 @@ class AdministrarWorkflowRepository
             ->get();
     }
 
-    public function crearNuevosEstados($estados)
-    {
-        $mapaEstados = [];
-        $now = now();
+   public function crearNuevosEstados($estados)
+{
+    $mapaEstados = [];
+    $now = now();
 
-        foreach ($estados as $nombre => $config) {
-            $id = DB::table('estado_tramite')->insertGetId([
-                'fecha_sistema' => $now,
-                'nombre' => $nombre,
-                'tipo' => strtoupper(str_replace(' ', '_', $nombre)),
-                'puede_rechazar' => $config['puede_rechazar'] ?? 0,
-                'puede_pedir_documentacion' => $config['puede_pedir_documentacion'] ?? 0,
-                'puede_elegir_camino' => 0,
-                'estado_tiene_expediente' => $config['estado_tiene_expediente'] ?? 0,
-            ]);
-            $mapaEstados[$nombre] = $id;
-        }
-
-        return $mapaEstados;
+    foreach ($estados as $nombre => $config) {
+        // Determinar el tipo según el nombre del estado
+        $tipo = $this->determinarTipoEstado($nombre);
+        
+        $id = DB::table('estado_tramite')->insertGetId([
+            'fecha_sistema' => $now,
+            'nombre' => $nombre,
+            'tipo' => $tipo,
+            'puede_rechazar' => $config['puede_rechazar'] ?? 0,
+            'puede_pedir_documentacion' => $config['puede_pedir_documentacion'] ?? 0,
+            'puede_elegir_camino' => 0,
+            'estado_tiene_expediente' => $config['estado_tiene_expediente'] ?? 0,
+        ]);
+        $mapaEstados[$nombre] = $id;
     }
+
+    return $mapaEstados;
+}
+
+private function determinarTipoEstado($nombreEstado)
+{
+    $estadosEspeciales = [
+        'En creacion' => 'EN_CREACION',
+        'En creación' => 'EN_CREACION',
+        'A finalizar' => 'A_FINALIZAR',
+        'A Finalizar' => 'A_FINALIZAR',
+        'Iniciado' => 'INICIADO',
+        'Finalización' => 'DE_FINALIZACION',
+        'Expediente' => 'EXPEDIENTE'
+    ];
+
+    // Buscar coincidencia exacta primero
+    if (isset($estadosEspeciales[$nombreEstado])) {
+        return $estadosEspeciales[$nombreEstado];
+    }
+
+    // Buscar coincidencia case-insensitive
+    $nombreLower = strtolower($nombreEstado);
+    foreach ($estadosEspeciales as $key => $tipo) {
+        if (strtolower($key) === $nombreLower) {
+            return $tipo;
+        }
+    }
+
+    // Para cualquier otro estado, usar PERSONALIZADO
+    return 'PERSONALIZADO';
+}
 
     public function crearConfiguraciones($configuraciones, $version, $idTipoTramite, $publico = 1, $activo = 1)
     {

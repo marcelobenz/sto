@@ -6,6 +6,7 @@ use App\DTOs\UsuarioInternoDTO;
 use App\Services\LicenciaService;
 use App\Services\TramiteService;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class AsignableATramiteController {
   public function __construct(
@@ -50,5 +51,32 @@ class AsignableATramiteController {
 
     // 5) devolver el DTO completo del usuario elegido
     return $usuarios->firstWhere('id', $idMenosCarga);
+  }
+
+
+ public function recomendadoPorId(int $idEstadoTramite): ?int
+  {
+    $usuariosAsignables = DB::table('estado_tramite_asignable')
+        ->where('id_estado_tramite', $idEstadoTramite)
+        ->pluck('id_usuario_interno')
+        ->toArray();
+
+    if (empty($usuariosAsignables)) {
+      return null;
+    }
+
+    $usuarioMenosCarga = DB::table('tramite_estado_tramite as tet')
+        ->select('tet.id_usuario_interno', DB::raw('COUNT(tet.id_tramite_estado_tramite) as cantidad_tramites'))
+        ->whereIn('tet.id_usuario_interno', $usuariosAsignables)
+        ->where('tet.activo', 1) 
+        ->groupBy('tet.id_usuario_interno')
+        ->orderBy('cantidad_tramites', 'asc')
+        ->first();
+
+    if (!$usuarioMenosCarga) {
+      return $usuariosAsignables[0];
+    }
+
+    return $usuarioMenosCarga->id_usuario_interno;
   }
 }

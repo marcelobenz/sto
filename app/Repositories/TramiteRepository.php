@@ -288,13 +288,14 @@ class TramiteRepository
 
 
 
-    public function getUltimoEstadoTramite($idTramite)
-    {
-        return DB::table('tramite_estado_tramite as tet')
-            ->where('tet.id_tramite', $idTramite)
-            ->orderByDesc('tet.fecha_sistema')
-            ->first();
-    }
+  public function getUltimoEstadoTramite($idTramite)
+{
+    return DB::table('tramite_estado_tramite as tet')
+        ->where('tet.id_tramite', $idTramite)
+        ->where('tet.activo', 1)
+        ->orderByDesc('tet.fecha_sistema')
+        ->first();
+}
 
    
  public function getSiguienteEstado($idEstadoActual)
@@ -306,12 +307,74 @@ class TramiteRepository
 }
 
     
-    public function crearEstadoTramite($idTramite, $idEstadoTramite)
-    {
-        return DB::table('tramite_estado_tramite')->insert([
+  public function crearEstadoTramite($idTramite, $idEstadoTramite, $idUsuarioAsignado, $idUsuarioEjecutor,$idUsuarioRecomendado)
+{
+    return DB::transaction(function () use ($idTramite, $idEstadoTramite, $idUsuarioAsignado, $idUsuarioEjecutor,$idUsuarioRecomendado) {
+        $estadoActual = DB::table('tramite_estado_tramite as tet')
+            ->join('estado_tramite as et', 'tet.id_estado_tramite', '=', 'et.id_estado_tramite')
+            ->where('tet.id_tramite', $idTramite)
+            ->where('tet.activo', 1)
+            ->first();
+
+        if (!$estadoActual) {
+            return false;
+        }
+
+        if ($estadoActual->id_estado_tramite == $idEstadoTramite) {
+            return false;
+        }
+
+        $estadoSiguiente = DB::table('estado_tramite')
+            ->where('id_estado_tramite', $idEstadoTramite)
+            ->first();
+
+        if (!$estadoSiguiente) {
+            return false;
+        }
+
+        DB::table('tramite_estado_tramite')
+            ->where('id_tramite', $idTramite)
+            ->where('activo', 1)
+            ->update([
+                'activo' => 0,
+                'completo' => 1,
+                'fecha_sistema' => now()
+            ]);
+
+        
+        $nuevoEstadoCreado = DB::table('tramite_estado_tramite')->insert([
             'id_tramite' => $idTramite,
             'id_estado_tramite' => $idEstadoTramite,
-            'fecha_sistema' => now()
+            'id_usuario_interno' => $idUsuarioRecomendado, 
+            'fecha_sistema' => now(),
+            'activo' => 1,
+            'completo' => 0,
+            'reiniciado' => 0,
+            'espera_documentacion' => 0
         ]);
-    }
+
+        
+        $descripcionEvento = 'Se avanzó el estado del trámite de "' . 
+                            ($estadoActual->nombre ?? 'Desconocido') . 
+                            '" a "' . 
+                            ($estadoSiguiente->nombre ?? 'Desconocido') . '"';
+
+        $idEvento = DB::table('evento')->insertGetId([
+            'descripcion' => $descripcionEvento,
+            'fecha_alta' => now(),
+            'fecha_modificacion' => now(),
+            'id_tipo_evento' => 1,
+            'clave' => 'CAMBIO_ESTADO'
+        ]);
+
+        DB::table('historial_tramite')->insert([
+            'fecha' => now(),
+            'id_tramite' => $idTramite,
+            'id_evento' => $idEvento,
+            'id_usuario_interno_asignado' => $idUsuarioEjecutor
+        ]);
+
+        return $nuevoEstadoCreado;
+    });
+}
 }

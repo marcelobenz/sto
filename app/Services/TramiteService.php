@@ -9,10 +9,13 @@ use App\Repositories\TramiteRepository;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
+use App\DTOs\EstadoTramiteDTO;
+use App\Http\Controllers\AsignableATramiteController;
 
 
 class TramiteService {
       protected $tramiteRepository;
+      protected $asignableController;
 
     public function __construct(TramiteRepository $tramiteRepository)
     {
@@ -67,18 +70,32 @@ class TramiteService {
 
 public function avanzarEstado($idTramite)
 {
-    return DB::transaction(function () use ($idTramite) {
-        $estadoActual = $this->tramiteRepository->getUltimoEstadoTramite($idTramite);
-        if (!$estadoActual) {
-            return false;
-        }
+    $estadoActual = $this->tramiteRepository->getUltimoEstadoTramite($idTramite);
+    if (!$estadoActual) {
+        return false;
+    }
 
-        $siguienteEstado = $this->tramiteRepository->getSiguienteEstado($estadoActual->id_estado_tramite);
-        if (!$siguienteEstado) {
-            return false;
-        }
+    $siguienteEstadoId = $this->tramiteRepository->getSiguienteEstado($estadoActual->id_estado_tramite);
+    if (!$siguienteEstadoId) {
+        return false;
+    }
 
-        return $this->tramiteRepository->crearEstadoTramite($idTramite, $siguienteEstado);
+    $siguienteEstado = DB::table('estado_tramite')
+        ->where('id_estado_tramite', $siguienteEstadoId)
+        ->first();
+    
+    if (!$siguienteEstado) {
+        return false;
+    }
+
+    $idUsuarioRecomendado = app(\App\Http\Controllers\AsignableATramiteController::class)->recomendadoPorId($siguienteEstado->id_estado_tramite);
+
+    $idUsuarioAsignado = $idUsuarioRecomendado ?: Session::get('usuario_interno')->id_usuario_interno;
+    
+    $idUsuarioEjecutor = Session::get('usuario_interno')->id_usuario_interno;
+
+    return DB::transaction(function () use ($idTramite, $siguienteEstadoId, $idUsuarioAsignado, $idUsuarioEjecutor, $idUsuarioRecomendado) {
+        return $this->tramiteRepository->crearEstadoTramite($idTramite, $siguienteEstadoId, $idUsuarioAsignado, $idUsuarioEjecutor, $idUsuarioRecomendado);
     });
 }
 
