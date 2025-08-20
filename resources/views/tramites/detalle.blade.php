@@ -174,7 +174,7 @@
             </div>
         </div>
 
-        <!-- Columna derecha: Adjuntos + Historial -->
+        <!-- Columna derecha: Adjuntos + Cuestionarios + Historial -->
         <div class="col-md-6 col-lg-6 mt-4">
             <div class="container-fluid px-3">
                 <!-- Adjuntos -->
@@ -214,6 +214,149 @@
                         </div>
                     </form>
                 </div>
+
+             
+<!-- Cuestionarios - Mostrar siempre que haya preguntas o respuestas -->
+@if($preguntas->isNotEmpty() || $respuestasCuestionario->isNotEmpty())
+<div class="container mt-4">
+    <div class="table-responsive" style="max-height: 350px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 8px;">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th colspan="2" class="text-center fs-4">Cuestionarios</th>
+                </tr>
+                @if($preguntas->where('es_editable', 1)->isEmpty() && $respuestasCuestionario->isNotEmpty())
+                <tr>
+                    <td colspan="2" class="text-center text-warning bg-light">
+                        <small><i class="fas fa-info-circle"></i> Respuestas históricas (solo lectura)</small>
+                    </td>
+                </tr>
+                @endif
+            </thead>
+            <tbody>
+                @if($preguntas->isNotEmpty())
+                <form action="{{ route('cuestionarios.guardar') }}" method="POST" id="formCuestionarios">
+                    @csrf
+                    <input type="hidden" name="id_tramite" value="{{ $idTramite }}">
+                    
+                    @foreach($preguntas as $pregunta)
+                    @php
+                        $respuestaExistente = $respuestasCuestionario->has($pregunta->id_pregunta) 
+                            ? $respuestasCuestionario->get($pregunta->id_pregunta) 
+                            : null;
+                        
+                        $respuestaValor = $respuestaExistente ? $respuestaExistente->flag_valor : '';
+                        $detalleRespuesta = $respuestaExistente ? $respuestaExistente->detalle : '';
+                        
+                        $mostrarDetalleSi = $pregunta->flag_detalle_si == 1;
+                        $mostrarDetalleNo = $pregunta->flag_detalle_no == 1;
+                        
+                        $mostrarTextarea = false;
+                        if ($respuestaValor == 1 && $mostrarDetalleSi) {
+                            $mostrarTextarea = true;
+                        } elseif ($respuestaValor == 0 && $mostrarDetalleNo) {
+                            $mostrarTextarea = true;
+                        }
+                        
+                        $esEditable = $pregunta->es_editable ?? 1;
+                    @endphp
+                    
+                    <tr>
+                        <td class="align-middle" style="width: 70%;">
+                            <strong>{{ $pregunta->descripcion }}</strong>
+                            @if(!$esEditable)
+                            <br><small class="text-warning"><i class="fas fa-lock"></i> Respuesta histórica</small>
+                            @endif
+                        </td>
+                        <td class="align-middle" style="width: 30%;">
+                            @if($esEditable)
+                            <!-- Campo editable -->
+                            <select name="respuestas[{{ $pregunta->id_pregunta }}]" class="form-select form-select-sm mb-2" 
+                                    data-flag-detalle-si="{{ $pregunta->flag_detalle_si }}"
+                                    data-flag-detalle-no="{{ $pregunta->flag_detalle_no }}"
+                                    onchange="toggleDetalle({{ $pregunta->id_pregunta }}, this.value)">
+                                <option value="">Seleccionar...</option>
+                                <option value="1" {{ $respuestaValor == 1 ? 'selected' : '' }}>SI</option>
+                                <option value="0" {{ $respuestaValor == 0 ? 'selected' : '' }}>NO</option>
+                            </select>
+                            @else
+                            <!-- Campo solo lectura -->
+                            <div class="form-control form-control-sm bg-light mb-2">
+                                {{ $respuestaValor == 1 ? 'SI' : ($respuestaValor == 0 ? 'NO' : 'Sin respuesta') }}
+                            </div>
+                            @endif
+                            
+                            @if($mostrarDetalleSi || $mostrarDetalleNo)
+                            <div id="detalle_{{ $pregunta->id_pregunta }}" style="display: {{ $mostrarTextarea ? 'block' : 'none' }};">
+                                @if($esEditable)
+                                <textarea name="detalles[{{ $pregunta->id_pregunta }}]" 
+                                          class="form-control form-control-sm" 
+                                          rows="2" 
+                                          placeholder="Ingrese el detalle...">{{ $detalleRespuesta }}</textarea>
+                                @else
+                                <div class="form-control form-control-sm bg-light" style="min-height: 60px;">
+                                    {{ $detalleRespuesta ?: 'Sin detalle' }}
+                                </div>
+                                @endif
+                            </div>
+                            @endif
+                        </td>
+                    </tr>
+                    @endforeach
+                    
+                    @if($preguntas->where('es_editable', 1)->isNotEmpty())
+                    <tr>
+                        <td colspan="2" class="text-center">
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="fas fa-save"></i> Guardar Respuestas
+                            </button>
+                            <button type="button" class="btn btn-warning btn-sm ms-2" onclick="limpiarCuestionario()">
+                                <i class="fas fa-eraser"></i> Limpiar Respuestas
+                            </button>
+                        </td>
+                    </tr>
+                    @endif
+                </form>
+                @elseif($respuestasCuestionario->isNotEmpty())
+                <!-- Solo mostrar respuestas históricas -->
+                @foreach($respuestasCuestionario as $respuesta)
+                @php
+                    $preguntaInfo = DB::table('pregunta')->where('id_pregunta', $respuesta->id_pregunta_cuestionario)->first();
+                @endphp
+                @if($preguntaInfo)
+                <tr>
+                    <td class="align-middle" style="width: 70%;">
+                        <strong>{{ $preguntaInfo->descripcion }}</strong>
+                        <br><small class="text-warning"><i class="fas fa-lock"></i> Respuesta histórica</small>
+                    </td>
+                    <td class="align-middle" style="width: 30%;">
+                        <div class="form-control form-control-sm bg-light mb-2">
+                            {{ $respuesta->flag_valor == 1 ? 'SI' : ($respuesta->flag_valor == 0 ? 'NO' : 'Sin respuesta') }}
+                        </div>
+                        
+                        @if($respuesta->detalle)
+                        <div class="form-control form-control-sm bg-light" style="min-height: 60px;">
+                            {{ $respuesta->detalle }}
+                        </div>
+                        @endif
+                    </td>
+                </tr>
+                @endif
+                @endforeach
+                @endif
+            </tbody>
+        </table>
+    </div>
+</div>
+@else
+<!-- Mensaje cuando no hay cuestionarios -->
+<div class="container mt-4">
+    <div class="alert alert-info text-center">
+        <i class="fas fa-info-circle"></i>
+        No hay cuestionarios configurados para este trámite.
+    </div>
+</div>
+@endif
 
                 <!-- Historial -->
                 <div class="container mt-4">
@@ -284,6 +427,20 @@
             });
         }, 2000);
     });
+
+    function toggleDetalle(idPregunta, respuesta) {
+        const detalleDiv = document.getElementById('detalle_' + idPregunta);
+        const textarea = detalleDiv.querySelector('textarea');
+        
+        if (respuesta === 'SI_CON_DETALLE' || respuesta === 'NO_CON_DETALLE') {
+            detalleDiv.style.display = 'block';
+            textarea.required = true;
+        } else {
+            detalleDiv.style.display = 'none';
+            textarea.required = false;
+            textarea.value = '';
+        }
+    }
 
     function darDeBajaTramite(idTramite) {
         if (confirm("¿Estás seguro de que deseas dar de baja este trámite?")) {
@@ -463,6 +620,250 @@ document.getElementById("formSeleccionEstado").addEventListener("submit", functi
         alert('Error al procesar la solicitud');
     });
 });
+
+document.getElementById('formCuestionarios').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const idTramite = formData.get('id_tramite');
+    
+    // Recopilar todas las respuestas y detalles
+    const data = {
+        id_tramite: idTramite,
+        respuestas: {},
+        detalles: {}
+    };
+    
+    // Obtener todas las respuestas
+    document.querySelectorAll('select[name^="respuestas"]').forEach(select => {
+        const name = select.getAttribute('name');
+        const match = name.match(/\[(\d+)\]/);
+        if (match) {
+            const idPregunta = match[1];
+            data.respuestas[idPregunta] = select.value;
+        }
+    });
+    
+    // Obtener todos los detalles
+    document.querySelectorAll('textarea[name^="detalles"]').forEach(textarea => {
+        const name = textarea.getAttribute('name');
+        const match = name.match(/\[(\d+)\]/);
+        if (match) {
+            const idPregunta = match[1];
+            data.detalles[idPregunta] = textarea.value;
+        }
+    });
+    
+    // Validar que todas las preguntas obligatorias tengan respuesta
+    let todasRespondidas = true;
+    let mensajeError = '';
+    
+    document.querySelectorAll('select[name^="respuestas"]').forEach(select => {
+        if (!select.value) {
+            todasRespondidas = false;
+            const preguntaText = select.closest('tr').querySelector('strong').textContent;
+            mensajeError += `- ${preguntaText}\n`;
+        }
+    });
+    
+    if (!todasRespondidas) {
+        alert('Por favor, responda todas las preguntas:\n' + mensajeError);
+        return;
+    }
+    
+    // Validar detalles cuando son requeridos según los flags
+    let detallesFaltantes = false;
+    let mensajeDetallesError = '';
+    
+    document.querySelectorAll('select[name^="respuestas"]').forEach(select => {
+        const name = select.getAttribute('name');
+        const match = name.match(/\[(\d+)\]/);
+        if (match) {
+            const idPregunta = match[1];
+            const respuesta = select.value;
+            
+            // Obtener los flags de la pregunta
+            const flagDetalleSi = parseInt(select.getAttribute('data-flag-detalle-si'));
+            const flagDetalleNo = parseInt(select.getAttribute('data-flag-detalle-no'));
+            
+            // Verificar si se requiere detalle
+            if ((respuesta === '1' && flagDetalleSi === 1) || (respuesta === '0' && flagDetalleNo === 1)) {
+                const detalleTextarea = document.querySelector(`textarea[name="detalles[${idPregunta}]"]`);
+                if (!detalleTextarea || !detalleTextarea.value.trim()) {
+                    detallesFaltantes = true;
+                    const preguntaText = select.closest('tr').querySelector('strong').textContent;
+                    mensajeDetallesError += `- ${preguntaText} requiere un detalle\n`;
+                }
+            }
+        }
+    });
+    
+    if (detallesFaltantes) {
+        alert('Las siguientes preguntas requieren detalles:\n' + mensajeDetallesError);
+        return;
+    }
+    
+    // Mostrar indicador de carga
+    const submitBtn = this.querySelector('button[type="submit"]');
+    if (submitBtn) {
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        submitBtn.disabled = true;
+    }
+    
+    // Enviar datos al servidor
+    fetch("{{ route('cuestionarios.guardar') }}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Restaurar botón
+        if (submitBtn) {
+            submitBtn.innerHTML = '<i class="fas fa-save"></i> Guardar Respuestas';
+            submitBtn.disabled = false;
+        }
+        
+        if (data.success) {
+            // Mostrar mensaje de éxito
+            showAlert('success', data.message);
+        } else {
+            showAlert('error', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        // Restaurar botón
+        if (submitBtn) {
+            submitBtn.innerHTML = '<i class="fas fa-save"></i> Guardar Respuestas';
+            submitBtn.disabled = false;
+        }
+        
+        showAlert('error', 'Error al guardar las respuestas');
+    });
+});
+
+// Función para mostrar alertas bonitas
+function showAlert(type, message) {
+    // Crear elemento de alerta
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.style.position = 'fixed';
+    alertDiv.style.top = '20px';
+    alertDiv.style.right = '20px';
+    alertDiv.style.zIndex = '9999';
+    alertDiv.style.minWidth = '300px';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    // Agregar al documento
+    document.body.appendChild(alertDiv);
+    
+    // Auto-eliminar después de 5 segundos
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.parentNode.removeChild(alertDiv);
+        }
+    }, 5000);
+}
+
+// Función para mostrar/ocultar campos de detalle
+function toggleDetalle(idPregunta, respuesta) {
+    const detalleDiv = document.getElementById('detalle_' + idPregunta);
+    if (!detalleDiv) return;
+    
+    // Verificar si el campo es editable
+    const textarea = detalleDiv.querySelector('textarea');
+    const divReadonly = detalleDiv.querySelector('.form-control.bg-light');
+    
+    // Solo procesar si es editable (textarea existe)
+    if (textarea) {
+        const select = document.querySelector(`select[name="respuestas[${idPregunta}]"]`);
+        const flagDetalleSi = parseInt(select.getAttribute('data-flag-detalle-si'));
+        const flagDetalleNo = parseInt(select.getAttribute('data-flag-detalle-no'));
+        
+        const respuestaNum = parseInt(respuesta);
+        
+        if ((respuestaNum === 1 && flagDetalleSi === 1) || (respuestaNum === 0 && flagDetalleNo === 1)) {
+            detalleDiv.style.display = 'block';
+            textarea.required = true;
+        } else {
+            detalleDiv.style.display = 'none';
+            textarea.required = false;
+            textarea.value = '';
+        }
+    }
+}
+
+// Hacer las funciones disponibles globalmente
+window.toggleDetalle = toggleDetalle;
+
+// Inicializar los detalles al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('select[name^="respuestas"]').forEach(select => {
+        const name = select.getAttribute('name');
+        const match = name.match(/\[(\d+)\]/);
+        if (match) {
+            const idPregunta = match[1];
+            const respuesta = select.value;
+            if (respuesta) {
+                setTimeout(() => {
+                    toggleDetalle(idPregunta, respuesta);
+                }, 100);
+            }
+        }
+    });
+});
+
+
+// Función para limpiar solo campos editables
+function limpiarCuestionario() {
+    if (confirm("¿Estás seguro de que deseas limpiar todas las respuestas editables del cuestionario?")) {
+        let camposLimpiados = 0;
+        
+        // Limpiar solo selects editables
+        document.querySelectorAll('select[name^="respuestas"]').forEach(select => {
+            if (select.value !== '') {
+                camposLimpiados++;
+                select.value = '';
+                
+                const name = select.getAttribute('name');
+                const match = name.match(/\[(\d+)\]/);
+                if (match) {
+                    const idPregunta = match[1];
+                    const detalleDiv = document.getElementById('detalle_' + idPregunta);
+                    if (detalleDiv) {
+                        detalleDiv.style.display = 'none';
+                    }
+                }
+            }
+        });
+        
+        // Limpiar solo textareas editables
+        document.querySelectorAll('textarea[name^="detalles"]').forEach(textarea => {
+            if (textarea.value !== '') {
+                camposLimpiados++;
+                textarea.value = '';
+                textarea.required = false;
+            }
+        });
+        
+        if (camposLimpiados > 0) {
+            showAlert('success', `Se limpiaron ${camposLimpiados} campos editables`);
+        } else {
+            showAlert('info', 'No había campos editables para limpiar');
+        }
+    }
+}
+
+// Hacer la función disponible globalmente
+window.limpiarCuestionario = limpiarCuestionario;
 
 </script>
 @endpush

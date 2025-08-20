@@ -125,7 +125,80 @@ class TramiteRepository
             ->where('m.id_tramite', $idTramite)
             ->first();
 
-            //dd( $tramiteInfo);
+            //dd($tramiteInfo);
+
+            $respuestasCuestionario = DB::table('respuesta_cuestionario as rc')
+        ->where('rc.id_tramite', $idTramite)
+        ->select(
+            'rc.id_respuesta_cuestionario',
+            'rc.id_pregunta_cuestionario',
+            'rc.flag_valor',
+            'rc.detalle',
+            'rc.fecha_sistema',
+            'rc.id_tramite',
+            'rc.id_estado_tramite'
+        )
+        ->get()
+        ->keyBy('id_pregunta_cuestionario');
+
+    // Obtener todas las preguntas que tienen respuestas o están configuradas para el estado actual
+    $preguntas = collect();
+
+    if ($tramiteInfo->id_estado_tramite) {
+        // 1. Primero buscar preguntas del estado actual
+        $cuestionariosEstado = DB::table('cuestionario_estado_tramite as cet')
+            ->join('cuestionario as c', 'cet.id_cuestionario', '=', 'c.id_cuestionario')
+            ->where('cet.id_estado_tramite', $tramiteInfo->id_estado_tramite)
+            ->where('c.flag_baja', 0)
+            ->select('c.id_cuestionario', 'c.titulo as nombre_cuestionario', 'c.descripcion')
+            ->get();
+
+        if ($cuestionariosEstado->isNotEmpty()) {
+            $idsCuestionarios = $cuestionariosEstado->pluck('id_cuestionario');
+            
+            $preguntasEstado = DB::table('pregunta as p')
+                ->whereIn('p.id_cuestionario', $idsCuestionarios)
+                ->where('p.flag_baja', 0)
+                ->select(
+                    'p.id_pregunta',
+                    'p.id_cuestionario',
+                    'p.descripcion',
+                    'p.flag_detalle_si',  
+                    'p.flag_detalle_no',
+                    'p.flag_finalizacion_si',
+                    'p.flag_rechazo_no',
+                    DB::raw('1 as es_editable') // Marcar como editable
+                )
+                ->orderBy('p.id_pregunta', 'asc')
+                ->get();
+                
+            $preguntas = $preguntas->merge($preguntasEstado);
+        }
+    }
+
+    // 2. Agregar preguntas que tienen respuestas pero no están en el estado actual
+    if ($respuestasCuestionario->isNotEmpty()) {
+        $idsPreguntasConRespuesta = $respuestasCuestionario->keys();
+        
+        $preguntasConRespuesta = DB::table('pregunta as p')
+            ->whereIn('p.id_pregunta', $idsPreguntasConRespuesta)
+            ->where('p.flag_baja', 0)
+            ->select(
+                'p.id_pregunta',
+                'p.id_cuestionario',
+                'p.descripcion',
+                'p.flag_detalle_si',  
+                'p.flag_detalle_no',
+                'p.flag_finalizacion_si',
+                'p.flag_rechazo_no',
+                DB::raw('0 as es_editable') // Marcar como no editable
+            )
+            ->orderBy('p.id_pregunta', 'asc')
+            ->get();
+            
+        // Combinar, evitando duplicados
+        $preguntas = $preguntas->merge($preguntasConRespuesta)->unique('id_pregunta');
+    }
 
         if ($tramiteInfo) {
             $tramiteInfo = $this->formatTramiteInfo($tramiteInfo);
@@ -148,7 +221,7 @@ class TramiteRepository
 
         $prioridades = DB::table('prioridad')->orderBy('id_prioridad')->get();
 
-        return compact('detalleTramite', 'tramiteInfo', 'historialTramite', 'tramiteArchivo', 'prioridades');
+        return compact('detalleTramite', 'tramiteInfo', 'historialTramite', 'tramiteArchivo', 'prioridades','preguntas','respuestasCuestionario');
     }
 
     protected function formatTramiteInfo($tramiteInfo)

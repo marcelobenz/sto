@@ -92,6 +92,7 @@ Route::post('/tramites/cambiar-prioridad', [TramiteController::class, 'cambiarPr
 Route::post('/tramites/darDeBaja', [TramiteController::class, 'darDeBaja'])->name('tramites.darDeBaja');
 Route::post('/tramites/avanzarEstado', [TramiteController::class, 'avanzarEstado'])->name('tramites.avanzarEstado');
 Route::post('/tramites/posibles-estados', [TramiteController::class, 'getPosiblesEstados'])->name('tramites.getPosiblesEstados');
+Route::post('/tramites/guardar-cuestionario', [TramiteController::class, 'guardarCuestionario'])->name('cuestionarios.guardar');
 
 //Estado Trámite
 Route::get('/estadoTramite/tienePermiso/{multinota}', [EstadoTramiteController::class, 'tienePermiso'])->name('estadoTramite.tienePermiso');
