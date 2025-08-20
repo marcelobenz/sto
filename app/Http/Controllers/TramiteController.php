@@ -43,7 +43,7 @@ class TramiteController extends Controller
     public function cambiarPrioridad(Request $request)
     {
         $request->validate([
-            'id_tramite' => 'required|exists:tramite,id_tramite',
+            'id_tramite' => 'required|exists:multinota,id_tramite',
             'id_prioridad' => 'required|exists:prioridad,id_prioridad',
         ]);
 
@@ -65,11 +65,31 @@ class TramiteController extends Controller
         return response()->json(['success' => $success]);
     }
 
-     public function avanzarEstado(Request $request)
-    {
-        $success = $this->tramiteService->avanzarEstado($request->input('idTramite'));
-        return response()->json(['success' => $success]);
-    }
+  public function getPosiblesEstados(Request $request)
+{
+    $idTramite = $request->input('idTramite');
+    $estados = $this->tramiteService->getPosiblesEstados($idTramite);
+
+    return response()->json([
+        'success' => true,
+        'estados' => $estados
+    ]);
+}
+
+public function avanzarEstado(Request $request)
+{
+    $idTramite = $request->input('idTramite');
+    $idEstadoNuevo = $request->input('idEstadoNuevo');
+
+    $success = $this->tramiteService->avanzarEstado($idTramite, $idEstadoNuevo);
+
+    return response()->json([
+        'success' => (bool)$success,
+        'message' => $success ? 'Estado actualizado' : 'No se pudo avanzar el estado'
+    ]);
+}
+
+
 
     public function enCurso()
     {

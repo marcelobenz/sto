@@ -76,6 +76,35 @@
             </div>
         </div>
 
+
+
+        <!-- Modal Selección Estado -->
+<div class="modal fade" id="modalSeleccionEstado" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="formSeleccionEstado">
+      @csrf
+      <input type="hidden" name="id_tramite" id="id_tramite_modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Seleccionar nuevo estado</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <select class="form-select" name="id_estado_nuevo" id="select_estado" required>
+            <option value="" disabled selected>Seleccione un estado</option>
+            <!-- Options will be added dynamically -->
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Aceptar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+
         <div class="col-md-6 col-lg-6 mt-4">
             <div class="container-fluid px-3">
                 <!-- Información del trámite -->
@@ -293,22 +322,147 @@
     }
 
 
-   function avanzarEstado(idTramite) {
-        if (confirm("¿Estás seguro de que deseas avanzar de estado este trámite?")) {
-            fetch("{{ route('tramites.avanzarEstado') }}", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                },
-                body: JSON.stringify({ idTramite })
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) location.reload();
-                    else alert("Error: " + data.message);
+let modalSeleccionEstado;
+
+function avanzarEstado(idTramite) {
+    fetch("{{ route('tramites.getPosiblesEstados') }}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+        },
+        body: JSON.stringify({ idTramite })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.estados.length === 1) {
+            if (confirm("¿Avanzar el trámite al siguiente estado?")) {
+                fetch("{{ route('tramites.avanzarEstado') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                    },
+                    body: JSON.stringify({ 
+                        idTramite: idTramite,
+                        idEstadoNuevo: data.estados[0].id_estado_tramite
+                    })
+                })
+                .then(r => r.json())
+                .then(resp => {
+                    if (resp.success) location.reload();
+                    else alert(resp.message);
                 });
+            }
+        } else if (data.estados.length > 1) {
+            let select = document.getElementById("select_estado");
+            select.innerHTML = "";
+            
+            let defaultOpt = document.createElement("option");
+            defaultOpt.value = "";
+            defaultOpt.textContent = "Seleccione un estado";
+            defaultOpt.disabled = true;
+            defaultOpt.selected = true; 
+            select.appendChild(defaultOpt);
+
+            data.estados.forEach(e => {
+                let opt = document.createElement("option");
+                opt.value = e.id_estado_tramite;
+                opt.textContent = e.nombre_estado;
+                select.appendChild(opt);
+            });
+
+            document.getElementById("id_tramite_modal").value = idTramite;
+
+            // Crear la instancia del modal si no existe
+            if (!modalSeleccionEstado) {
+                modalSeleccionEstado = new bootstrap.Modal(document.getElementById("modalSeleccionEstado"));
+                
+                // Agregar event listeners para los botones de cerrar
+                const modalElement = document.getElementById("modalSeleccionEstado");
+                
+                // Botón X (close)
+                const btnClose = modalElement.querySelector(".btn-close");
+                if (btnClose) {
+                    btnClose.addEventListener("click", function() {
+                        modalSeleccionEstado.hide();
+                    });
+                }
+                
+                // Botón Cancelar
+                const btnCancel = modalElement.querySelector('.btn-secondary[data-bs-dismiss="modal"]');
+                if (btnCancel) {
+                    btnCancel.addEventListener("click", function() {
+                        modalSeleccionEstado.hide();
+                    });
+                }
+                
+                // Click fuera del modal
+                modalElement.addEventListener("click", function(e) {
+                    if (e.target === modalElement) {
+                        modalSeleccionEstado.hide();
+                    }
+                });
+                
+                // Tecla ESC
+                document.addEventListener("keydown", function(e) {
+                    if (e.key === "Escape" && modalSeleccionEstado._isShown) {
+                        modalSeleccionEstado.hide();
+                    }
+                });
+            }
+            
+            modalSeleccionEstado.show();
+        } else {
+            alert("No hay configuraciones de avance disponibles.");
         }
-    }
+    });
+}
+
+document.getElementById("formSeleccionEstado").addEventListener("submit", function(e) {
+    e.preventDefault();
+    
+    let idTramite = document.getElementById("id_tramite_modal").value;
+    let idEstadoNuevo = document.getElementById("select_estado").value;
+
+    console.log("Valor seleccionado:", idEstadoNuevo);
+
+    fetch("{{ route('tramites.avanzarEstado') }}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+        },
+        body: JSON.stringify({ 
+            idTramite: idTramite, 
+            idEstadoNuevo: idEstadoNuevo 
+        })
+    })
+    .then(r => r.json())
+    .then(resp => {
+        // Cerrar el modal ANTES de verificar la respuesta
+        if (modalSeleccionEstado) {
+            modalSeleccionEstado.hide();
+        }
+        
+        if (resp.success) {
+            // Pequeño delay para asegurar que el modal se cierre completamente
+            setTimeout(() => {
+                location.reload();
+            }, 300);
+        } else {
+            alert(resp.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        // Cerrar el modal incluso si hay error
+        if (modalSeleccionEstado) {
+            modalSeleccionEstado.hide();
+        }
+        alert('Error al procesar la solicitud');
+    });
+});
+
 </script>
 @endpush

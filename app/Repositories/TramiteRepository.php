@@ -11,9 +11,8 @@ class TramiteRepository
     public function getTramitesData(array $params, bool $soloIniciados)
     {
         $query = DB::table('multinota as m')
-            ->join('tramite as t', 'm.id_tramite', '=', 't.id_tramite')
             ->join('tipo_tramite_multinota as tt', 'm.id_tipo_tramite_multinota', '=', 'tt.id_tipo_tramite_multinota')
-            ->join('contribuyente_externo as ce', 't.id_tramite', '=', 'ce.id_tramite')
+            ->join('contribuyente_multinota as cm', 'm.cuit_contribuyente', '=', 'cm.cuit')
             ->join('tramite_estado_tramite as te', 'm.id_tramite', '=', 'te.id_tramite')
             ->join('usuario_interno as u', 'te.id_usuario_interno', '=', 'u.id_usuario_interno')
             ->join('categoria as c', 'tt.id_categoria', '=', 'c.id_categoria')
@@ -25,17 +24,17 @@ class TramiteRepository
                 'tt.nombre as tipo_tramite',
                 'e.nombre as estado',
                 'm.fecha_alta',
-                't.cuit_contribuyente',
-                't.flag_cancelado', 
-                't.flag_rechazado',
-                DB::raw("CONCAT(ce.nombre, ' ', ce.apellido) as contribuyente"),
+                'm.cuit_contribuyente',
+                'm.flag_cancelado', 
+                'm.flag_rechazado',
+                DB::raw("CONCAT(cm.nombre, ' ', cm.apellido) as contribuyente"),
                 DB::raw("CONCAT(u.nombre, ' ', u.apellido) as usuario_interno")
             )
             ->where('te.activo', 1);
 
         if ($soloIniciados) {
-            $query->where('t.flag_cancelado', '!=', 1)
-                ->where('t.flag_rechazado', '!=', 1)
+            $query->where('m.flag_cancelado', '!=', 1)
+                ->where('m.flag_rechazado', '!=', 1)
                 ->where('e.nombre', 'Iniciado');
         }
 
@@ -46,7 +45,7 @@ class TramiteRepository
                   ->orWhere('c.nombre', 'like', "%{$params['searchValue']}%")
                   ->orWhere('tt.nombre', 'like', "%{$params['searchValue']}%")
                   ->orWhere('e.nombre', 'like', "%{$params['searchValue']}%")
-                  ->orWhere(DB::raw("CONCAT(ce.nombre, ' ', ce.apellido)"), 'like', "%{$params['searchValue']}%")
+                  ->orWhere(DB::raw("CONCAT(cm.nombre, ' ', cm.apellido)"), 'like', "%{$params['searchValue']}%")
                   ->orWhere(DB::raw("CONCAT(u.nombre, ' ', u.apellido)"), 'like', "%{$params['searchValue']}%");
             });
         }
@@ -103,7 +102,6 @@ class TramiteRepository
             ->get();
 
         $tramiteInfo = DB::table('multinota as m')
-            ->join('tramite as t', 'm.id_tramite', '=', 't.id_tramite')
             ->join('tipo_tramite_multinota as ttm', 'm.id_tipo_tramite_multinota', '=', 'ttm.id_tipo_tramite_multinota')
             ->leftJoin('tramite_estado_tramite as tet', function($join) {
                 $join->on('tet.id_tramite', '=', 'm.id_tramite')
@@ -111,7 +109,7 @@ class TramiteRepository
             })
             ->leftJoin('usuario_interno as ui', 'ui.id_usuario_interno', '=', 'tet.id_usuario_interno')
             ->leftJoin('estado_tramite as et', 'et.id_estado_tramite', '=', 'tet.id_estado_tramite')
-            ->leftJoin('prioridad as p', 't.id_prioridad', '=', 'p.id_prioridad')
+            ->leftJoin('prioridad as p', 'm.id_prioridad', '=', 'p.id_prioridad')
             ->select(
                 'ttm.nombre',
                 'm.fecha_alta',
@@ -119,8 +117,8 @@ class TramiteRepository
                 'ui.nombre as nombre_usuario',
                 'ui.apellido as apellido_usuario',
                 'et.nombre as estado_actual',
-                't.flag_cancelado',
-                't.flag_rechazado',
+                'm.flag_cancelado',
+                'm.flag_rechazado',
                 'p.nombre as prioridad',
                 'tet.id_estado_tramite as id_estado_tramite'
             )
@@ -175,7 +173,7 @@ class TramiteRepository
         DB::beginTransaction();
 
         try {
-            $affected = DB::table('tramite')
+            $affected = DB::table('multinota')
                 ->where('id_tramite', $idTramite)
                 ->update([
                     'flag_cancelado' => 1,
@@ -213,11 +211,10 @@ class TramiteRepository
         DB::beginTransaction();
 
         try {
-            DB::table('tramite')
+            DB::table('multinota')
                 ->where('id_tramite', $idTramite)
                 ->update([
                     'id_prioridad' => $idPrioridad,
-                    'fecha_modificacion' => now()
                 ]);
 
             $prioridad = DB::table('prioridad')->where('id_prioridad', $idPrioridad)->first();
@@ -305,6 +302,26 @@ class TramiteRepository
         ->where('cet.activo', 1)
         ->value('cet.id_proximo_estado'); 
 }
+
+public function getPosiblesEstados($idTramite)
+{
+    $estadoActual = DB::table('tramite_estado_tramite')
+        ->where('id_tramite', $idTramite)
+        ->orderByDesc('id_tramite_estado_tramite') 
+        ->select('id_estado_tramite')
+        ->first();
+
+    if (!$estadoActual) {
+        return collect(); 
+    }
+
+    return DB::table('configuracion_estado_tramite')
+        ->join('estado_tramite', 'estado_tramite.id_estado_tramite', '=', 'configuracion_estado_tramite.id_proximo_estado')
+        ->where('configuracion_estado_tramite.id_estado_tramite', $estadoActual->id_estado_tramite)
+        ->select('estado_tramite.id_estado_tramite', 'estado_tramite.nombre as nombre_estado')
+        ->get();
+}
+
 
     
   public function crearEstadoTramite($idTramite, $idEstadoTramite, $idUsuarioAsignado, $idUsuarioEjecutor,$idUsuarioRecomendado)
