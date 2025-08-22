@@ -73,7 +73,7 @@ class TramiteService {
         return $this->tramiteRepository->getPosiblesEstados($idTramite);
     }
 
-public function avanzarEstado($idTramite, $idEstadoNuevo)
+public function avanzarEstado($idTramite, $idEstadoNuevo = null)
 {
     $estadoActual = $this->tramiteRepository->getUltimoEstadoTramite($idTramite);
 
@@ -82,9 +82,25 @@ public function avanzarEstado($idTramite, $idEstadoNuevo)
         return false;
     }
 
-    if ($idEstadoNuevo) {
-        $siguienteEstadoId = (int)$idEstadoNuevo;
-    } 
+    // Si no se proporciona idEstadoNuevo, significa que estamos en el último estado
+    if (is_null($idEstadoNuevo)) {
+        \Log::debug('No se proporcionó estado nuevo, finalizando trámite', ['idTramite' => $idTramite]);
+        
+        $idUsuarioEjecutor = Session::get('usuario_interno')->id_usuario_interno;
+        
+        // Llamar al repository con un idEstadoTramite que no existe para activar la lógica de finalización
+        // Pasamos el id del estado actual para que el repository pueda verificar que no hay próximo estado
+        return $this->tramiteRepository->crearEstadoTramite(
+            $idTramite, 
+            $estadoActual->id_estado_tramite, // Pasamos el estado actual
+            $idUsuarioEjecutor, 
+            $idUsuarioEjecutor, 
+            $idUsuarioEjecutor
+        );
+    }
+
+    // Lógica normal para cuando sí se proporciona un estado nuevo
+    $siguienteEstadoId = (int)$idEstadoNuevo;
 
     if (!$siguienteEstadoId) {
         \Log::warning('No se encontró siguiente estado', ['idTramite' => $idTramite]);

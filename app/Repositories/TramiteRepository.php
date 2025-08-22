@@ -113,6 +113,7 @@ class TramiteRepository
             ->select(
                 'ttm.nombre',
                 'm.fecha_alta',
+                'm.id_tramite',
                 'ui.legajo as legajo',
                 'ui.nombre as nombre_usuario',
                 'ui.apellido as apellido_usuario',
@@ -225,21 +226,31 @@ class TramiteRepository
     }
 
     protected function formatTramiteInfo($tramiteInfo)
-    {
-        if ($tramiteInfo->flag_cancelado == 1) {
-            $tramiteInfo->estado_actual = 'Dado de Baja';
-        } elseif ($tramiteInfo->flag_rechazado == 1) {
-            $tramiteInfo->estado_actual = 'Rechazado';
-        } elseif ($tramiteInfo->estado_actual === 'A Finalizar') {
+{
+    if ($tramiteInfo->flag_cancelado == 1) {
+        $tramiteInfo->estado_actual = 'Dado de Baja';
+    } elseif ($tramiteInfo->flag_rechazado == 1) {
+        $tramiteInfo->estado_actual = 'Rechazado';
+    } elseif ($tramiteInfo->estado_actual === 'A Finalizar') {
+        // Consultar si este estado está completo en tramite_estado_tramite
+        $estadoAFinalizar = DB::table('tramite_estado_tramite')
+            ->where('id_tramite', $tramiteInfo->id_tramite)
+            ->where('id_estado_tramite', $tramiteInfo->id_estado_tramite)
+            ->value('completo');
+
+        if ($estadoAFinalizar == 1) {
             $tramiteInfo->estado_actual = 'Finalizado';
+        } else {
+            $tramiteInfo->estado_actual = 'A Finalizar';
         }
-
-        unset($tramiteInfo->flag_cancelado);
-        unset($tramiteInfo->flag_rechazado);
-
-        
-        return $tramiteInfo;
     }
+
+    unset($tramiteInfo->flag_cancelado);
+    unset($tramiteInfo->flag_rechazado);
+
+    return $tramiteInfo;
+}
+
 
     public function darDeBajaTramite($idTramite, $idUsuario)
     {
@@ -397,28 +408,82 @@ public function getPosiblesEstados($idTramite)
 
 
     
-  public function crearEstadoTramite($idTramite, $idEstadoTramite, $idUsuarioAsignado, $idUsuarioEjecutor,$idUsuarioRecomendado)
+public function crearEstadoTramite($idTramite, $idEstadoTramite, $idUsuarioAsignado, $idUsuarioEjecutor, $idUsuarioRecomendado)
 {
-    return DB::transaction(function () use ($idTramite, $idEstadoTramite, $idUsuarioAsignado, $idUsuarioEjecutor,$idUsuarioRecomendado) {
+    \Log::debug('crearEstadoTramite: inicio', [
+        'idTramite' => $idTramite,
+        'idEstadoTramite' => $idEstadoTramite,
+        'idUsuarioAsignado' => $idUsuarioAsignado,
+        'idUsuarioEjecutor' => $idUsuarioEjecutor,
+        'idUsuarioRecomendado' => $idUsuarioRecomendado
+    ]);
+    return DB::transaction(function () use ($idTramite, $idEstadoTramite, $idUsuarioAsignado, $idUsuarioEjecutor, $idUsuarioRecomendado) {
         $estadoActual = DB::table('tramite_estado_tramite as tet')
             ->join('estado_tramite as et', 'tet.id_estado_tramite', '=', 'et.id_estado_tramite')
             ->where('tet.id_tramite', $idTramite)
             ->where('tet.activo', 1)
             ->first();
+        \Log::debug('Estado actual obtenido', ['estadoActual' => $estadoActual]);
 
         if (!$estadoActual) {
+            \Log::warning('No se encontró estado actual para el trámite', ['idTramite' => $idTramite]);
             return false;
         }
 
+        $idProximoEstado = DB::table('configuracion_estado_tramite')
+            ->where('id_estado_tramite', $estadoActual->id_estado_tramite)
+            ->where('activo', 1)
+            ->value('id_proximo_estado');
+        \Log::debug('ID próximo estado', ['idProximoEstado' => $idProximoEstado]);
+
+        if (is_null($idProximoEstado)) {
+            \Log::debug('No hay próximo estado, finalizando trámite');
+            DB::table('tramite_estado_tramite')
+                ->where('id_tramite', $idTramite)
+                ->where('activo', 1)
+                ->update([
+                    'completo' => 1,
+                    'fecha_sistema' => now()
+                ]);
+
+            $descripcionEvento = 'El trámite finalizó en el estado "' . ($estadoActual->nombre ?? 'Desconocido') . '"';
+            \Log::debug('Descripción evento finalización', ['descripcionEvento' => $descripcionEvento]);
+
+            $idEvento = DB::table('evento')->insertGetId([
+                'descripcion' => $descripcionEvento,
+                'fecha_alta' => now(),
+                'fecha_modificacion' => now(),
+                'id_tipo_evento' => 1,
+                'clave' => 'FINALIZACIÓN'
+            ]);
+            \Log::debug('ID evento finalización', ['idEvento' => $idEvento]);
+
+            DB::table('historial_tramite')->insert([
+                'fecha' => now(),
+                'id_tramite' => $idTramite,
+                'id_evento' => $idEvento,
+                'id_usuario_interno_asignado' => $idUsuarioEjecutor
+            ]);
+            \Log::debug('Historial de finalización insertado');
+
+            return true;
+        }
+
         if ($estadoActual->id_estado_tramite == $idEstadoTramite) {
+            \Log::warning('El estado actual y el nuevo estado son iguales, no se avanza', [
+                'idEstadoActual' => $estadoActual->id_estado_tramite,
+                'idEstadoNuevo' => $idEstadoTramite
+            ]);
             return false;
         }
 
         $estadoSiguiente = DB::table('estado_tramite')
             ->where('id_estado_tramite', $idEstadoTramite)
             ->first();
+        \Log::debug('Estado siguiente obtenido', ['estadoSiguiente' => $estadoSiguiente]);
 
         if (!$estadoSiguiente) {
+            \Log::warning('No se encontró el estado siguiente', ['idEstadoTramite' => $idEstadoTramite]);
             return false;
         }
 
@@ -430,24 +495,28 @@ public function getPosiblesEstados($idTramite)
                 'completo' => 1,
                 'fecha_sistema' => now()
             ]);
+        \Log::debug('Estado actual marcado como inactivo y completo');
 
-        
         $nuevoEstadoCreado = DB::table('tramite_estado_tramite')->insert([
             'id_tramite' => $idTramite,
             'id_estado_tramite' => $idEstadoTramite,
-            'id_usuario_interno' => $idUsuarioRecomendado, 
+            'id_usuario_interno' => $idUsuarioRecomendado,
             'fecha_sistema' => now(),
             'activo' => 1,
             'completo' => 0,
             'reiniciado' => 0,
             'espera_documentacion' => 0
         ]);
+        \Log::debug('Nuevo estado creado', [
+            'id_tramite' => $idTramite,
+            'id_estado_tramite' => $idEstadoTramite,
+            'id_usuario_interno' => $idUsuarioRecomendado
+        ]);
 
-        
-        $descripcionEvento = 'Se avanzó el estado del trámite de "' . 
-                            ($estadoActual->nombre ?? 'Desconocido') . 
-                            '" a "' . 
+        $descripcionEvento = 'Se avanzó el estado del trámite de "' .
+                            ($estadoActual->nombre ?? 'Desconocido') . '" a "' .
                             ($estadoSiguiente->nombre ?? 'Desconocido') . '"';
+        \Log::debug('Descripción evento avance', ['descripcionEvento' => $descripcionEvento]);
 
         $idEvento = DB::table('evento')->insertGetId([
             'descripcion' => $descripcionEvento,
@@ -456,6 +525,7 @@ public function getPosiblesEstados($idTramite)
             'id_tipo_evento' => 1,
             'clave' => 'CAMBIO_ESTADO'
         ]);
+        \Log::debug('ID evento avance', ['idEvento' => $idEvento]);
 
         DB::table('historial_tramite')->insert([
             'fecha' => now(),
@@ -463,8 +533,10 @@ public function getPosiblesEstados($idTramite)
             'id_evento' => $idEvento,
             'id_usuario_interno_asignado' => $idUsuarioEjecutor
         ]);
+        \Log::debug('Historial de avance insertado');
 
         return $nuevoEstadoCreado;
     });
 }
+
 }

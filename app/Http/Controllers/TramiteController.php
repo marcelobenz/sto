@@ -85,6 +85,9 @@ public function avanzarEstado(Request $request)
     $idTramite = $request->input('idTramite');
     $idEstadoNuevo = $request->input('idEstadoNuevo');
 
+    // Si idEstadoNuevo es null o vacío, pasamos null al service
+    $idEstadoNuevo = !empty($idEstadoNuevo) ? $idEstadoNuevo : null;
+    
     $success = $this->tramiteService->avanzarEstado($idTramite, $idEstadoNuevo);
 
     return response()->json([
@@ -130,12 +133,44 @@ public function guardarCuestionario(Request $request)
         $idEstadoTramite = $estadoTramite->id_estado_tramite;
         \Log::debug('ID Estado tramite', ['id_estado_tramite' => $idEstadoTramite]);
         
+        // Variables para controlar las acciones a realizar
+        $debeRechazar = false;
+        $debeFinalizar = false;
+        
         foreach ($respuestas as $idPregunta => $respuesta) {
             \Log::debug('Procesando respuesta', [
                 'idPregunta' => $idPregunta,
                 'respuesta' => $respuesta,
                 'detalle' => $detalles[$idPregunta] ?? null
             ]);
+            
+            // Verificar flags de la pregunta
+            $pregunta = DB::table('pregunta')
+                ->where('id_pregunta', $idPregunta)
+                ->select('flag_rechazo_no', 'flag_finalizacion_si')
+                ->first();
+            
+            if ($pregunta) {
+                // Verificar si se debe rechazar (respuesta NO y flag_rechazo_no = 1)
+                if ($pregunta->flag_rechazo_no == 1 && $respuesta == 0) {
+                    \Log::debug('Pregunta con flag_rechazo_no = 1 y respuesta NO detectada', [
+                        'idPregunta' => $idPregunta,
+                        'flag_rechazo_no' => $pregunta->flag_rechazo_no,
+                        'respuesta' => $respuesta
+                    ]);
+                    $debeRechazar = true;
+                }
+                
+                // Verificar si se debe finalizar (respuesta SI y flag_finalizacion_si = 1)
+                if ($pregunta->flag_finalizacion_si == 1 && $respuesta == 1) {
+                    \Log::debug('Pregunta con flag_finalizacion_si = 1 y respuesta SI detectada', [
+                        'idPregunta' => $idPregunta,
+                        'flag_finalizacion_si' => $pregunta->flag_finalizacion_si,
+                        'respuesta' => $respuesta
+                    ]);
+                    $debeFinalizar = true;
+                }
+            }
             
             // Buscar si ya existe una respuesta para esta pregunta
             $respuestaExistente = RespuestaCuestionario::where('id_tramite', $idTramite)
@@ -168,10 +203,94 @@ public function guardarCuestionario(Request $request)
             }
         }
         
-        \Log::debug('Todas las respuestas procesadas correctamente');
+        // Procesar acciones después de guardar todas las respuestas
+        $mensaje = 'Respuestas guardadas correctamente';
+        
+        // Si se debe rechazar el trámite, actualizar flag_rechazado
+        if ($debeRechazar) {
+            \Log::debug('Actualizando flag_rechazado del trámite a 1', ['id_tramite' => $idTramite]);
+            $tramite->update(['flag_rechazado' => 1]);
+            $mensaje .= '. El trámite ha sido marcado como rechazado.';
+        }
+        
+        // Si se debe finalizar el trámite, avanzar al estado A_FINALIZAR
+        if ($debeFinalizar) {
+            \Log::debug('Procesando finalización del trámite', ['id_tramite' => $idTramite]);
+            
+            // Obtener el id_tipo_tramite_multinota del trámite
+            $tipoTramite = DB::table('multinota')
+                ->where('id_tramite', $idTramite)
+                ->select('id_tipo_tramite_multinota')
+                ->first();
+            
+            if ($tipoTramite) {
+                \Log::debug('Tipo de trámite obtenido', ['id_tipo_tramite' => $tipoTramite->id_tipo_tramite_multinota]);
+                
+                // Buscar el estado final (el que tiene id_proximo_estado = null)
+                $estadoFinal = DB::table('configuracion_estado_tramite')
+                    ->where('id_tipo_tramite_multinota', $tipoTramite->id_tipo_tramite_multinota)
+                    ->where('activo', 1)
+                    ->whereNull('id_proximo_estado')
+                    ->select('id_estado_tramite')
+                    ->first();
+                
+                if ($estadoFinal) {
+                    \Log::debug('Estado final encontrado', ['id_estado_final' => $estadoFinal->id_estado_tramite]);
+                    
+                    try {
+                        // Desactivar el estado actual del trámite
+                        DB::table('tramite_estado_tramite')
+                            ->where('id_tramite', $idTramite)
+                            ->where('activo', 1)
+                            ->update(['activo' => 0]);
+                        
+                        // Agregar el nuevo estado final con completo = 1
+                        DB::table('tramite_estado_tramite')->insert([
+                            'id_tramite' => $idTramite,
+                            'id_estado_tramite' => $estadoFinal->id_estado_tramite,
+                            'fecha_sistema' => now(),
+                            'activo' => 1,
+                            'completo' => 1,
+                            'id_usuario_interno' => auth()->user()->legajo ?? null,
+                        ]);
+                        
+                        \Log::debug('Trámite movido al estado final', [
+                            'id_tramite' => $idTramite,
+                            'id_estado_final' => $estadoFinal->id_estado_tramite
+                        ]);
+                        
+                        $mensaje .= '. El trámite ha sido movido al estado de finalización.';
+                        
+                    } catch (\Exception $e) {
+                        \Log::error('Error al actualizar estado del trámite', [
+                            'id_tramite' => $idTramite,
+                            'error' => $e->getMessage()
+                        ]);
+                        // No fallar completamente, solo registrar el error
+                        $mensaje .= '. Error al actualizar el estado del trámite.';
+                    }
+                } else {
+                    \Log::warning('No se encontró estado final para el tipo de trámite', [
+                        'id_tipo_tramite' => $tipoTramite->id_tipo_tramite_multinota
+                    ]);
+                    $mensaje .= '. No se pudo determinar el estado final del trámite.';
+                }
+            } else {
+                \Log::error('No se pudo obtener el tipo de trámite', ['id_tramite' => $idTramite]);
+                $mensaje .= '. Error al obtener información del tipo de trámite.';
+            }
+        }
+        
+        \Log::debug('Todas las respuestas procesadas correctamente', [
+            'tramite_rechazado' => $debeRechazar,
+            'tramite_finalizado' => $debeFinalizar
+        ]);
+        
         return response()->json([
             'success' => true,
-            'message' => 'Respuestas guardadas correctamente'
+            'message' => $mensaje,
+            'tramite_rechazado' => $debeRechazar,
+            'tramite_finalizado' => $debeFinalizar
         ]);
         
     } catch (\Exception $e) {

@@ -67,7 +67,7 @@
                 @if($usuarioSesion->legajo != $tramiteInfo->legajo)
                 <button class="btn btn-primary" onclick="tomarTramite({{ $idTramite }})" title="Tomar"><i class="fas fa-sign-out-alt"></i></button>
                 @endif
-                @if($usuarioSesion->legajo == $tramiteInfo->legajo)
+                @if($usuarioSesion->legajo == $tramiteInfo->legajo  && $tramiteInfo->estado_actual != 'Finalizado' && $tramiteInfo->estado_actual != 'Dado de Baja' && $tramiteInfo->estado_actual != 'Rechazado')
                 <button class="btn btn-success" onclick="avanzarEstado({{ $idTramite }})" title="Avanzar Estado"><i class="fas fa-arrow-right"></i></button>
                 @endif
                 @endif
@@ -482,6 +482,134 @@
 let modalSeleccionEstado;
 
 function avanzarEstado(idTramite) {
+    // Primero verificar si hay preguntas editables (cuestionario activo)
+    const preguntasEditables = document.querySelectorAll('select[name^="respuestas"]');
+    const hayCuestionarioActivo = preguntasEditables.length > 0;
+    
+    if (hayCuestionarioActivo) {
+        // Si hay cuestionario activo, validar que todas las preguntas estén respondidas
+        let todasRespondidas = true;
+        let mensajeError = '';
+        
+        preguntasEditables.forEach(select => {
+            if (!select.value) {
+                todasRespondidas = false;
+                const preguntaText = select.closest('tr').querySelector('strong').textContent;
+                mensajeError += `- ${preguntaText}\n`;
+            }
+        });
+        
+        if (!todasRespondidas) {
+            alert('Debe completar todas las preguntas del cuestionario antes de avanzar el estado:\n' + mensajeError);
+            return;
+        }
+        
+        // Validar detalles cuando son requeridos según los flags
+        let detallesFaltantes = false;
+        let mensajeDetallesError = '';
+        
+        preguntasEditables.forEach(select => {
+            const name = select.getAttribute('name');
+            const match = name.match(/\[(\d+)\]/);
+            if (match) {
+                const idPregunta = match[1];
+                const respuesta = select.value;
+                
+                // Obtener los flags de la pregunta
+                const flagDetalleSi = parseInt(select.getAttribute('data-flag-detalle-si'));
+                const flagDetalleNo = parseInt(select.getAttribute('data-flag-detalle-no'));
+                
+                // Verificar si se requiere detalle
+                if ((respuesta === '1' && flagDetalleSi === 1) || (respuesta === '0' && flagDetalleNo === 1)) {
+                    const detalleTextarea = document.querySelector(`textarea[name="detalles[${idPregunta}]"]`);
+                    if (!detalleTextarea || !detalleTextarea.value.trim()) {
+                        detallesFaltantes = true;
+                        const preguntaText = select.closest('tr').querySelector('strong').textContent;
+                        mensajeDetallesError += `- ${preguntaText} requiere un detalle\n`;
+                    }
+                }
+            }
+        });
+        
+        if (detallesFaltantes) {
+            alert('Las siguientes preguntas requieren detalles:\n' + mensajeDetallesError);
+            return;
+        }
+        
+        // Si hay cuestionario y está completo, primero guardarlo
+        if (confirm("Se guardará el cuestionario y se avanzará el estado del trámite. ¿Desea continuar?")) {
+            // Guardar cuestionario primero
+            const formCuestionarios = document.getElementById('formCuestionarios');
+            if (formCuestionarios) {
+                const formData = new FormData(formCuestionarios);
+                const data = {
+                    id_tramite: formData.get('id_tramite'),
+                    respuestas: {},
+                    detalles: {}
+                };
+                
+                // Recopilar respuestas
+                preguntasEditables.forEach(select => {
+                    const name = select.getAttribute('name');
+                    const match = name.match(/\[(\d+)\]/);
+                    if (match) {
+                        const idPregunta = match[1];
+                        data.respuestas[idPregunta] = select.value;
+                    }
+                });
+                
+                // Recopilar detalles
+                document.querySelectorAll('textarea[name^="detalles"]').forEach(textarea => {
+                    const name = textarea.getAttribute('name');
+                    const match = name.match(/\[(\d+)\]/);
+                    if (match) {
+                        const idPregunta = match[1];
+                        data.detalles[idPregunta] = textarea.value;
+                    }
+                });
+                
+                // Guardar cuestionario y luego proceder con el avance de estado
+                fetch("{{ route('cuestionarios.guardar') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Si el cuestionario causó rechazo o finalización, no continuar con avance manual
+                        if (data.tramite_rechazado || data.tramite_finalizado) {
+                            showAlert('warning', data.message + ' La página se actualizará automáticamente.');
+                            setTimeout(() => {
+                                location.reload();
+                            }, 2000);
+                            return;
+                        }
+                        
+                        // Continuar con el avance de estado
+                        procederConAvanceEstado(idTramite);
+                    } else {
+                        alert('Error al guardar el cuestionario: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al guardar el cuestionario');
+                });
+            }
+        }
+    } else {
+        // No hay cuestionario activo, proceder directamente con el avance
+        if (confirm("¿Desea avanzar el estado del trámite?")) {
+            procederConAvanceEstado(idTramite);
+        }
+    }
+}
+
+function procederConAvanceEstado(idTramite) {
     fetch("{{ route('tramites.getPosiblesEstados') }}", {
         method: "POST",
         headers: {
@@ -493,25 +621,28 @@ function avanzarEstado(idTramite) {
     .then(res => res.json())
     .then(data => {
         if (data.estados.length === 1) {
-            if (confirm("¿Avanzar el trámite al siguiente estado?")) {
-                fetch("{{ route('tramites.avanzarEstado') }}", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                    },
-                    body: JSON.stringify({ 
-                        idTramite: idTramite,
-                        idEstadoNuevo: data.estados[0].id_estado_tramite
-                    })
+            // Un solo estado posible, avanzar directamente
+            fetch("{{ route('tramites.avanzarEstado') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                body: JSON.stringify({ 
+                    idTramite: idTramite,
+                    idEstadoNuevo: data.estados[0].id_estado_tramite
                 })
-                .then(r => r.json())
-                .then(resp => {
-                    if (resp.success) location.reload();
-                    else alert(resp.message);
-                });
-            }
+            })
+            .then(r => r.json())
+            .then(resp => {
+                if (resp.success) {
+                    location.reload();
+                } else {
+                    alert(resp.message);
+                }
+            });
         } else if (data.estados.length > 1) {
+            // Múltiples estados posibles, mostrar modal de selección
             let select = document.getElementById("select_estado");
             select.innerHTML = "";
             
@@ -531,48 +662,38 @@ function avanzarEstado(idTramite) {
 
             document.getElementById("id_tramite_modal").value = idTramite;
 
-            // Crear la instancia del modal si no existe
+            // Mostrar el modal de selección
             if (!modalSeleccionEstado) {
                 modalSeleccionEstado = new bootstrap.Modal(document.getElementById("modalSeleccionEstado"));
-                
-                // Agregar event listeners para los botones de cerrar
-                const modalElement = document.getElementById("modalSeleccionEstado");
-                
-                // Botón X (close)
-                const btnClose = modalElement.querySelector(".btn-close");
-                if (btnClose) {
-                    btnClose.addEventListener("click", function() {
-                        modalSeleccionEstado.hide();
-                    });
-                }
-                
-                // Botón Cancelar
-                const btnCancel = modalElement.querySelector('.btn-secondary[data-bs-dismiss="modal"]');
-                if (btnCancel) {
-                    btnCancel.addEventListener("click", function() {
-                        modalSeleccionEstado.hide();
-                    });
-                }
-                
-                // Click fuera del modal
-                modalElement.addEventListener("click", function(e) {
-                    if (e.target === modalElement) {
-                        modalSeleccionEstado.hide();
-                    }
-                });
-                
-                // Tecla ESC
-                document.addEventListener("keydown", function(e) {
-                    if (e.key === "Escape" && modalSeleccionEstado._isShown) {
-                        modalSeleccionEstado.hide();
-                    }
-                });
             }
-            
             modalSeleccionEstado.show();
         } else {
-            alert("No hay configuraciones de avance disponibles.");
+            // No hay estados disponibles - estamos en el último estado
+            // Llamar a avanzarEstado sin idEstadoNuevo para que el backend maneje la finalización
+            fetch("{{ route('tramites.avanzarEstado') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                body: JSON.stringify({ 
+                    idTramite: idTramite,
+                    // No enviamos idEstadoNuevo para que el backend detecte que es el último estado
+                })
+            })
+            .then(r => r.json())
+            .then(resp => {
+                if (resp.success) {
+                    location.reload();
+                } else {
+                    alert(resp.message);
+                }
+            });
         }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al obtener los estados posibles');
     });
 }
 
@@ -728,9 +849,30 @@ document.getElementById('formCuestionarios').addEventListener('submit', function
             submitBtn.disabled = false;
         }
         
-        if (data.success) {
-            // Mostrar mensaje de éxito
-            showAlert('success', data.message);
+    if (data.success) {
+            // Si el trámite fue rechazado o finalizado, mostrar mensaje y recargar página
+            if (data.tramite_rechazado || data.tramite_finalizado) {
+                let alertType = 'warning';
+                let mensaje = data.message;
+                
+                // Personalizar el tipo de alerta según la acción
+                if (data.tramite_finalizado && !data.tramite_rechazado) {
+                    alertType = 'success';
+                } else if (data.tramite_rechazado) {
+                    alertType = 'warning';
+                }
+                
+                // Mostrar mensaje apropiado
+                showAlert(alertType, mensaje);
+                
+                // Recargar la página después de 2 segundos para que el usuario vea el mensaje
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            } else {
+                // Solo mostrar mensaje de éxito sin recargar
+                showAlert('success', data.message);
+            }
         } else {
             showAlert('error', data.message);
         }
@@ -757,20 +899,46 @@ function showAlert(type, message) {
     alertDiv.style.right = '20px';
     alertDiv.style.zIndex = '9999';
     alertDiv.style.minWidth = '300px';
+    
+    // Agregar icono según el tipo de alerta
+    let icon = '';
+    switch(type) {
+        case 'success':
+            icon = '<i class="fas fa-check-circle me-2"></i>';
+            break;
+        case 'warning':
+            icon = '<i class="fas fa-exclamation-triangle me-2"></i>';
+            break;
+        case 'error':
+            icon = '<i class="fas fa-times-circle me-2"></i>';
+            break;
+        case 'info':
+            icon = '<i class="fas fa-info-circle me-2"></i>';
+            break;
+    }
+    
     alertDiv.innerHTML = `
-        ${message}
+        ${icon}${message}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     `;
     
     // Agregar al documento
     document.body.appendChild(alertDiv);
     
-    // Auto-eliminar después de 5 segundos
+    // Auto-eliminar después de 5 segundos (excepto para warnings que se recargan)
+    const timeout = type === 'warning' ? 2500 : 5000;
     setTimeout(() => {
         if (alertDiv.parentNode) {
             alertDiv.parentNode.removeChild(alertDiv);
         }
-    }, 5000);
+    }, timeout);
+}
+
+// Función adicional para mostrar confirmación de rechazo
+function mostrarConfirmacionRechazo(mensaje, callback) {
+    if (confirm(mensaje + '\n\n¿Desea continuar? La página se actualizará automáticamente.')) {
+        callback();
+    }
 }
 
 // Función para mostrar/ocultar campos de detalle
