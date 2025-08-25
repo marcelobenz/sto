@@ -8,6 +8,7 @@ use App\Models\Multinota;
 use App\Models\TramiteEstadoTramite;
 use App\Models\RespuestaCuestionario;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 
 class TramiteController extends Controller
 {
@@ -302,6 +303,64 @@ public function guardarCuestionario(Request $request)
             'success' => false,
             'message' => 'Error al guardar las respuestas: ' . $e->getMessage()
         ], 500);
+    }
+}
+
+
+
+public function pedirDocumentacion(Request $request)
+{
+    try {
+        $idTramite = $request->input('idTramite');
+        
+        // Buscar el estado actual del trámite (activo=1)
+        $tramiteEstado = DB::table('tramite_estado_tramite')
+            ->where('id_tramite', $idTramite)
+            ->where('activo', 1)
+            ->first();
+            
+        if (!$tramiteEstado) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se encontró un estado activo para este trámite'
+            ]);
+        }
+        
+        // Actualizar el flag espera_documentacion
+        DB::table('tramite_estado_tramite')
+            ->where('id_tramite_estado_tramite', $tramiteEstado->id_tramite_estado_tramite)
+            ->update(['espera_documentacion' => 1]);
+            
+
+        $descripcionEvento = 'Se solicita documentación';
+
+        $idUsuarioEjecutor = Session::get('usuario_interno')->id_usuario_interno;
+
+        $idEvento = DB::table('evento')->insertGetId([
+                'descripcion' => $descripcionEvento,
+                'fecha_alta' => now(),
+                'fecha_modificacion' => now(),
+                'id_tipo_evento' => 1,
+                'clave' => 'PEDIR_DOCUMENTACION'
+            ]);
+
+            DB::table('historial_tramite')->insert([
+                'fecha' => now(),
+                'id_tramite' => $idTramite,
+                'id_evento' => $idEvento,
+                'id_usuario_interno_asignado' => $idUsuarioEjecutor
+            ]);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Se ha solicitado documentación adicional correctamente'
+        ]);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al solicitar documentación: ' . $e->getMessage()
+        ]);
     }
 }
 

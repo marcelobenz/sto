@@ -18,6 +18,8 @@
         <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
 
+    <x-loader />
+
     <div class="row gx-4 align-items-start mt-4">
         <div class="d-flex justify-content-between align-items-center w-100 flex-wrap bg-light p-3 rounded">
             <div class="d-flex flex-grow-1 gap-2">
@@ -29,16 +31,19 @@
                     {{ $tramiteInfo->fecha_alta ? date('d/m/Y', strtotime($tramiteInfo->fecha_alta)) : 'Sin fecha' }}
                 </div>
                 <div class="border rounded p-2 flex-grow-1 bg-white">
-                    Estado actual:
+                  Estado actual:
                     <span class="badge 
-                        @if($tramiteInfo->estado_actual === 'Aprobado') bg-success
-                        @elseif($tramiteInfo->estado_actual === 'Rechazado') bg-danger
-                        @elseif($tramiteInfo->estado_actual === 'Dado de Baja') bg-secondary
-                        @elseif($tramiteInfo->estado_actual === 'Iniciado') bg-primary
-                        @elseif($tramiteInfo->estado_actual === 'Finalizado') bg-success
-                        @else bg-dark
-                        @endif">
-                        {{ $tramiteInfo->estado_actual ?? 'Desconocido' }}
+                    @if($tramiteInfo->estado_actual === 'Aprobado') bg-success
+                    @elseif($tramiteInfo->estado_actual === 'Rechazado') bg-danger
+                    @elseif($tramiteInfo->estado_actual === 'Dado de Baja') bg-secondary
+                    @elseif($tramiteInfo->estado_actual === 'Iniciado') bg-primary
+                    @elseif($tramiteInfo->estado_actual === 'Finalizado') bg-success
+                    @else bg-dark
+                    @endif">
+                    {{ $tramiteInfo->estado_actual ?? 'Desconocido' }}
+                        @if($tramiteInfo->espera_documentacion)
+                            (Espera Documentación)
+                         @endif
                     </span>
                 </div>
                 <div class="border rounded p-2 flex-grow-1 bg-white">
@@ -58,6 +63,9 @@
                 </div>
             </div>
             <div class="ms-3 d-flex gap-1">
+                @if($tramiteInfo->puede_pedir_documentacion && !$tramiteInfo->espera_documentacion)
+                <button class="btn btn-primary" onclick="pedirDocumentacion({{$idTramite}})" title="Pedir Documentación"><i class="fas fa-file"></i></button>
+                @endif
                 <button class="btn btn-warning" title="Reasignar"><i class="fas fa-random"></i></button>
                 <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalCambiarPrioridad" title="Cambiar prioridad"><i class="fas fa-exclamation"></i></button>
                  @if(Session::has('usuario_interno') && isset($tramiteInfo->legajo))
@@ -67,7 +75,7 @@
                 @if($usuarioSesion->legajo != $tramiteInfo->legajo)
                 <button class="btn btn-primary" onclick="tomarTramite({{ $idTramite }})" title="Tomar"><i class="fas fa-sign-out-alt"></i></button>
                 @endif
-                @if($usuarioSesion->legajo == $tramiteInfo->legajo  && $tramiteInfo->estado_actual != 'Finalizado' && $tramiteInfo->estado_actual != 'Dado de Baja' && $tramiteInfo->estado_actual != 'Rechazado')
+                @if($usuarioSesion->legajo == $tramiteInfo->legajo  && $tramiteInfo->estado_actual != 'Finalizado' && $tramiteInfo->estado_actual != 'Dado de Baja' && $tramiteInfo->estado_actual != 'Rechazado' && !$tramiteInfo->espera_documentacion)
                 <button class="btn btn-success" onclick="avanzarEstado({{ $idTramite }})" title="Avanzar Estado"><i class="fas fa-arrow-right"></i></button>
                 @endif
                 @endif
@@ -479,9 +487,12 @@
     }
 
 
+// Reemplaza la sección del JavaScript relacionada con el modal desde la línea donde defines modalSeleccionEstado
+
 let modalSeleccionEstado;
 
 function avanzarEstado(idTramite) {
+    document.getElementById("loader").style.display = "flex";
     // Primero verificar si hay preguntas editables (cuestionario activo)
     const preguntasEditables = document.querySelectorAll('select[name^="respuestas"]');
     const hayCuestionarioActivo = preguntasEditables.length > 0;
@@ -500,6 +511,7 @@ function avanzarEstado(idTramite) {
         });
         
         if (!todasRespondidas) {
+            document.getElementById("loader").style.display = "none";
             alert('Debe completar todas las preguntas del cuestionario antes de avanzar el estado:\n' + mensajeError);
             return;
         }
@@ -532,6 +544,7 @@ function avanzarEstado(idTramite) {
         });
         
         if (detallesFaltantes) {
+            document.getElementById("loader").style.display = "none";
             alert('Las siguientes preguntas requieren detalles:\n' + mensajeDetallesError);
             return;
         }
@@ -580,6 +593,7 @@ function avanzarEstado(idTramite) {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
+                        document.getElementById("loader").style.display = "none";
                         // Si el cuestionario causó rechazo o finalización, no continuar con avance manual
                         if (data.tramite_rechazado || data.tramite_finalizado) {
                             showAlert('warning', data.message + ' La página se actualizará automáticamente.');
@@ -592,19 +606,25 @@ function avanzarEstado(idTramite) {
                         // Continuar con el avance de estado
                         procederConAvanceEstado(idTramite);
                     } else {
+                        document.getElementById("loader").style.display = "none";
                         alert('Error al guardar el cuestionario: ' + data.message);
                     }
                 })
                 .catch(error => {
+                    document.getElementById("loader").style.display = "none";
                     console.error('Error:', error);
                     alert('Error al guardar el cuestionario');
                 });
             }
+        } else {
+            document.getElementById("loader").style.display = "none";
         }
     } else {
         // No hay cuestionario activo, proceder directamente con el avance
         if (confirm("¿Desea avanzar el estado del trámite?")) {
             procederConAvanceEstado(idTramite);
+        } else {
+            document.getElementById("loader").style.display = "none";
         }
     }
 }
@@ -620,6 +640,7 @@ function procederConAvanceEstado(idTramite) {
     })
     .then(res => res.json())
     .then(data => {
+        document.getElementById("loader").style.display = "none";
         if (data.estados.length === 1) {
             // Un solo estado posible, avanzar directamente
             fetch("{{ route('tramites.avanzarEstado') }}", {
@@ -643,30 +664,7 @@ function procederConAvanceEstado(idTramite) {
             });
         } else if (data.estados.length > 1) {
             // Múltiples estados posibles, mostrar modal de selección
-            let select = document.getElementById("select_estado");
-            select.innerHTML = "";
-            
-            let defaultOpt = document.createElement("option");
-            defaultOpt.value = "";
-            defaultOpt.textContent = "Seleccione un estado";
-            defaultOpt.disabled = true;
-            defaultOpt.selected = true; 
-            select.appendChild(defaultOpt);
-
-            data.estados.forEach(e => {
-                let opt = document.createElement("option");
-                opt.value = e.id_estado_tramite;
-                opt.textContent = e.nombre_estado;
-                select.appendChild(opt);
-            });
-
-            document.getElementById("id_tramite_modal").value = idTramite;
-
-            // Mostrar el modal de selección
-            if (!modalSeleccionEstado) {
-                modalSeleccionEstado = new bootstrap.Modal(document.getElementById("modalSeleccionEstado"));
-            }
-            modalSeleccionEstado.show();
+            mostrarModalSeleccionEstado(data.estados, idTramite);
         } else {
             // No hay estados disponibles - estamos en el último estado
             // Llamar a avanzarEstado sin idEstadoNuevo para que el backend maneje la finalización
@@ -692,54 +690,150 @@ function procederConAvanceEstado(idTramite) {
         }
     })
     .catch(error => {
+        document.getElementById("loader").style.display = "none";
         console.error('Error:', error);
         alert('Error al obtener los estados posibles');
     });
 }
 
-document.getElementById("formSeleccionEstado").addEventListener("submit", function(e) {
-    e.preventDefault();
+
+let eventListenersAdded = false;
+
+function mostrarModalSeleccionEstado(estados, idTramite) {
+    // Limpiar el select y agregar opciones
+    let select = document.getElementById("select_estado");
+    select.innerHTML = "";
     
-    let idTramite = document.getElementById("id_tramite_modal").value;
-    let idEstadoNuevo = document.getElementById("select_estado").value;
+    let defaultOpt = document.createElement("option");
+    defaultOpt.value = "";
+    defaultOpt.textContent = "Seleccione un estado";
+    defaultOpt.disabled = true;
+    defaultOpt.selected = true; 
+    select.appendChild(defaultOpt);
 
-    console.log("Valor seleccionado:", idEstadoNuevo);
-
-    fetch("{{ route('tramites.avanzarEstado') }}", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRF-TOKEN": "{{ csrf_token() }}"
-        },
-        body: JSON.stringify({ 
-            idTramite: idTramite, 
-            idEstadoNuevo: idEstadoNuevo 
-        })
-    })
-    .then(r => r.json())
-    .then(resp => {
-        // Cerrar el modal ANTES de verificar la respuesta
-        if (modalSeleccionEstado) {
-            modalSeleccionEstado.hide();
-        }
-        
-        if (resp.success) {
-            // Pequeño delay para asegurar que el modal se cierre completamente
-            setTimeout(() => {
-                location.reload();
-            }, 300);
-        } else {
-            alert(resp.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        // Cerrar el modal incluso si hay error
-        if (modalSeleccionEstado) {
-            modalSeleccionEstado.hide();
-        }
-        alert('Error al procesar la solicitud');
+    estados.forEach(e => {
+        let opt = document.createElement("option");
+        opt.value = e.id_estado_tramite;
+        opt.textContent = e.nombre_estado;
+        select.appendChild(opt);
     });
+
+    document.getElementById("id_tramite_modal").value = idTramite;
+
+    // Inicializar el modal si no existe
+    if (!modalSeleccionEstado) {
+        modalSeleccionEstado = new bootstrap.Modal(document.getElementById("modalSeleccionEstado"), {
+            keyboard: true
+        });
+        
+        const modalElement = document.getElementById("modalSeleccionEstado");
+        
+        // Event listener para cuando se cierra el modal
+        modalElement.addEventListener('hidden.bs.modal', function () {
+            document.getElementById("formSeleccionEstado").reset();
+            document.getElementById("id_tramite_modal").value = "";
+        });
+    }
+    
+    // Agregar event listeners usando delegación de eventos (solo una vez)
+    if (!eventListenersAdded) {
+        // Usar delegación de eventos en el documento
+        document.addEventListener('click', function(e) {
+            // Botón cerrar (X)
+            if (e.target.matches('#modalSeleccionEstado .btn-close')) {
+                cerrarModalSeleccionEstado();
+                return;
+            }
+            
+            // Botón Cancelar
+            if (e.target.matches('#modalSeleccionEstado .btn-secondary[data-bs-dismiss="modal"]')) {
+                e.preventDefault();
+                e.stopPropagation();
+                cerrarModalSeleccionEstado();
+                return;
+            }
+        });
+        
+        eventListenersAdded = true;
+    }
+    
+    // Mostrar el modal
+    modalSeleccionEstado.show();
+}
+
+function cerrarModalSeleccionEstado() {
+    if (modalSeleccionEstado) {
+        modalSeleccionEstado.hide();
+    }
+}
+
+// Event listener para el formulario de selección de estado
+document.addEventListener('DOMContentLoaded', function() {
+    const formSeleccionEstado = document.getElementById("formSeleccionEstado");
+    if (formSeleccionEstado) {
+        formSeleccionEstado.addEventListener("submit", function(e) {
+            e.preventDefault();
+            
+            let idTramite = document.getElementById("id_tramite_modal").value;
+            let idEstadoNuevo = document.getElementById("select_estado").value;
+
+            if (!idEstadoNuevo) {
+                alert("Por favor seleccione un estado");
+                return;
+            }
+
+            console.log("Valor seleccionado:", idEstadoNuevo);
+
+            // Deshabilitar el botón de submit para evitar múltiples clics
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'Procesando...';
+            }
+
+            fetch("{{ route('tramites.avanzarEstado') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                body: JSON.stringify({ 
+                    idTramite: idTramite, 
+                    idEstadoNuevo: idEstadoNuevo 
+                })
+            })
+            .then(r => r.json())
+            .then(resp => {
+                // Cerrar el modal
+                cerrarModalSeleccionEstado();
+                
+                if (resp.success) {
+                    // Pequeño delay para asegurar que el modal se cierre completamente
+                    setTimeout(() => {
+                        location.reload();
+                    }, 300);
+                } else {
+                    // Rehabilitar el botón en caso de error
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Aceptar';
+                    }
+                    alert(resp.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Cerrar el modal y rehabilitar el botón
+                cerrarModalSeleccionEstado();
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Aceptar';
+                }
+                alert('Error al procesar la solicitud');
+            });
+        });
+    }
 });
 
 document.getElementById('formCuestionarios').addEventListener('submit', function(e) {
@@ -1032,6 +1126,46 @@ function limpiarCuestionario() {
 
 // Hacer la función disponible globalmente
 window.limpiarCuestionario = limpiarCuestionario;
+
+
+
+
+function pedirDocumentacion(idTramite) {
+    if (confirm("¿Estás seguro de que deseas solicitar documentación adicional para este trámite?")) {
+        // Mostrar loader
+        document.getElementById("loader").style.display = "flex";
+        
+        fetch("{{ route('tramites.pedirDocumentacion') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+            },
+            body: JSON.stringify({ idTramite })
+        })
+        .then(res => res.json())
+        .then(data => {
+            // Ocultar loader
+            document.getElementById("loader").style.display = "none";
+            
+            if (data.success) {
+                showAlert('success', data.message);
+                // Opcional: recargar la página después de un tiempo
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            } else {
+                showAlert('error', data.message);
+            }
+        })
+        .catch(error => {
+            // Ocultar loader
+            document.getElementById("loader").style.display = "none";
+            console.error('Error:', error);
+            showAlert('error', 'Error al solicitar documentación');
+        });
+    }
+}
 
 </script>
 @endpush

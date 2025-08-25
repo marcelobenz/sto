@@ -121,7 +121,9 @@ class TramiteRepository
                 'm.flag_cancelado',
                 'm.flag_rechazado',
                 'p.nombre as prioridad',
-                'tet.id_estado_tramite as id_estado_tramite'
+                'tet.id_estado_tramite as id_estado_tramite',
+                'et.puede_pedir_documentacion',
+                'tet.espera_documentacion'
             )
             ->where('m.id_tramite', $idTramite)
             ->first();
