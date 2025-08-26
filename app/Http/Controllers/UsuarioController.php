@@ -19,9 +19,9 @@ class UsuarioController extends Controller
     public function index(Request $request)
     {
         $usuarioInterno = Session::get('usuario_interno');
-        if(!$usuarioInterno->hasPermission('CONFIGURAR_USUARIOS')){
+      /*  if(!$usuarioInterno->hasPermission('CONFIGURAR_USUARIOS')){
             return redirect()->route('navbar');
-        }
+        }*/
 
         if ($request->ajax()) {
             $data = $this->usuarioService->listarUsuarios();

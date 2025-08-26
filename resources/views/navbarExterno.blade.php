@@ -65,7 +65,7 @@
     </nav>
 
     <!-- Contenido -->
-    <div class="pt-20 px-4 max-w-7xl mx-auto">
+    <div>
         @yield('contenidoPrincipal')
     </div>
 

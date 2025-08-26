@@ -10,23 +10,21 @@ class IngresoExternoRepository
 {
     public function obtenerTramitesPorCuit($cuit)
     {
-        return DB::table('tramite as t')
-            ->join('multinota as m', 't.id_tramite', '=', 'm.id_tramite')
-            ->join('tramite_estado_tramite as tet', 'tet.id_tramite', '=', 't.id_tramite')
+        return DB::table('multinota as m')
+            ->join('tramite_estado_tramite as tet', 'tet.id_tramite', '=', 'm.id_tramite')
             ->join('tipo_tramite_multinota as ttm', 'ttm.id_tipo_tramite_multinota', '=', 'm.id_tipo_tramite_multinota')
             ->join('categoria as c', 'ttm.id_categoria', '=', 'c.id_categoria')
             ->leftJoin('usuario_interno as u', 'u.id_usuario_interno', '=', 'tet.id_usuario_interno')
             ->select(
-                't.id_tramite',
-                't.fecha_alta',
-                't.fecha_modificacion',
-                't.correo',
-                't.cuit_contribuyente',
+                'm.id_tramite',
+                'm.fecha_alta',
+                'm.correo',
+                'm.cuit_contribuyente',
                 'c.nombre as nombre_categoria'
             )
-            ->where('t.cuit_contribuyente', $cuit)
+            ->where('m.cuit_contribuyente', $cuit)
             ->distinct()
-            ->orderBy('t.id_tramite', 'DESC');
+            ->orderBy('m.id_tramite', 'DESC');
     }
 
 

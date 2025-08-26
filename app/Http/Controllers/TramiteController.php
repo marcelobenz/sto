@@ -39,6 +39,12 @@ class TramiteController extends Controller
         return view('tramites.detalle', array_merge($data, ['idTramite' => $idTramite]));
     }
 
+    public function detalleExterno($idTramite)
+    {
+        $data = $this->tramiteService->getTramiteDetails($idTramite);
+        return view('externo.detalle', array_merge($data, ['idTramite' => $idTramite]));
+    }
+
     public function darDeBaja(Request $request)
     {
         $success = $this->tramiteService->darDeBajaTramite($request->input('idTramite'));

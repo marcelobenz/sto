@@ -215,6 +215,7 @@ Route::post('/ingreso-externo/registrar', [IngresoExternoController::class, 'reg
 Route::get('/bandeja-usuario-externo', [IngresoExternoController::class, 'bandejaExterna'])->name('bandeja-usuario-externo');
 Route::get('/cambiar-clave', [ContribuyenteMultinotaController::class, 'showChangePasswordForm'])->name('cambiar-clave');
 Route::post('/cambiar-clave', [ContribuyenteMultinotaController::class, 'changePassword'])->name('cambiar-clave.submit');
+Route::get('/externo/{id}/detalle', [TramiteController::class, 'detalleExterno'])->name('externo.detalle');
 
 //Administración Workflow
 Route::get('/perfil-externo', [ContribuyenteMultinotaController::class, 'perfil'])->name('perfil-externo');

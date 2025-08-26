@@ -76,7 +76,7 @@ public function registrar(Request $request)
 {
     $request->validate([
         'cuit' => 'required|string|unique:contribuyente_multinota,cuit',
-        'correo' => 'required|email|unique:contribuyente_multinota,correo',
+        'correo' => 'required|email',
         'nombre' => 'required|string|max:255',
         'apellido' => 'required|string|max:255',
         'telefono_1' => 'nullable|string|max:20',
