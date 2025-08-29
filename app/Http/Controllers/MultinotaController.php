@@ -15,11 +15,11 @@ use App\Models\Campo;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
 use Carbon\Carbon;
-use DB;
 
 class MultinotaController extends Controller
 {
@@ -630,65 +630,74 @@ class MultinotaController extends Controller
     }
 
     public function guardarMultinota($id) {
-        $multinotaSelected = Session::get('MULTINOTA_SELECTED');
-        $seccionesAsociadas = Session::get('SECCIONES_ASOCIADAS');
-        $categorias = Cache::get('CATEGORIAS');
+        try {
+            DB::beginTransaction();
 
-        // A la multinota obsoleta se le asigna "baja_logica" = 1
-        TipoTramiteMultinota::where('id_tipo_tramite_multinota', (int) $id)->update(['baja_logica' => 1]);
+            $multinotaSelected = Session::get('MULTINOTA_SELECTED');
+            $seccionesAsociadas = Session::get('SECCIONES_ASOCIADAS');
+            $categorias = Cache::get('CATEGORIAS');
 
-        // Mensaje inicial se guarda en mensaje_inicial
-        MensajeInicial::create(['mensaje_inicial' => $multinotaSelected->mensaje_inicial]);
+            // A la multinota obsoleta se le asigna "baja_logica" = 1
+            TipoTramiteMultinota::where('id_tipo_tramite_multinota', (int) $id)->update(['baja_logica' => 1]);
 
-        // Los demas datos de la multinota se guardan en tipo_tramite_multinota 
-        TipoTramiteMultinota::create([
-            'nombre' => $multinotaSelected->nombre,
-            'codigo' => $multinotaSelected->codigo,
-            'id_categoria' => $multinotaSelected->id_categoria,
-            'publico' => $multinotaSelected->publico,
-            'nivel' => $multinotaSelected->nivel,
-            'muestra_mensaje' => $multinotaSelected->muestra_mensaje,
-            'lleva_expediente' => $multinotaSelected->lleva_expediente,
-            'baja_logica' => 0,
-            'lleva_documentacion' => $multinotaSelected->lleva_documentacion,
-            'id_multinota_servicio' => $multinotaSelected->id_multinota_servicio,
-        ]);
+            // Mensaje inicial se guarda en mensaje_inicial
+            MensajeInicial::create(['mensaje_inicial' => $multinotaSelected->mensaje_inicial]);
 
-        // La recupero para saber el ID de la nueva multinota
-        $res = TipoTramiteMultinota::select('id_tipo_tramite_multinota')
-        ->where('baja_logica', 0)
-        ->where('nombre', $multinotaSelected->nombre)
-        ->get();
-
-        $nuevoId = $res[0]->id_tipo_tramite_multinota;
-
-        // Recupero ID de mensaje inicial previamente insertado
-        $maxIdMensajeInicial = MensajeInicial::max('id_mensaje_inicial');
-
-        // Relacion mensaje inicial / multinota se guarda en tipo_tramite_mensaje_inicial
-        TipoTramiteMensajeInicial::create([
-            'id_tipo_tramite_multinota' => $nuevoId,
-            'id_mensaje_inicial' => $maxIdMensajeInicial,
-        ]);
-
-        // La relacion entre la multinota y sus secciones se guarda en multinota_seccion, asi como el orden
-        
-        // Se recorre el array de secciones para ir insertando una por una en base
-        foreach ($seccionesAsociadas as $s) {
-            MultinotaSeccion::create([
-                'id_tipo_tramite_multinota' => $nuevoId,
-                'id_seccion' => $s->id_seccion,
-                'orden' => $s->orden,
+            // Los demas datos de la multinota se guardan en tipo_tramite_multinota 
+            TipoTramiteMultinota::create([
+                'nombre' => $multinotaSelected->nombre,
+                'codigo' => $multinotaSelected->codigo,
+                'id_categoria' => $multinotaSelected->id_categoria,
+                'publico' => $multinotaSelected->publico,
+                'nivel' => $multinotaSelected->nivel,
+                'muestra_mensaje' => $multinotaSelected->muestra_mensaje,
+                'lleva_expediente' => $multinotaSelected->lleva_expediente,
+                'baja_logica' => 0,
+                'lleva_documentacion' => $multinotaSelected->lleva_documentacion,
+                'id_multinota_servicio' => $multinotaSelected->id_multinota_servicio,
             ]);
+
+            // La recupero para saber el ID de la nueva multinota
+            $res = TipoTramiteMultinota::select('id_tipo_tramite_multinota')
+            ->where('baja_logica', 0)
+            ->where('nombre', $multinotaSelected->nombre)
+            ->get();
+
+            $nuevoId = $res[0]->id_tipo_tramite_multinota;
+
+            // Recupero ID de mensaje inicial previamente insertado
+            $maxIdMensajeInicial = MensajeInicial::max('id_mensaje_inicial');
+
+            // Relacion mensaje inicial / multinota se guarda en tipo_tramite_mensaje_inicial
+            TipoTramiteMensajeInicial::create([
+                'id_tipo_tramite_multinota' => $nuevoId,
+                'id_mensaje_inicial' => $maxIdMensajeInicial,
+            ]);
+
+            // La relacion entre la multinota y sus secciones se guarda en multinota_seccion, asi como el orden
+            
+            // Se recorre el array de secciones para ir insertando una por una en base
+            foreach ($seccionesAsociadas as $s) {
+                MultinotaSeccion::create([
+                    'id_tipo_tramite_multinota' => $nuevoId,
+                    'id_seccion' => $s->id_seccion,
+                    'orden' => $s->orden,
+                ]);
+            }
+
+            // Se inserta un registro en la tabla multinota_tipo_cuenta con valor '-'
+            MultinotaTipoCuenta::create([
+                'id_tipo_tramite_multinota' => $nuevoId,
+                'cod_tipo_cuenta' => '-',
+            ]);
+
+            DB::commit();
+
+            return view('multinotas.index', compact('categorias'));
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return back()->with('error', 'Error al guardar multinota');
         }
-
-        // Se inserta un registro en la tabla multinota_tipo_cuenta con valor '-'
-        MultinotaTipoCuenta::create([
-            'id_tipo_tramite_multinota' => $nuevoId,
-            'cod_tipo_cuenta' => '-',
-        ]);
-
-        return view('multinotas.index', compact('categorias'));
     }
 
     public function desactivarMultinota($id) {

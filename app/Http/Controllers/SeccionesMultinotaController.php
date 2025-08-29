@@ -8,9 +8,9 @@ use App\Models\Campo;
 use App\Models\OpcionCampo;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
-use DB;
 
 class SeccionesMultinotaController extends Controller
 {
@@ -360,58 +360,67 @@ class SeccionesMultinotaController extends Controller
     }
 
     public function editarSeccion(Request $request) {
-        $seccionActual = Session::get('SECCION_ACTUAL');
-        $campos = Session::get('CAMPOS_ACTUALES');
-        $opcionesCampo = Session::get('OPCIONES_CAMPO_ACTUALES');
+        try {
+            DB::beginTransaction();
 
-        //1) Actualizar seccion actual, seteando activo = 0. Si la seccion tiene ID = 1 (ID dummy), no se busca en base porque no existe
-        if($seccionActual->id_seccion != 1) {
-            $seccion = SeccionMultinota::find($seccionActual->id_seccion);
-            $seccion->activo = 0;
-            $seccion->save();
-        }
+            $seccionActual = Session::get('SECCION_ACTUAL');
+            $campos = Session::get('CAMPOS_ACTUALES');
+            $opcionesCampo = Session::get('OPCIONES_CAMPO_ACTUALES');
 
-        //2) Insertar nueva seccion, seteando activo = 1
-        $nuevaSeccion = new SeccionMultinota();
-        $nuevaSeccion->titulo = $request->titulo;
-        $nuevaSeccion->temporal = 0;
-        $nuevaSeccion->activo = 1;
-        $nuevaSeccion->save();
+            //1) Actualizar seccion actual, seteando activo = 0. Si la seccion tiene ID = 1 (ID dummy), no se busca en base porque no existe
+            if($seccionActual->id_seccion != 1) {
+                $seccion = SeccionMultinota::find($seccionActual->id_seccion);
+                $seccion->activo = 0;
+                $seccion->save();
+            }
 
-        $nuevaSeccion = SeccionMultinota::where('activo', 1)
-        ->where('titulo', $request->titulo)
-        ->get();
+            //2) Insertar nueva seccion, seteando activo = 1
+            $nuevaSeccion = new SeccionMultinota();
+            $nuevaSeccion->titulo = $request->titulo;
+            $nuevaSeccion->temporal = 0;
+            $nuevaSeccion->activo = 1;
+            $nuevaSeccion->save();
 
-        //3) Se insertan los campos de manera asociada al nuevo id de la seccion multinota
-        foreach ($campos as $c) {
-            $nuevoCampo = new Campo();
-            $nuevoCampo->nombre = $c->nombre;
-            $nuevoCampo->tipo = $c->tipo;
-            $nuevoCampo->dimension = $c->dimension;
-            $nuevoCampo->orden = $c->orden;
-            $nuevoCampo->obligatorio = $c->obligatorio;
-            $nuevoCampo->mascara = $c->mascara;
-            $nuevoCampo->limite_minimo = $c->limite_minimo;
-            $nuevoCampo->limite_maximo = $c->limite_maximo;
-            $nuevoCampo->id_seccion = $nuevaSeccion[0]->id_seccion;
-            $nuevoCampo->save();
+            $nuevaSeccion = SeccionMultinota::where('activo', 1)
+            ->where('titulo', $request->titulo)
+            ->get();
 
-            //4) Para los campos de tipo LISTA o CAJAS_SELECCION, se insertan nuevos registros en opcion_campo con la referencia del nuevo id_campo correspondiente
-            if($c->tipo == 'LISTA' || $c->tipo == 'CAJAS_SELECCION') {
-                $id_campo = Campo::where('id_seccion', $nuevaSeccion[0]->id_seccion)
-                ->max('id_campo');
+            //3) Se insertan los campos de manera asociada al nuevo id de la seccion multinota
+            foreach ($campos as $c) {
+                $nuevoCampo = new Campo();
+                $nuevoCampo->nombre = $c->nombre;
+                $nuevoCampo->tipo = $c->tipo;
+                $nuevoCampo->dimension = $c->dimension;
+                $nuevoCampo->orden = $c->orden;
+                $nuevoCampo->obligatorio = $c->obligatorio;
+                $nuevoCampo->mascara = $c->mascara;
+                $nuevoCampo->limite_minimo = $c->limite_minimo;
+                $nuevoCampo->limite_maximo = $c->limite_maximo;
+                $nuevoCampo->id_seccion = $nuevaSeccion[0]->id_seccion;
+                $nuevoCampo->save();
 
-                foreach ($opcionesCampo as $opc) {
-                    $opcion = new OpcionCampo();
-                    $opcion->id_campo = $id_campo;
-                    $opcion->opcion = $opc->opcion;
-                    $opcion->orden = $opc->orden;
-                    $opcion->save();
+                //4) Para los campos de tipo LISTA o CAJAS_SELECCION, se insertan nuevos registros en opcion_campo con la referencia del nuevo id_campo correspondiente
+                if($c->tipo == 'LISTA' || $c->tipo == 'CAJAS_SELECCION') {
+                    $id_campo = Campo::where('id_seccion', $nuevaSeccion[0]->id_seccion)
+                    ->max('id_campo');
+
+                    foreach ($opcionesCampo as $opc) {
+                        $opcion = new OpcionCampo();
+                        $opcion->id_campo = $id_campo;
+                        $opcion->opcion = $opc->opcion;
+                        $opcion->orden = $opc->orden;
+                        $opcion->save();
+                    }
                 }
             }
-        }
 
-        return view('secciones-multinota.index');
+            DB::commit();
+
+            return view('secciones-multinota.index');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return back()->with('error', 'Error al guardar seccion');
+        }
     }
 
     public function setearNuevoOrdenCampos($array) {
