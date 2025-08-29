@@ -39,4 +39,9 @@ class TipoTramiteMultinota extends Model {
     {
         return $this->belongsTo(Categoria::class, 'id_categoria');
     }
+
+    public function workflow()
+    {
+        return $this->hasMany(ConfiguracionEstadoTramite::class, 'id_tipo_tramite_multinota', 'id_tipo_tramite_multinota');
+    }
 }
