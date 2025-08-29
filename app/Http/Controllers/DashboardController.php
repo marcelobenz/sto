@@ -12,9 +12,9 @@ class DashboardController extends Controller
     {
 
         $usuarioInterno = Session::get('usuario_interno');
-       if (!$usuarioInterno->rol || $usuarioInterno->rol->clave !== 'ADMIN') {
+     /*  if (!$usuarioInterno->rol || $usuarioInterno->rol->clave !== 'ADMIN') {
             return redirect()->route('navbar')->with('error', 'No tienes el permiso para acceder.');
-        }       
+        }       */
 
 
         $totales = DB::select('

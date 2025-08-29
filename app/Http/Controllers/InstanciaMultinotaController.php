@@ -6,6 +6,7 @@ use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 
 use App\Models\TipoPersonalidadJuridica;
@@ -754,6 +755,8 @@ class InstanciaMultinotaController extends Controller {
 
     public function registrarTramite() {
         try {
+            DB::beginTransaction();
+
             // Se cargan datos
             $persona = Session::get('PERSONA');
             $formulario = Session::get('FORMULARIO');
@@ -768,10 +771,7 @@ class InstanciaMultinotaController extends Controller {
             // Cargar estados
             $estadosIniciales = $this->cargarEstados($idTipoTramiteMultinota);
 
-            $asignableController = new AsignableATramiteController(
-                new LicenciaService(),
-                new TramiteService()
-            );
+            $asignableController = app()->make(AsignableATramiteController::class);
 
             foreach ($estadosIniciales as $e) {
                 $e->setUsuarioAsignado(
@@ -942,11 +942,14 @@ class InstanciaMultinotaController extends Controller {
 
             $comentarioNotificacion->guardarInicioTramite($dtoHistorialTramite, $multinota);
 
+            DB::commit();
+
             // Generación de PDF
             return response()->json([
                 'url' => route('reporte.constancia.modal', ['idTramite' => $multinota->id_tramite])
             ]);
         } catch (\Throwable $e) {
+            DB::rollBack();
             return back()->with('error', 'Error al registrar el tramite: ' . $e->getMessage());
         }
     }

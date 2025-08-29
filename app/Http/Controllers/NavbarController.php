@@ -56,6 +56,7 @@ class NavbarController extends Controller
                 $multinotasActivas = TipoTramiteMultinota::where('id_categoria', $c->id_categoria)
                 ->where('baja_logica', 0)
                 ->where('publico', 1)
+                ->whereHas('workflow')
                 ->orderBy('nombre', 'asc')
                 ->get();
 

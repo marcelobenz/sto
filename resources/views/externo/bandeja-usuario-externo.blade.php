@@ -2,7 +2,7 @@
 
 @section('heading')
     <link href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css" rel="stylesheet">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
          /* Estilos personalizados para el mensaje de procesamiento */
          #custom-processing {
@@ -42,9 +42,9 @@
                     <th>ID Trámite</th>
                     <th>Categoría</th>
                     <th>Fecha de Alta</th>
-                    <th>Fecha de Modificación</th>
                     <th>Correo</th>
                     <th>CUIT Contribuyente</th>
+                    <th>Acciones</th> <!-- Nueva columna -->
                 </tr>
             </thead>
             <tbody>
@@ -60,29 +60,54 @@
 
 <script>
     $(document).ready(function() {
-        $('#tramitesTable').DataTable({
-            "processing": true,
-            "serverSide": true,
-            "ajax": "{{ route('bandeja-usuario-externo') }}",
-            "columns": [
-                { "data": "id_tramite" },
-                { "data": "nombre_categoria" },
-                { "data": "fecha_alta" },
-                { "data": "fecha_modificacion" },
-                { "data": "correo" },
-                { "data": "cuit_contribuyente" }
-            ],
-            "language": {
-                "paginate": {
-                    "previous": "<",
-                    "next": ">"
+      let table = $('#tramitesTable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: function(data, callback, settings) {
+            $.ajax({
+                url: "{{ route('bandeja-usuario-externo') }}",
+                type: 'GET',
+                data: data,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest' 
                 },
-                "processing": "<div id='custom-processing'>Cargando, por favor espera...</div>"
+                success: function(response) {
+                    callback(response);
+                }
+            });
+        },
+        columns: [
+            { data: 'id_tramite' },
+            { data: 'nombre_categoria' },
+            { data: 'fecha_alta' },
+            { data: 'correo' },
+            { data: 'cuit_contribuyente' },
+            { 
+                data: null,
+                orderable: false,
+                searchable: false,
+                render: function(data, type, row) {
+                    return `
+                        <a href="/externo/${row.id_tramite}/detalle" title="Ver detalle" class="btn-ver-detalle px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-800"
+                            data-id="${row.id_tramite}">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                    `;
+                }
+            }
+        ],
+        language: {
+            paginate: {
+                previous: "<",
+                next: ">"
             },
-            "lengthMenu": [10, 25, 50],
-            "pageLength": 10,
-            "order": [[ 2, "desc" ]] // Ordena por fecha de alta descendente por defecto
-        });
+            processing: "<div id='custom-processing'>Cargando, por favor espera...</div>"
+        },
+        lengthMenu: [10, 25, 50],
+        pageLength: 10,
+        order: [[2, 'desc']]
+    });
+
     });
 </script>
 @endpush

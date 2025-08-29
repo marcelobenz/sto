@@ -16,6 +16,18 @@ class ContribuyenteMultinota extends Model
     public $incrementing = true;
     protected $keyType = 'int';
 
+    protected $fillable = [
+        'cuit',
+        'correo',
+        'nombre',
+        'apellido',
+        'telefono1',
+        'telefono2',
+        'clave',
+        'id_direccion',
+        'fecha_alta',
+    ];
+
 
     public function direccion()
 {

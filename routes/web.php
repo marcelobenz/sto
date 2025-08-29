@@ -90,6 +90,10 @@ Route::get('/tramites/en-curso', [TramiteController::class, 'enCurso'])->name('t
 Route::post('/tramites/tomarTramite', [TramiteController::class, 'tomarTramite'])->name('tramites.tomarTramite');
 Route::post('/tramites/cambiar-prioridad', [TramiteController::class, 'cambiarPrioridad'])->name('tramites.cambiarPrioridad');
 Route::post('/tramites/darDeBaja', [TramiteController::class, 'darDeBaja'])->name('tramites.darDeBaja');
+Route::post('/tramites/avanzarEstado', [TramiteController::class, 'avanzarEstado'])->name('tramites.avanzarEstado');
+Route::post('/tramites/posibles-estados', [TramiteController::class, 'getPosiblesEstados'])->name('tramites.getPosiblesEstados');
+Route::post('/tramites/guardar-cuestionario', [TramiteController::class, 'guardarCuestionario'])->name('cuestionarios.guardar');
+Route::post('/tramites/pedir-documentacion', [TramiteController::class, 'pedirDocumentacion'])->name('tramites.pedirDocumentacion');
 
 //Estado Trámite
 Route::get('/estadoTramite/tienePermiso/{multinota}', [EstadoTramiteController::class, 'tienePermiso'])->name('estadoTramite.tienePermiso');
@@ -121,6 +125,9 @@ Route::post('/instanciaTramite/handleCheckConfirmarDeclaracion', [InstanciaMulti
 Route::get('/instanciaTramite/registrarTramite', [InstanciaMultinotaController::class, 'registrarTramite'])->name('instanciaTramite.registrarTramite');
 
 //Categorías
+Route::get('/perfil', [UsuarioController::class, 'perfil'])->name('perfil');
+Route::post('/perfil/actualizar', [UsuarioController::class, 'actualizarPerfil'])->name('perfil.actualizar');
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
 Route::get('/categorias', [CategoriaController::class, 'index'])->name('categorias.index');
 Route::put('/categorias/{id}/desactivar', [CategoriaController::class, 'desactivar'])->name('categorias.desactivar');
 Route::get('/categorias/{id}/edit', [CategoriaController::class, 'edit'])->name('categorias.edit');
@@ -208,6 +215,7 @@ Route::post('/ingreso-externo/registrar', [IngresoExternoController::class, 'reg
 Route::get('/bandeja-usuario-externo', [IngresoExternoController::class, 'bandejaExterna'])->name('bandeja-usuario-externo');
 Route::get('/cambiar-clave', [ContribuyenteMultinotaController::class, 'showChangePasswordForm'])->name('cambiar-clave');
 Route::post('/cambiar-clave', [ContribuyenteMultinotaController::class, 'changePassword'])->name('cambiar-clave.submit');
+Route::get('/externo/{id}/detalle', [TramiteController::class, 'detalleExterno'])->name('externo.detalle');
 
 //Administración Workflow
 Route::get('/perfil-externo', [ContribuyenteMultinotaController::class, 'perfil'])->name('perfil-externo');
@@ -222,7 +230,7 @@ Route::post('/workflow/editar/guardarBorrador/{id}', [AdministracionWorkflowCont
 Route::post('/workflow/editar/publicarBorrador/{id}', [AdministracionWorkflowController::class, 'publicarBorrador'])->name('workflow.publicarBorrador');
 
 //Navbar
-Route::view('/navbar', [NavbarController::class, 'cargarElementos'])->name('navbar');
+//Route::view('/navbar', [NavbarController::class, 'cargarElementos'])->name('navbar');
 
 //Bandeja Personal
 Route::get('/bandeja-personal', [BandejaPersonalController::class, 'index'])->name('bandeja-personal.index');

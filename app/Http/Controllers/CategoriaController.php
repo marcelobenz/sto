@@ -2,118 +2,82 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Categoria;
+use App\Services\CategoriaService;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
 
 class CategoriaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    protected $categoriaService;
+
+    public function __construct(CategoriaService $categoriaService)
+    {
+        $this->categoriaService = $categoriaService;
+    }
+
     public function index(Request $request)
     {
-        // Obtiene todas las categorias activas de la base de datos
-        //$categorias = Categoria::all();
-
-        // Obtiene las categorias con paginación
-        // $categorias = Categoria::paginate(10); // Cambia el 10 por el número de elementos que quieres por página
-
-        
         if ($request->ajax()) {
-            $data = Categoria::leftJoin('categoria as parent', 'categoria.id_padre', '=', 'parent.id_categoria')
-            ->select('categoria.*', 'parent.nombre as parent_nombre')
-            ->where('categoria.flag_activo', 1)
-            ->get();
+            $data = $this->categoriaService->getAllCategoriesForDataTables();
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->make(true);
         }
 
-        // Retorna la vista con las categorias
-        //return view('categorias.index', compact('categorias'));
         return view('categorias.index');
-
     }
-
 
     public function desactivar(Request $request, $id)
     {
-        $categoria = Categoria::find($id);
-        if ($categoria) {
-            $categoria->flag_activo = 0; 
-            $categoria->save();
+        $result = $this->categoriaService->deactivateCategory($id);
+        
+        if ($result) {
             return response()->json(['message' => 'Categoría desactivada correctamente.'], 200);
-        } else {
-            return response()->json(['message' => 'Categoría no encontrada.'], 404);
         }
+        
+        return response()->json(['message' => 'Categoría no encontrada.'], 404);
     }
-
 
     public function edit($id)
     {
-        $categoria = Categoria::findOrFail($id);
-        $categoriasActivas = Categoria::where('flag_activo', 1)->get();
+        $categoria = $this->categoriaService->findOrFailCategory($id);
+        $categoriasActivas = $this->categoriaService->getActiveCategories();
         return view('categorias.edit', compact('categoria', 'categoriasActivas'));
     }
 
-public function update(Request $request, $id)
-{
-    // Validar los datos del request
-    $request->validate([
-        'nombre' => 'required|string|max:255',
-        'id_padre' => 'nullable|integer',
-        'flag_activo' => 'required|boolean',
-    ]);
-
-    // Encontrar la categoría por ID
-    $categoria = Categoria::find($id);
-
-    if (!$categoria) {
-        return redirect()->route('categorias.index')->with('error', 'Categoría no encontrada.');
-    }
-
-    // Actualizar los campos de la categoría
-    $categoria->nombre = $request->nombre;
-    $categoria->id_padre = $request->id_padre;
-    $categoria->flag_activo = $request->flag_activo;
-
-    // Guardar los cambios en la base de datos
-    $categoria->save();
-
-    // Redirigir con un mensaje de éxito
-    return redirect()->route('categorias.index')->with('success', 'Categoría actualizada correctamente.');
-}
-
-
-public function create()
+    public function update(Request $request, $id)
     {
-        $categoriasActivas = Categoria::where('flag_activo', 1)->get();
-        return view('categorias.create', compact('categoriasActivas'));
-    }
-
-    // Guarda la nueva categoría en la base de datos
-    public function store(Request $request)
-    {
-        // Validar los datos del request
         $request->validate([
             'nombre' => 'required|string|max:255',
             'id_padre' => 'nullable|integer',
             'flag_activo' => 'required|boolean',
         ]);
 
-        $categoria = new Categoria();
-        $categoria->nombre = $request->input('nombre');
-        $categoria->id_padre = $request->input('id_padre');
-        $categoria->flag_activo = $request->input('flag_activo');
-        $categoria->fecha_alta = now(); // Asigna la fecha actual
+        $result = $this->categoriaService->updateCategory($id, $request->all());
 
-        $categoria->save();
-        // Redirigir con un mensaje de éxito
-        return redirect()->route('categorias.index')->with('success', 'Categoría creada correctamente.');
+        if (!$result) {
+            return redirect()->route('categorias.index')->with('error', 'Categoría no encontrada.');
+        }
+
+        return redirect()->route('categorias.index')->with('success', 'Categoría actualizada correctamente.');
     }
 
+    public function create()
+    {
+        $categoriasActivas = $this->categoriaService->getActiveCategories();
+        return view('categorias.create', compact('categoriasActivas'));
+    }
 
+    public function store(Request $request)
+    {
+        $request->validate([
+            'nombre' => 'required|string|max:255',
+            'id_padre' => 'nullable|integer',
+            'flag_activo' => 'required|boolean',
+        ]);
 
-    
+        $this->categoriaService->createCategory($request->all());
+
+        return redirect()->route('categorias.index')->with('success', 'Categoría creada correctamente.');
+    }
 }

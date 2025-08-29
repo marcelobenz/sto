@@ -18,6 +18,8 @@
         <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
 
+    <x-loader />
+
     <div class="row gx-4 align-items-start mt-4">
         <div class="d-flex justify-content-between align-items-center w-100 flex-wrap bg-light p-3 rounded">
             <div class="d-flex flex-grow-1 gap-2">
@@ -29,16 +31,19 @@
                     {{ $tramiteInfo->fecha_alta ? date('d/m/Y', strtotime($tramiteInfo->fecha_alta)) : 'Sin fecha' }}
                 </div>
                 <div class="border rounded p-2 flex-grow-1 bg-white">
-                    Estado actual:
+                  Estado actual:
                     <span class="badge 
-                        @if($tramiteInfo->estado_actual === 'Aprobado') bg-success
-                        @elseif($tramiteInfo->estado_actual === 'Rechazado') bg-danger
-                        @elseif($tramiteInfo->estado_actual === 'Dado de Baja') bg-secondary
-                        @elseif($tramiteInfo->estado_actual === 'Iniciado') bg-primary
-                        @elseif($tramiteInfo->estado_actual === 'Finalizado') bg-success
-                        @else bg-dark
-                        @endif">
-                        {{ $tramiteInfo->estado_actual ?? 'Desconocido' }}
+                    @if($tramiteInfo->estado_actual === 'Aprobado') bg-success
+                    @elseif($tramiteInfo->estado_actual === 'Rechazado') bg-danger
+                    @elseif($tramiteInfo->estado_actual === 'Dado de Baja') bg-secondary
+                    @elseif($tramiteInfo->estado_actual === 'Iniciado') bg-primary
+                    @elseif($tramiteInfo->estado_actual === 'Finalizado') bg-success
+                    @else bg-dark
+                    @endif">
+                    {{ $tramiteInfo->estado_actual ?? 'Desconocido' }}
+                        @if($tramiteInfo->espera_documentacion)
+                            (Espera Documentación)
+                         @endif
                     </span>
                 </div>
                 <div class="border rounded p-2 flex-grow-1 bg-white">
@@ -58,13 +63,55 @@
                 </div>
             </div>
             <div class="ms-3 d-flex gap-1">
+                @if($tramiteInfo->puede_pedir_documentacion && !$tramiteInfo->espera_documentacion)
+                <button class="btn btn-primary" onclick="pedirDocumentacion({{$idTramite}})" title="Pedir Documentación"><i class="fas fa-file"></i></button>
+                @endif
                 <button class="btn btn-warning" title="Reasignar"><i class="fas fa-random"></i></button>
                 <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalCambiarPrioridad" title="Cambiar prioridad"><i class="fas fa-exclamation"></i></button>
+                 @if(Session::has('usuario_interno') && isset($tramiteInfo->legajo))
+                    @php
+                        $usuarioSesion = Session::get('usuario_interno');
+                    @endphp
+                @if($usuarioSesion->legajo != $tramiteInfo->legajo)
                 <button class="btn btn-primary" onclick="tomarTramite({{ $idTramite }})" title="Tomar"><i class="fas fa-sign-out-alt"></i></button>
+                @endif
+                @if($usuarioSesion->legajo == $tramiteInfo->legajo  && $tramiteInfo->estado_actual != 'Finalizado' && $tramiteInfo->estado_actual != 'Dado de Baja' && $tramiteInfo->estado_actual != 'Rechazado' && !$tramiteInfo->espera_documentacion)
+                <button class="btn btn-success" onclick="avanzarEstado({{ $idTramite }})" title="Avanzar Estado"><i class="fas fa-arrow-right"></i></button>
+                @endif
+                @endif
                 <button class="btn btn-danger" onclick="darDeBajaTramite({{ $idTramite }})" title="Dar de baja"><i class="fas fa-ban"></i></button>
                 <button class="btn btn-danger" onclick="window.open('{{ route('reporte.constancia', ['idTramite' => $idTramite]) }}', '_blank')" title="Imprimir"><i class="fas fa-print"></i></button>
             </div>
         </div>
+
+
+
+        <!-- Modal Selección Estado -->
+<div class="modal fade" id="modalSeleccionEstado" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="formSeleccionEstado">
+      @csrf
+      <input type="hidden" name="id_tramite" id="id_tramite_modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Seleccionar nuevo estado</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <select class="form-select" name="id_estado_nuevo" id="select_estado" required>
+            <option value="" disabled selected>Seleccione un estado</option>
+            <!-- Options will be added dynamically -->
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Aceptar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
 
         <div class="col-md-6 col-lg-6 mt-4">
             <div class="container-fluid px-3">
@@ -135,7 +182,7 @@
             </div>
         </div>
 
-        <!-- Columna derecha: Adjuntos + Historial -->
+        <!-- Columna derecha: Adjuntos + Cuestionarios + Historial -->
         <div class="col-md-6 col-lg-6 mt-4">
             <div class="container-fluid px-3">
                 <!-- Adjuntos -->
@@ -175,6 +222,149 @@
                         </div>
                     </form>
                 </div>
+
+             
+<!-- Cuestionarios - Mostrar siempre que haya preguntas o respuestas -->
+@if($preguntas->isNotEmpty() || $respuestasCuestionario->isNotEmpty())
+<div class="container mt-4">
+    <div class="table-responsive" style="max-height: 350px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 8px;">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th colspan="2" class="text-center fs-4">Cuestionarios</th>
+                </tr>
+                @if($preguntas->where('es_editable', 1)->isEmpty() && $respuestasCuestionario->isNotEmpty())
+                <tr>
+                    <td colspan="2" class="text-center text-warning bg-light">
+                        <small><i class="fas fa-info-circle"></i> Respuestas históricas (solo lectura)</small>
+                    </td>
+                </tr>
+                @endif
+            </thead>
+            <tbody>
+                @if($preguntas->isNotEmpty())
+                <form action="{{ route('cuestionarios.guardar') }}" method="POST" id="formCuestionarios">
+                    @csrf
+                    <input type="hidden" name="id_tramite" value="{{ $idTramite }}">
+                    
+                    @foreach($preguntas as $pregunta)
+                    @php
+                        $respuestaExistente = $respuestasCuestionario->has($pregunta->id_pregunta) 
+                            ? $respuestasCuestionario->get($pregunta->id_pregunta) 
+                            : null;
+                        
+                        $respuestaValor = $respuestaExistente ? $respuestaExistente->flag_valor : '';
+                        $detalleRespuesta = $respuestaExistente ? $respuestaExistente->detalle : '';
+                        
+                        $mostrarDetalleSi = $pregunta->flag_detalle_si == 1;
+                        $mostrarDetalleNo = $pregunta->flag_detalle_no == 1;
+                        
+                        $mostrarTextarea = false;
+                        if ($respuestaValor == 1 && $mostrarDetalleSi) {
+                            $mostrarTextarea = true;
+                        } elseif ($respuestaValor == 0 && $mostrarDetalleNo) {
+                            $mostrarTextarea = true;
+                        }
+                        
+                        $esEditable = $pregunta->es_editable ?? 1;
+                    @endphp
+                    
+                    <tr>
+                        <td class="align-middle" style="width: 70%;">
+                            <strong>{{ $pregunta->descripcion }}</strong>
+                            @if(!$esEditable)
+                            <br><small class="text-warning"><i class="fas fa-lock"></i> Respuesta histórica</small>
+                            @endif
+                        </td>
+                        <td class="align-middle" style="width: 30%;">
+                            @if($esEditable)
+                            <!-- Campo editable -->
+                            <select name="respuestas[{{ $pregunta->id_pregunta }}]" class="form-select form-select-sm mb-2" 
+                                    data-flag-detalle-si="{{ $pregunta->flag_detalle_si }}"
+                                    data-flag-detalle-no="{{ $pregunta->flag_detalle_no }}"
+                                    onchange="toggleDetalle({{ $pregunta->id_pregunta }}, this.value)">
+                                <option value="">Seleccionar...</option>
+                                <option value="1" {{ $respuestaValor == 1 ? 'selected' : '' }}>SI</option>
+                                <option value="0" {{ $respuestaValor == 0 ? 'selected' : '' }}>NO</option>
+                            </select>
+                            @else
+                            <!-- Campo solo lectura -->
+                            <div class="form-control form-control-sm bg-light mb-2">
+                                {{ $respuestaValor == 1 ? 'SI' : ($respuestaValor == 0 ? 'NO' : 'Sin respuesta') }}
+                            </div>
+                            @endif
+                            
+                            @if($mostrarDetalleSi || $mostrarDetalleNo)
+                            <div id="detalle_{{ $pregunta->id_pregunta }}" style="display: {{ $mostrarTextarea ? 'block' : 'none' }};">
+                                @if($esEditable)
+                                <textarea name="detalles[{{ $pregunta->id_pregunta }}]" 
+                                          class="form-control form-control-sm" 
+                                          rows="2" 
+                                          placeholder="Ingrese el detalle...">{{ $detalleRespuesta }}</textarea>
+                                @else
+                                <div class="form-control form-control-sm bg-light" style="min-height: 60px;">
+                                    {{ $detalleRespuesta ?: 'Sin detalle' }}
+                                </div>
+                                @endif
+                            </div>
+                            @endif
+                        </td>
+                    </tr>
+                    @endforeach
+                    
+                    @if($preguntas->where('es_editable', 1)->isNotEmpty())
+                    <tr>
+                        <td colspan="2" class="text-center">
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="fas fa-save"></i> Guardar Respuestas
+                            </button>
+                            <button type="button" class="btn btn-warning btn-sm ms-2" onclick="limpiarCuestionario()">
+                                <i class="fas fa-eraser"></i> Limpiar Respuestas
+                            </button>
+                        </td>
+                    </tr>
+                    @endif
+                </form>
+                @elseif($respuestasCuestionario->isNotEmpty())
+                <!-- Solo mostrar respuestas históricas -->
+                @foreach($respuestasCuestionario as $respuesta)
+                @php
+                    $preguntaInfo = DB::table('pregunta')->where('id_pregunta', $respuesta->id_pregunta_cuestionario)->first();
+                @endphp
+                @if($preguntaInfo)
+                <tr>
+                    <td class="align-middle" style="width: 70%;">
+                        <strong>{{ $preguntaInfo->descripcion }}</strong>
+                        <br><small class="text-warning"><i class="fas fa-lock"></i> Respuesta histórica</small>
+                    </td>
+                    <td class="align-middle" style="width: 30%;">
+                        <div class="form-control form-control-sm bg-light mb-2">
+                            {{ $respuesta->flag_valor == 1 ? 'SI' : ($respuesta->flag_valor == 0 ? 'NO' : 'Sin respuesta') }}
+                        </div>
+                        
+                        @if($respuesta->detalle)
+                        <div class="form-control form-control-sm bg-light" style="min-height: 60px;">
+                            {{ $respuesta->detalle }}
+                        </div>
+                        @endif
+                    </td>
+                </tr>
+                @endif
+                @endforeach
+                @endif
+            </tbody>
+        </table>
+    </div>
+</div>
+@else
+<!-- Mensaje cuando no hay cuestionarios -->
+<div class="container mt-4">
+    <div class="alert alert-info text-center">
+        <i class="fas fa-info-circle"></i>
+        No hay cuestionarios configurados para este trámite.
+    </div>
+</div>
+@endif
 
                 <!-- Historial -->
                 <div class="container mt-4">
@@ -236,6 +426,8 @@
 
 @push('scripts')
 <script>
+
+    console.log('Información del trámite:', @json($tramiteInfo));
     $(document).ready(function () {
         setTimeout(function () {
             $(".alert").fadeOut(500, function () {
@@ -243,6 +435,20 @@
             });
         }, 2000);
     });
+
+    function toggleDetalle(idPregunta, respuesta) {
+        const detalleDiv = document.getElementById('detalle_' + idPregunta);
+        const textarea = detalleDiv.querySelector('textarea');
+        
+        if (respuesta === 'SI_CON_DETALLE' || respuesta === 'NO_CON_DETALLE') {
+            detalleDiv.style.display = 'block';
+            textarea.required = true;
+        } else {
+            detalleDiv.style.display = 'none';
+            textarea.required = false;
+            textarea.value = '';
+        }
+    }
 
     function darDeBajaTramite(idTramite) {
         if (confirm("¿Estás seguro de que deseas dar de baja este trámite?")) {
@@ -279,5 +485,687 @@
                 });
         }
     }
+
+
+// Reemplaza la sección del JavaScript relacionada con el modal desde la línea donde defines modalSeleccionEstado
+
+let modalSeleccionEstado;
+
+function avanzarEstado(idTramite) {
+    document.getElementById("loader").style.display = "flex";
+    // Primero verificar si hay preguntas editables (cuestionario activo)
+    const preguntasEditables = document.querySelectorAll('select[name^="respuestas"]');
+    const hayCuestionarioActivo = preguntasEditables.length > 0;
+    
+    if (hayCuestionarioActivo) {
+        // Si hay cuestionario activo, validar que todas las preguntas estén respondidas
+        let todasRespondidas = true;
+        let mensajeError = '';
+        
+        preguntasEditables.forEach(select => {
+            if (!select.value) {
+                todasRespondidas = false;
+                const preguntaText = select.closest('tr').querySelector('strong').textContent;
+                mensajeError += `- ${preguntaText}\n`;
+            }
+        });
+        
+        if (!todasRespondidas) {
+            document.getElementById("loader").style.display = "none";
+            alert('Debe completar todas las preguntas del cuestionario antes de avanzar el estado:\n' + mensajeError);
+            return;
+        }
+        
+        // Validar detalles cuando son requeridos según los flags
+        let detallesFaltantes = false;
+        let mensajeDetallesError = '';
+        
+        preguntasEditables.forEach(select => {
+            const name = select.getAttribute('name');
+            const match = name.match(/\[(\d+)\]/);
+            if (match) {
+                const idPregunta = match[1];
+                const respuesta = select.value;
+                
+                // Obtener los flags de la pregunta
+                const flagDetalleSi = parseInt(select.getAttribute('data-flag-detalle-si'));
+                const flagDetalleNo = parseInt(select.getAttribute('data-flag-detalle-no'));
+                
+                // Verificar si se requiere detalle
+                if ((respuesta === '1' && flagDetalleSi === 1) || (respuesta === '0' && flagDetalleNo === 1)) {
+                    const detalleTextarea = document.querySelector(`textarea[name="detalles[${idPregunta}]"]`);
+                    if (!detalleTextarea || !detalleTextarea.value.trim()) {
+                        detallesFaltantes = true;
+                        const preguntaText = select.closest('tr').querySelector('strong').textContent;
+                        mensajeDetallesError += `- ${preguntaText} requiere un detalle\n`;
+                    }
+                }
+            }
+        });
+        
+        if (detallesFaltantes) {
+            document.getElementById("loader").style.display = "none";
+            alert('Las siguientes preguntas requieren detalles:\n' + mensajeDetallesError);
+            return;
+        }
+        
+        // Si hay cuestionario y está completo, primero guardarlo
+        if (confirm("Se guardará el cuestionario y se avanzará el estado del trámite. ¿Desea continuar?")) {
+            // Guardar cuestionario primero
+            const formCuestionarios = document.getElementById('formCuestionarios');
+            if (formCuestionarios) {
+                const formData = new FormData(formCuestionarios);
+                const data = {
+                    id_tramite: formData.get('id_tramite'),
+                    respuestas: {},
+                    detalles: {}
+                };
+                
+                // Recopilar respuestas
+                preguntasEditables.forEach(select => {
+                    const name = select.getAttribute('name');
+                    const match = name.match(/\[(\d+)\]/);
+                    if (match) {
+                        const idPregunta = match[1];
+                        data.respuestas[idPregunta] = select.value;
+                    }
+                });
+                
+                // Recopilar detalles
+                document.querySelectorAll('textarea[name^="detalles"]').forEach(textarea => {
+                    const name = textarea.getAttribute('name');
+                    const match = name.match(/\[(\d+)\]/);
+                    if (match) {
+                        const idPregunta = match[1];
+                        data.detalles[idPregunta] = textarea.value;
+                    }
+                });
+                
+                // Guardar cuestionario y luego proceder con el avance de estado
+                fetch("{{ route('cuestionarios.guardar') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById("loader").style.display = "none";
+                        // Si el cuestionario causó rechazo o finalización, no continuar con avance manual
+                        if (data.tramite_rechazado || data.tramite_finalizado) {
+                            showAlert('warning', data.message + ' La página se actualizará automáticamente.');
+                            setTimeout(() => {
+                                location.reload();
+                            }, 2000);
+                            return;
+                        }
+                        
+                        // Continuar con el avance de estado
+                        procederConAvanceEstado(idTramite);
+                    } else {
+                        document.getElementById("loader").style.display = "none";
+                        alert('Error al guardar el cuestionario: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    document.getElementById("loader").style.display = "none";
+                    console.error('Error:', error);
+                    alert('Error al guardar el cuestionario');
+                });
+            }
+        } else {
+            document.getElementById("loader").style.display = "none";
+        }
+    } else {
+        // No hay cuestionario activo, proceder directamente con el avance
+        if (confirm("¿Desea avanzar el estado del trámite?")) {
+            procederConAvanceEstado(idTramite);
+        } else {
+            document.getElementById("loader").style.display = "none";
+        }
+    }
+}
+
+function procederConAvanceEstado(idTramite) {
+    fetch("{{ route('tramites.getPosiblesEstados') }}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+        },
+        body: JSON.stringify({ idTramite })
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("loader").style.display = "none";
+        if (data.estados.length === 1) {
+            // Un solo estado posible, avanzar directamente
+            fetch("{{ route('tramites.avanzarEstado') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                body: JSON.stringify({ 
+                    idTramite: idTramite,
+                    idEstadoNuevo: data.estados[0].id_estado_tramite
+                })
+            })
+            .then(r => r.json())
+            .then(resp => {
+                if (resp.success) {
+                    location.reload();
+                } else {
+                    alert(resp.message);
+                }
+            });
+        } else if (data.estados.length > 1) {
+            // Múltiples estados posibles, mostrar modal de selección
+            mostrarModalSeleccionEstado(data.estados, idTramite);
+        } else {
+            // No hay estados disponibles - estamos en el último estado
+            // Llamar a avanzarEstado sin idEstadoNuevo para que el backend maneje la finalización
+            fetch("{{ route('tramites.avanzarEstado') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                body: JSON.stringify({ 
+                    idTramite: idTramite,
+                    // No enviamos idEstadoNuevo para que el backend detecte que es el último estado
+                })
+            })
+            .then(r => r.json())
+            .then(resp => {
+                if (resp.success) {
+                    location.reload();
+                } else {
+                    alert(resp.message);
+                }
+            });
+        }
+    })
+    .catch(error => {
+        document.getElementById("loader").style.display = "none";
+        console.error('Error:', error);
+        alert('Error al obtener los estados posibles');
+    });
+}
+
+
+let eventListenersAdded = false;
+
+function mostrarModalSeleccionEstado(estados, idTramite) {
+    // Limpiar el select y agregar opciones
+    let select = document.getElementById("select_estado");
+    select.innerHTML = "";
+    
+    let defaultOpt = document.createElement("option");
+    defaultOpt.value = "";
+    defaultOpt.textContent = "Seleccione un estado";
+    defaultOpt.disabled = true;
+    defaultOpt.selected = true; 
+    select.appendChild(defaultOpt);
+
+    estados.forEach(e => {
+        let opt = document.createElement("option");
+        opt.value = e.id_estado_tramite;
+        opt.textContent = e.nombre_estado;
+        select.appendChild(opt);
+    });
+
+    document.getElementById("id_tramite_modal").value = idTramite;
+
+    // Inicializar el modal si no existe
+    if (!modalSeleccionEstado) {
+        modalSeleccionEstado = new bootstrap.Modal(document.getElementById("modalSeleccionEstado"), {
+            keyboard: true
+        });
+        
+        const modalElement = document.getElementById("modalSeleccionEstado");
+        
+        // Event listener para cuando se cierra el modal
+        modalElement.addEventListener('hidden.bs.modal', function () {
+            document.getElementById("formSeleccionEstado").reset();
+            document.getElementById("id_tramite_modal").value = "";
+        });
+    }
+    
+    // Agregar event listeners usando delegación de eventos (solo una vez)
+    if (!eventListenersAdded) {
+        // Usar delegación de eventos en el documento
+        document.addEventListener('click', function(e) {
+            // Botón cerrar (X)
+            if (e.target.matches('#modalSeleccionEstado .btn-close')) {
+                cerrarModalSeleccionEstado();
+                return;
+            }
+            
+            // Botón Cancelar
+            if (e.target.matches('#modalSeleccionEstado .btn-secondary[data-bs-dismiss="modal"]')) {
+                e.preventDefault();
+                e.stopPropagation();
+                cerrarModalSeleccionEstado();
+                return;
+            }
+        });
+        
+        eventListenersAdded = true;
+    }
+    
+    // Mostrar el modal
+    modalSeleccionEstado.show();
+}
+
+function cerrarModalSeleccionEstado() {
+    if (modalSeleccionEstado) {
+        modalSeleccionEstado.hide();
+    }
+}
+
+// Event listener para el formulario de selección de estado
+document.addEventListener('DOMContentLoaded', function() {
+    const formSeleccionEstado = document.getElementById("formSeleccionEstado");
+    if (formSeleccionEstado) {
+        formSeleccionEstado.addEventListener("submit", function(e) {
+            e.preventDefault();
+            
+            let idTramite = document.getElementById("id_tramite_modal").value;
+            let idEstadoNuevo = document.getElementById("select_estado").value;
+
+            if (!idEstadoNuevo) {
+                alert("Por favor seleccione un estado");
+                return;
+            }
+
+            console.log("Valor seleccionado:", idEstadoNuevo);
+
+            // Deshabilitar el botón de submit para evitar múltiples clics
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'Procesando...';
+            }
+
+            fetch("{{ route('tramites.avanzarEstado') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                body: JSON.stringify({ 
+                    idTramite: idTramite, 
+                    idEstadoNuevo: idEstadoNuevo 
+                })
+            })
+            .then(r => r.json())
+            .then(resp => {
+                // Cerrar el modal
+                cerrarModalSeleccionEstado();
+                
+                if (resp.success) {
+                    // Pequeño delay para asegurar que el modal se cierre completamente
+                    setTimeout(() => {
+                        location.reload();
+                    }, 300);
+                } else {
+                    // Rehabilitar el botón en caso de error
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Aceptar';
+                    }
+                    alert(resp.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Cerrar el modal y rehabilitar el botón
+                cerrarModalSeleccionEstado();
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Aceptar';
+                }
+                alert('Error al procesar la solicitud');
+            });
+        });
+    }
+});
+
+document.getElementById('formCuestionarios').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const idTramite = formData.get('id_tramite');
+    
+    // Recopilar todas las respuestas y detalles
+    const data = {
+        id_tramite: idTramite,
+        respuestas: {},
+        detalles: {}
+    };
+    
+    // Obtener todas las respuestas
+    document.querySelectorAll('select[name^="respuestas"]').forEach(select => {
+        const name = select.getAttribute('name');
+        const match = name.match(/\[(\d+)\]/);
+        if (match) {
+            const idPregunta = match[1];
+            data.respuestas[idPregunta] = select.value;
+        }
+    });
+    
+    // Obtener todos los detalles
+    document.querySelectorAll('textarea[name^="detalles"]').forEach(textarea => {
+        const name = textarea.getAttribute('name');
+        const match = name.match(/\[(\d+)\]/);
+        if (match) {
+            const idPregunta = match[1];
+            data.detalles[idPregunta] = textarea.value;
+        }
+    });
+    
+    // Validar que todas las preguntas obligatorias tengan respuesta
+    let todasRespondidas = true;
+    let mensajeError = '';
+    
+    document.querySelectorAll('select[name^="respuestas"]').forEach(select => {
+        if (!select.value) {
+            todasRespondidas = false;
+            const preguntaText = select.closest('tr').querySelector('strong').textContent;
+            mensajeError += `- ${preguntaText}\n`;
+        }
+    });
+    
+    if (!todasRespondidas) {
+        alert('Por favor, responda todas las preguntas:\n' + mensajeError);
+        return;
+    }
+    
+    // Validar detalles cuando son requeridos según los flags
+    let detallesFaltantes = false;
+    let mensajeDetallesError = '';
+    
+    document.querySelectorAll('select[name^="respuestas"]').forEach(select => {
+        const name = select.getAttribute('name');
+        const match = name.match(/\[(\d+)\]/);
+        if (match) {
+            const idPregunta = match[1];
+            const respuesta = select.value;
+            
+            // Obtener los flags de la pregunta
+            const flagDetalleSi = parseInt(select.getAttribute('data-flag-detalle-si'));
+            const flagDetalleNo = parseInt(select.getAttribute('data-flag-detalle-no'));
+            
+            // Verificar si se requiere detalle
+            if ((respuesta === '1' && flagDetalleSi === 1) || (respuesta === '0' && flagDetalleNo === 1)) {
+                const detalleTextarea = document.querySelector(`textarea[name="detalles[${idPregunta}]"]`);
+                if (!detalleTextarea || !detalleTextarea.value.trim()) {
+                    detallesFaltantes = true;
+                    const preguntaText = select.closest('tr').querySelector('strong').textContent;
+                    mensajeDetallesError += `- ${preguntaText} requiere un detalle\n`;
+                }
+            }
+        }
+    });
+    
+    if (detallesFaltantes) {
+        alert('Las siguientes preguntas requieren detalles:\n' + mensajeDetallesError);
+        return;
+    }
+    
+    // Mostrar indicador de carga
+    const submitBtn = this.querySelector('button[type="submit"]');
+    if (submitBtn) {
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        submitBtn.disabled = true;
+    }
+    
+    // Enviar datos al servidor
+    fetch("{{ route('cuestionarios.guardar') }}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": "{{ csrf_token() }}"
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Restaurar botón
+        if (submitBtn) {
+            submitBtn.innerHTML = '<i class="fas fa-save"></i> Guardar Respuestas';
+            submitBtn.disabled = false;
+        }
+        
+    if (data.success) {
+            // Si el trámite fue rechazado o finalizado, mostrar mensaje y recargar página
+            if (data.tramite_rechazado || data.tramite_finalizado) {
+                let alertType = 'warning';
+                let mensaje = data.message;
+                
+                // Personalizar el tipo de alerta según la acción
+                if (data.tramite_finalizado && !data.tramite_rechazado) {
+                    alertType = 'success';
+                } else if (data.tramite_rechazado) {
+                    alertType = 'warning';
+                }
+                
+                // Mostrar mensaje apropiado
+                showAlert(alertType, mensaje);
+                
+                // Recargar la página después de 2 segundos para que el usuario vea el mensaje
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            } else {
+                // Solo mostrar mensaje de éxito sin recargar
+                showAlert('success', data.message);
+            }
+        } else {
+            showAlert('error', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        // Restaurar botón
+        if (submitBtn) {
+            submitBtn.innerHTML = '<i class="fas fa-save"></i> Guardar Respuestas';
+            submitBtn.disabled = false;
+        }
+        
+        showAlert('error', 'Error al guardar las respuestas');
+    });
+});
+
+// Función para mostrar alertas bonitas
+function showAlert(type, message) {
+    // Crear elemento de alerta
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.style.position = 'fixed';
+    alertDiv.style.top = '20px';
+    alertDiv.style.right = '20px';
+    alertDiv.style.zIndex = '9999';
+    alertDiv.style.minWidth = '300px';
+    
+    // Agregar icono según el tipo de alerta
+    let icon = '';
+    switch(type) {
+        case 'success':
+            icon = '<i class="fas fa-check-circle me-2"></i>';
+            break;
+        case 'warning':
+            icon = '<i class="fas fa-exclamation-triangle me-2"></i>';
+            break;
+        case 'error':
+            icon = '<i class="fas fa-times-circle me-2"></i>';
+            break;
+        case 'info':
+            icon = '<i class="fas fa-info-circle me-2"></i>';
+            break;
+    }
+    
+    alertDiv.innerHTML = `
+        ${icon}${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    // Agregar al documento
+    document.body.appendChild(alertDiv);
+    
+    // Auto-eliminar después de 5 segundos (excepto para warnings que se recargan)
+    const timeout = type === 'warning' ? 2500 : 5000;
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.parentNode.removeChild(alertDiv);
+        }
+    }, timeout);
+}
+
+// Función adicional para mostrar confirmación de rechazo
+function mostrarConfirmacionRechazo(mensaje, callback) {
+    if (confirm(mensaje + '\n\n¿Desea continuar? La página se actualizará automáticamente.')) {
+        callback();
+    }
+}
+
+// Función para mostrar/ocultar campos de detalle
+function toggleDetalle(idPregunta, respuesta) {
+    const detalleDiv = document.getElementById('detalle_' + idPregunta);
+    if (!detalleDiv) return;
+    
+    // Verificar si el campo es editable
+    const textarea = detalleDiv.querySelector('textarea');
+    const divReadonly = detalleDiv.querySelector('.form-control.bg-light');
+    
+    // Solo procesar si es editable (textarea existe)
+    if (textarea) {
+        const select = document.querySelector(`select[name="respuestas[${idPregunta}]"]`);
+        const flagDetalleSi = parseInt(select.getAttribute('data-flag-detalle-si'));
+        const flagDetalleNo = parseInt(select.getAttribute('data-flag-detalle-no'));
+        
+        const respuestaNum = parseInt(respuesta);
+        
+        if ((respuestaNum === 1 && flagDetalleSi === 1) || (respuestaNum === 0 && flagDetalleNo === 1)) {
+            detalleDiv.style.display = 'block';
+            textarea.required = true;
+        } else {
+            detalleDiv.style.display = 'none';
+            textarea.required = false;
+            textarea.value = '';
+        }
+    }
+}
+
+// Hacer las funciones disponibles globalmente
+window.toggleDetalle = toggleDetalle;
+
+// Inicializar los detalles al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('select[name^="respuestas"]').forEach(select => {
+        const name = select.getAttribute('name');
+        const match = name.match(/\[(\d+)\]/);
+        if (match) {
+            const idPregunta = match[1];
+            const respuesta = select.value;
+            if (respuesta) {
+                setTimeout(() => {
+                    toggleDetalle(idPregunta, respuesta);
+                }, 100);
+            }
+        }
+    });
+});
+
+
+// Función para limpiar solo campos editables
+function limpiarCuestionario() {
+    if (confirm("¿Estás seguro de que deseas limpiar todas las respuestas editables del cuestionario?")) {
+        let camposLimpiados = 0;
+        
+        // Limpiar solo selects editables
+        document.querySelectorAll('select[name^="respuestas"]').forEach(select => {
+            if (select.value !== '') {
+                camposLimpiados++;
+                select.value = '';
+                
+                const name = select.getAttribute('name');
+                const match = name.match(/\[(\d+)\]/);
+                if (match) {
+                    const idPregunta = match[1];
+                    const detalleDiv = document.getElementById('detalle_' + idPregunta);
+                    if (detalleDiv) {
+                        detalleDiv.style.display = 'none';
+                    }
+                }
+            }
+        });
+        
+        // Limpiar solo textareas editables
+        document.querySelectorAll('textarea[name^="detalles"]').forEach(textarea => {
+            if (textarea.value !== '') {
+                camposLimpiados++;
+                textarea.value = '';
+                textarea.required = false;
+            }
+        });
+        
+        if (camposLimpiados > 0) {
+            showAlert('success', `Se limpiaron ${camposLimpiados} campos editables`);
+        } else {
+            showAlert('info', 'No había campos editables para limpiar');
+        }
+    }
+}
+
+// Hacer la función disponible globalmente
+window.limpiarCuestionario = limpiarCuestionario;
+
+
+
+
+function pedirDocumentacion(idTramite) {
+    if (confirm("¿Estás seguro de que deseas solicitar documentación adicional para este trámite?")) {
+        // Mostrar loader
+        document.getElementById("loader").style.display = "flex";
+        
+        fetch("{{ route('tramites.pedirDocumentacion') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": "{{ csrf_token() }}"
+            },
+            body: JSON.stringify({ idTramite })
+        })
+        .then(res => res.json())
+        .then(data => {
+            // Ocultar loader
+            document.getElementById("loader").style.display = "none";
+            
+            if (data.success) {
+                showAlert('success', data.message);
+                // Opcional: recargar la página después de un tiempo
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            } else {
+                showAlert('error', data.message);
+            }
+        })
+        .catch(error => {
+            // Ocultar loader
+            document.getElementById("loader").style.display = "none";
+            console.error('Error:', error);
+            showAlert('error', 'Error al solicitar documentación');
+        });
+    }
+}
+
 </script>
 @endpush

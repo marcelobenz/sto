@@ -2,30 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Rol;
-use App\Models\Permiso;
 use Illuminate\Http\Request;
+use App\Services\RolService;
 
 class RolController extends Controller
 {
-    // Mostrar la lista de roles
+    protected $rolService;
+
+    public function __construct(RolService $rolService)
+    {
+        $this->rolService = $rolService;
+    }
+
     public function index()
     {
-        $roles = Rol::all();
+        $roles = $this->rolService->listarRoles();
         return view('roles.index', compact('roles'));
     }
 
-    // Mostrar el formulario para editar un rol
     public function edit($id)
     {
-        $rol = Rol::findOrFail($id);
-        $permisos = Permiso::all(); // Obtener todos los permisos
-        $permisosAsignados = $rol->permisos->pluck('id_permiso')->toArray(); // Permisos asignados al rol
-
-        return view('roles.edit', compact('rol', 'permisos', 'permisosAsignados'));
+        $datos = $this->rolService->obtenerDatosEdicion($id);
+        return view('roles.edit', $datos);
     }
 
-    // Actualizar un rol en el almacenamiento
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -33,24 +33,17 @@ class RolController extends Controller
             'permisos' => 'array',
         ]);
 
-        $rol = Rol::findOrFail($id);
-        $rol->nombre = $request->input('nombre');
-        $rol->save();
-
-        // Actualizar permisos
-        $rol->permisos()->sync($request->input('permisos', [])); // Sincronizar permisos
+        $this->rolService->actualizarRol($id, $request->only(['nombre', 'permisos']));
 
         return redirect()->route('roles.index')->with('success', 'Rol actualizado con éxito.');
     }
 
-
     public function create()
     {
-        $permisos = Permiso::all(); // Obtener todos los permisos para asignar al rol
+        $permisos = $this->rolService->obtenerDatosCreacion();
         return view('roles.create', compact('permisos'));
     }
 
-    // Almacenar un nuevo rol
     public function store(Request $request)
     {
         $request->validate([
@@ -58,16 +51,7 @@ class RolController extends Controller
             'permisos' => 'array',
         ]);
 
-        $rol = new Rol();
-        $rol->nombre = $request->input('nombre');
-        
-        // Formatear el nombre para el campo clave
-        $rol->clave = strtolower(str_replace(' ', '_', trim($rol->nombre)));
-
-        $rol->save();
-
-        // Asignar permisos al rol
-        $rol->permisos()->sync($request->input('permisos', [])); // Sincronizar permisos
+        $this->rolService->crearRol($request->only(['nombre', 'permisos']));
 
         return redirect()->route('roles.index')->with('success', 'Rol creado con éxito.');
     }

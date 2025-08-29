@@ -65,7 +65,7 @@
     </nav>
 
     <!-- Contenido -->
-    <div class="pt-20 px-4 max-w-7xl mx-auto">
+    <div>
         @yield('contenidoPrincipal')
     </div>
 
@@ -77,7 +77,7 @@
         }, 5000);
     </script>
 
-    @yield('scripting')
+    @stack('scripts')
 
 </body>
 </html>
