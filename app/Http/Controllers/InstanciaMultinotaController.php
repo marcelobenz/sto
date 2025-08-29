@@ -771,10 +771,7 @@ class InstanciaMultinotaController extends Controller {
             // Cargar estados
             $estadosIniciales = $this->cargarEstados($idTipoTramiteMultinota);
 
-            $asignableController = new AsignableATramiteController(
-                new LicenciaService(),
-                new TramiteService()
-            );
+            $asignableController = app()->make(AsignableATramiteController::class);
 
             foreach ($estadosIniciales as $e) {
                 $e->setUsuarioAsignado(
